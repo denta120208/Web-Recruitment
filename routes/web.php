@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApplicantController;
+use App\Http\Controllers\AuthController;
+use Illuminate\Http\Request;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Authentication routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Applicant routes (protected by auth middleware)
+use App\Http\Middleware\EnsureTermsAccepted;
+
+Route::prefix('applicant')->name('applicant.')->middleware(['auth', EnsureTermsAccepted::class])->group(function () {
+    Route::get('/', [ApplicantController::class, 'index'])->name('index');
+    Route::get('/create', [ApplicantController::class, 'create'])->name('create');
+    Route::post('/store', [ApplicantController::class, 'store'])->name('store');
+    Route::get('/success', [ApplicantController::class, 'success'])->name('success');
+});
+
+// Terms routes (show and accept)
+Route::middleware('auth')->group(function(){
+    Route::get('/terms', function(){
+        return view('auth.terms');
+    })->name('terms.show');
+
+    Route::post('/terms/accept', function(Request $request){
+        $user = $request->user();
+        if ($user) {
+            $user->accepted_terms_at = now();
+            $user->save();
+        }
+        return redirect()->route('applicant.create');
+    })->name('terms.accept');
+});
