@@ -224,6 +224,14 @@
                                     <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
                                 </button>
                             </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" value="1" id="acceptTerms" name="accepted_terms" required>
+                                <label class="form-check-label small ms-2" for="acceptTerms">
+                                    Saya menyetujui <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Syarat &amp; Ketentuan Pengelolaan Data</a> yang berlaku.
+                                </label>
+                                <div class="invalid-feedback">Anda harus menyetujui syarat & ketentuan untuk melanjutkan.</div>
+                            </div>
                         </form>
 
                         <div class="text-center">
@@ -247,6 +255,37 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Syarat &amp; Ketentuan Pengelolaan Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Dengan mencentang dan menyetujui syarat ini, Anda menyetujui bahwa data pribadi Anda akan dikelola oleh Metropolitan Land Tbk untuk keperluan proses rekrutmen dan administrasi terkait.</p>
+                    <p>Data yang dikumpulkan termasuk (tetapi tidak terbatas pada): nama, tanggal lahir, alamat, email, nomor telepon, CV, foto, riwayat pendidikan dan pekerjaan. Data akan disimpan sesuai dengan kebijakan privasi dan hanya digunakan untuk keperluan yang tercantum di atas.</p>
+                    <p>Jika Anda setuju, silakan centang kotak persetujuan pada formulir pendaftaran untuk melanjutkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // If the browser shows native validation message when submit is attempted while modal is open,
+        // ensure focus returns to the checkbox when modal closes so user can easily tick it.
+        var termsModal = document.getElementById('termsModal');
+        if (termsModal) {
+            termsModal.addEventListener('hidden.bs.modal', function () {
+                var cb = document.getElementById('acceptTerms');
+                if (cb) cb.focus();
+            });
+        }
+    </script>
     <script>
         // Password strength indicator
         document.getElementById('password').addEventListener('input', function() {

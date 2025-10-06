@@ -17,9 +17,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Applicant routes (protected by auth middleware)
-use App\Http\Middleware\EnsureTermsAccepted;
-
-Route::prefix('applicant')->name('applicant.')->middleware(['auth', EnsureTermsAccepted::class])->group(function () {
+Route::prefix('applicant')->name('applicant.')->middleware(['auth'])->group(function () {
     Route::get('/', [ApplicantController::class, 'index'])->name('index');
     Route::get('/create', [ApplicantController::class, 'create'])->name('create');
     Route::post('/store', [ApplicantController::class, 'store'])->name('store');
