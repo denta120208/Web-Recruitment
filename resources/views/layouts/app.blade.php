@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'Metland Recruitment')</title>
+    <!-- Favicon / touch icon -->
+    <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo_metland.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo_metland.png') }}">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -232,9 +235,9 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--gradient-bg);">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('applicant.index') }}">
-                <i class="bi bi-briefcase-fill me-2"></i>
-                Metland Recruitment
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('applicant.index') }}">
+                <img src="{{ asset('storage/applicants/logo_metland.png') }}" alt="Metland" style="height:32px;width:auto;margin-right:8px;border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,0.08)">
+                <span>Metland Recruitment</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>

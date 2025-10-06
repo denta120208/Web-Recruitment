@@ -104,7 +104,7 @@ class ApplicantController extends Controller
         if ($request->has('work_experiences')) {
             foreach ($request->work_experiences as $workExp) {
                 if (!empty($workExp['CompanyName'])) {
-                    RequireWorkExperience::create([
+                    RequireWorkExperience::create([ 
                         'RequireID' => $applicant->RequireID,
                         'CompanyName' => $workExp['CompanyName'],
                         'JobLevel' => $workExp['JobLevel'],

@@ -2,6 +2,25 @@
 
 @section('title', 'Syarat & Ketentuan')
 
+@section('styles')
+<style>
+    /* Make the checkbox accent use the site's secondary color so it doesn't blend in */
+    .form-check-input {
+        accent-color: var(--secondary-color);
+    }
+
+    /* Fallback for browsers not supporting accent-color */
+    .form-check-input:checked {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.15rem rgba(52, 152, 219, 0.25);
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="container py-5">
     <div class="row justify-content-center">
