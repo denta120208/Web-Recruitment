@@ -27,7 +27,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--gradient-bg);
+            background: white;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -44,7 +44,7 @@
         }
 
         .register-header {
-            background: var(--gradient-bg);
+            background: #009290;
             color: white;
             padding: 2rem;
             text-align: center;
@@ -66,18 +66,47 @@
             box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
         }
 
+        /* ensure the floating container is positioned for absolute toggle button */
+        .form-floating.position-relative { position: relative; }
+
+        /* square toggle button aligned centrally on the right of input */
+        .toggle-password-btn {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            padding: 6px;
+            border-radius: 8px;
+            height: 42px;
+            width: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid #e9ecef;
+        }
+
+        .toggle-password-btn i { font-size: 1rem; }
+
         .btn-primary {
-            background: var(--gradient-bg);
+            background: #009290; /* match requested brand color */
+            color: #ffffff;
             border: none;
             border-radius: 10px;
             padding: 0.75rem 2rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
         }
 
         .btn-primary:hover {
+            background: #007c73;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .btn-primary:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0,146,144,0.25);
+            outline: none;
         }
 
         .btn-outline-primary {
@@ -194,14 +223,17 @@
 
                             <div class="form-floating mb-3 position-relative">
                                 <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" name="password" placeholder="Password" required>
+                                       id="password" name="password" placeholder="Password" required
+                                       pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()\[\]{}<>~`_+=\\|;:\\"'\/,.-]).{8,}"
+                                       title="Minimal 8 karakter, harus mengandung huruf besar, huruf kecil, angka, dan karakter spesial">
                                 <label for="password">Password</label>
-                                <button type="button" id="toggleRegPassword" class="btn btn-sm btn-outline-secondary position-absolute" style="top:50%;right:12px;transform:translateY(-50%);padding:6px 8px;border-radius:6px;">
+                                <button type="button" id="toggleRegPassword" class="toggle-password-btn" aria-label="Toggle password visibility">
                                     <i class="bi bi-eye" id="toggleRegPasswordIcon"></i>
                                 </button>
                                 <div class="password-strength">
                                     <div class="password-strength-bar" id="strengthBar"></div>
                                 </div>
+                                <small class="text-muted">Password minimal 8 karakter, harus berisi huruf besar, huruf kecil, angka, dan simbol.</small>
                                 @error('password')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -211,7 +243,7 @@
                                 <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" 
                                        id="password_confirmation" name="password_confirmation" placeholder="Konfirmasi Password" required>
                                 <label for="password_confirmation">Konfirmasi Password</label>
-                                <button type="button" id="toggleRegConfirm" class="btn btn-sm btn-outline-secondary position-absolute" style="top:50%;right:12px;transform:translateY(-50%);padding:6px 8px;border-radius:6px;">
+                                <button type="button" id="toggleRegConfirm" class="toggle-password-btn" aria-label="Toggle confirm password visibility">
                                     <i class="bi bi-eye" id="toggleRegConfirmIcon"></i>
                                 </button>
                                 @error('password_confirmation')
@@ -285,6 +317,25 @@
                 if (cb) cb.focus();
             });
         }
+    </script>
+    <script>
+        // align toggle-password-btn vertically with its corresponding input
+        function alignToggleButtons(container) {
+            container = container || document;
+            var groups = container.querySelectorAll('.form-floating.position-relative');
+            groups.forEach(function(g){
+                var input = g.querySelector('input');
+                var btn = g.querySelector('.toggle-password-btn');
+                if (!input || !btn) return;
+                // compute offsetTop of input relative to group
+                var top = input.offsetTop + (input.clientHeight / 2);
+                btn.style.top = top + 'px';
+                btn.style.transform = 'translateY(-50%)';
+            });
+        }
+
+        window.addEventListener('load', function(){ alignToggleButtons(); });
+        window.addEventListener('resize', function(){ alignToggleButtons(); });
     </script>
     <script>
         // Password strength indicator

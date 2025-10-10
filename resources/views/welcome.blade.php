@@ -6,8 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Metland Recruitment - Login</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo_metland.png?v=1') }}">
-    <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo_metland.png?v=1') }}">
+    <link rel="icon" type="image/png" href="{{ asset('storage/applicants/Logo_Metland.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('storage/applicants/Logo_Metland.png') }}">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,18 +16,21 @@
     
     <style>
         :root {
-            --primary-color: #2c3e50;
+            --primary-color: #009290; /* Metland text color requested (black) */
             --secondary-color: #3498db;
             --accent-color: #e74c3c;
             --success-color: #27ae60;
             --warning-color: #f39c12;
-            --light-bg: #f8f9fa;
-            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --light-bg: #e6dfdfff;
+        }
+
+        html, body {
+            height: 100%;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--gradient-bg);
+            background: #ffffff; /* ensure page background is white */
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -35,7 +38,7 @@
         }
 
         .login-container {
-            background: white;
+            background: #eeededff; /* slightly darker off-white so box stands out from page white */
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
@@ -44,14 +47,15 @@
         }
 
         .login-header {
-            background: var(--gradient-bg);
-            color: white;
-            padding: 2rem;
+            background: transparent; /* let container color show through */
+            color: var(--primary-color);
+            padding: 1.75rem 2rem 0.75rem 2rem;
             text-align: center;
         }
 
         .login-body {
-            padding: 2rem;
+            padding: 1.5rem 2rem 2rem 2rem;
+            background: transparent; /* let container color show through */
         }
 
         .form-control {
@@ -67,17 +71,24 @@
         }
 
         .btn-primary {
-            background: var(--gradient-bg);
+            background: #009290; /* requested color */
+            color: #ffffff;
             border: none;
             border-radius: 10px;
             padding: 0.75rem 2rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
         }
 
         .btn-primary:hover {
+            background: #007c73; /* slightly darker on hover */
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .btn-primary:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0,146,144,0.25);
+            outline: none;
         }
 
         .btn-outline-primary {
@@ -95,9 +106,14 @@
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .25rem;
         }
 
         .subtitle {
@@ -127,10 +143,10 @@
                 <div class="login-container">
                     <div class="login-header text-center">
                         <div class="logo">
-                            <i class="bi bi-briefcase-fill me-2"></i>
-                            Metland Recruitment
+                            <img src="{{ asset('storage/applicants/Logo_Metland.png') }}" alt="Metland Logo" style="height:50px; object-fit:contain;">
+                            <span style="color:var(--primary-color); font-size:1.25rem;">Metland Recruitment</span>
                         </div>
-                        <div class="subtitle">Platform Rekrutmen Terpercaya</div>
+                        
                     </div>
                     
                     <div class="login-body">

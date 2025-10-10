@@ -6,8 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Login - Metland Recruitment</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo_metland.png?v=1') }}">
-    <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo_metland.png?v=1') }}">
+    <link rel="icon" type="image/png" href="{{ asset('storage/applicants/Logo_Metland.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('storage/applicants/Logo_Metland.png') }}">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,18 +16,20 @@
     
     <style>
         :root {
-            --primary-color: #2c3e50;
+            --primary-color: #009290;
             --secondary-color: #3498db;
             --accent-color: #e74c3c;
             --success-color: #27ae60;
             --warning-color: #f39c12;
-            --light-bg: #f8f9fa;
+            --light-bg: #ffffff;
             --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
+        html, body { height: 100%; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--gradient-bg);
+            background: #ffffff; /* page white */
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -35,7 +37,7 @@
         }
 
         .login-container {
-            background: white;
+            background: #ffffffff; /* light gray box to contrast with white page */
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
@@ -44,9 +46,9 @@
         }
 
         .login-header {
-            background: var(--gradient-bg);
-            color: white;
-            padding: 2rem;
+            background: #009290; /* requested header color */
+            color: #ffffff;
+            padding: 1.75rem 2rem 0.75rem 2rem;
             text-align: center;
         }
 
@@ -66,18 +68,43 @@
             box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
         }
 
+        .form-floating.position-relative { position: relative; }
+        .toggle-password-btn {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            padding: 6px;
+            border-radius: 8px;
+            height: 42px;
+            width: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid #e9ecef;
+        }
+        .toggle-password-btn i { font-size: 1rem; }
+
         .btn-primary {
-            background: var(--gradient-bg);
+            background: #009290; /* match requested brand color */
+            color: #ffffff;
             border: none;
             border-radius: 10px;
             padding: 0.75rem 2rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
         }
 
         .btn-primary:hover {
+            background: #007c73;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .btn-primary:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0,146,144,0.25);
+            outline: none;
         }
 
         .btn-outline-primary {
@@ -131,11 +158,11 @@
             <div class="col-md-6 col-lg-4">
                 <div class="login-container">
                     <div class="login-header">
-                        <div class="logo">
-                            <i class="bi bi-briefcase-fill me-2"></i>
-                            Metland Recruitment
+                        <div class="logo" style="line-height:1; color: #ffffff;">
+                            <div style="font-size:2rem; font-weight:800;">Metland</div>
+                            <div style="font-size:1.1rem; font-weight:700; margin-top:6px;">Recruitment</div>
                         </div>
-                        <div class="subtitle">Masuk ke Akun Anda</div>
+                        <div class="subtitle" style="color: rgba(255,255,255,0.9);">Masuk ke Akun Anda</div>
                     </div>
                     
                     <div class="login-body">
@@ -172,7 +199,7 @@
                                 <input type="password" class="form-control @error('password') is-invalid @enderror" 
                                        id="password" name="password" placeholder="Password" required>
                                 <label for="password">Password</label>
-                                <button type="button" id="togglePassword" class="btn btn-sm btn-outline-secondary position-absolute" style="top:50%;right:12px;transform:translateY(-50%);padding:6px 8px;border-radius:6px;">
+                                <button type="button" id="togglePassword" class="toggle-password-btn" aria-label="Toggle password visibility">
                                     <i class="bi bi-eye" id="togglePasswordIcon"></i>
                                 </button>
                                 @error('password')
@@ -233,6 +260,24 @@
                 });
             }
         })();
+    </script>
+    <script>
+        // align toggle-password-btn vertically with its corresponding input
+        function alignToggleButtons(container) {
+            container = container || document;
+            var groups = container.querySelectorAll('.form-floating.position-relative');
+            groups.forEach(function(g){
+                var input = g.querySelector('input');
+                var btn = g.querySelector('.toggle-password-btn');
+                if (!input || !btn) return;
+                var top = input.offsetTop + (input.clientHeight / 2);
+                btn.style.top = top + 'px';
+                btn.style.transform = 'translateY(-50%)';
+            });
+        }
+
+        window.addEventListener('load', function(){ alignToggleButtons(); });
+        window.addEventListener('resize', function(){ alignToggleButtons(); });
     </script>
 </body>
 </html>

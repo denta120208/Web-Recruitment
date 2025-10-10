@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -292,62 +292,6 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
-    <!-- DevTools deterrent: disables right-click and common shortcuts, and shows overlay on some detections -->
-    <style>
-        #devtools-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); color: white; display: none; align-items: center; justify-content: center; z-index: 99999; }
-        #devtools-overlay .box { max-width: 720px; padding: 2rem; text-align: center; }
-    </style>
-    <div id="devtools-overlay" aria-hidden="true"><div class="box"><h3>Inspection Disabled</h3><p>Fitur inspect / developer tools dinonaktifkan pada aplikasi ini.</p></div></div>
-
-    <script>
-        (function(){
-            // Disable right-click context menu
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-            });
-
-            // Disable common devtools shortcuts
-            document.addEventListener('keydown', function(e) {
-                // F12
-                if (e.key === 'F12') e.preventDefault();
-                // Ctrl+Shift+I / Ctrl+Shift+J
-                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j')) e.preventDefault();
-                // Ctrl+U
-                if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) e.preventDefault();
-                // Ctrl+Shift+C (element picker)
-                if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) e.preventDefault();
-            });
-
-            // Simple DevTools detection (heuristic): checks for increased window.outerWidth - innerWidth and uses debugger detection
-            var overlay = document.getElementById('devtools-overlay');
-            function showOverlay(){ if (overlay) overlay.style.display = 'flex'; }
-
-            // Heuristic 1: check for DevTools size (works for docked devtools)
-            var threshold = 160; // px
-            setInterval(function(){
-                var widthDiff = window.outerWidth - window.innerWidth;
-                var heightDiff = window.outerHeight - window.innerHeight;
-                if (widthDiff > threshold || heightDiff > threshold) {
-                    showOverlay();
-                }
-            }, 1000);
-
-            // Heuristic 2: debugger detection (may be noisy in some environments)
-            var devtoolsOpen = false;
-            var start = Date.now();
-            // Try using toString trick
-            (function detectByDebugger(){
-                var stop = Date.now();
-                if (stop - start > 1000) {
-                    devtoolsOpen = true;
-                    showOverlay();
-                }
-            })();
-
-            // Final note: cannot fully prevent inspection; deter casual users only
-        })();
-    </script>
-
     @yield('scripts')
 </body>
 </html>

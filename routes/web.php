@@ -14,6 +14,9 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
+// Registration verification (OTP)
+Route::get('/register/verify', [AuthController::class, 'showVerifyForm'])->name('register.verify');
+Route::post('/register/verify', [AuthController::class, 'verifyRegister'])->name('register.verify.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Applicant routes (protected by auth middleware)
