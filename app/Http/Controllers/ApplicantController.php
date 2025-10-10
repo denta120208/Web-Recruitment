@@ -36,12 +36,12 @@ class ApplicantController extends Controller
             'LinkedIn' => 'nullable|url|max:255',
             'Instagram' => 'nullable|string|max:255',
             'Phone' => 'required|string|max:20',
-            // CV must be PDF only and max 5MB
+           
             'CVPath' => 'nullable|file|mimes:pdf|max:5120',
             'PhotoPath' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        // Handle file uploads only to 'mlnas' disk. If any upload fails, rollback any uploaded files and return error.
+       
         $uploaded = [];
 
         if ($request->hasFile('CVPath')) {
@@ -58,7 +58,7 @@ class ApplicantController extends Controller
                 $uploaded[] = ['disk' => 'mlnas', 'path' => $path];
             } catch (\Exception $e) {
                 \Log::error('MLNAS CV upload failed: ' . $e->getMessage());
-                // cleanup any previously uploaded files
+                
                 foreach ($uploaded as $u) {
                     try {
                         Storage::disk($u['disk'])->delete($u['path']);
@@ -85,7 +85,7 @@ class ApplicantController extends Controller
                 $uploaded[] = ['disk' => 'mlnas', 'path' => $path];
             } catch (\Exception $e) {
                 \Log::error('MLNAS Photo upload failed: ' . $e->getMessage());
-                // cleanup any previously uploaded files
+                
                 foreach ($uploaded as $u) {
                     try {
                         Storage::disk($u['disk'])->delete($u['path']);
@@ -100,7 +100,7 @@ class ApplicantController extends Controller
 
         $applicant = Applicant::create($validated);
 
-        // Handle work experiences
+       
         if ($request->has('work_experiences')) {
             foreach ($request->work_experiences as $workExp) {
                 if (!empty($workExp['CompanyName'])) {
@@ -116,7 +116,7 @@ class ApplicantController extends Controller
             }
         }
 
-        // Handle educations
+      
         if ($request->has('educations')) {
             foreach ($request->educations as $education) {
                 if (!empty($education['InstitutionName'])) {
@@ -131,7 +131,7 @@ class ApplicantController extends Controller
             }
         }
 
-        // Handle trainings
+        
         if ($request->has('trainings')) {
             foreach ($request->trainings as $training) {
                 if (!empty($training['TrainingName'])) {
