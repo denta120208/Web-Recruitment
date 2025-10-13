@@ -27,7 +27,7 @@ class ApplicantController extends Controller
         $validated = $request->validate([
             'FirstName' => 'required|string|max:255',
             'MiddleName' => 'nullable|string|max:255',
-            'LastName' => 'required|string|max:255',
+            'LastName' => 'nullable|string|max:255',
             'Gender' => 'required|in:Male,Female',
             'DateOfBirth' => 'required|date',
             'Address' => 'required|string|max:500',
@@ -37,8 +37,8 @@ class ApplicantController extends Controller
             'Instagram' => 'nullable|string|max:255',
             'Phone' => 'required|string|max:20',
            
-            'CVPath' => 'nullable|file|mimes:pdf|max:5120',
-            'PhotoPath' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'CVPath' => 'required|file|mimes:pdf|max:5120',
+            'PhotoPath' => 'required|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
        
@@ -98,19 +98,41 @@ class ApplicantController extends Controller
             }
         }
 
+        // Ensure at least one education entry is provided
+        $hasEducation = false;
+        if ($request->has('educations')) {
+            foreach ($request->educations as $education) {
+                if (!empty($education['InstitutionName'])) {
+                    $hasEducation = true;
+                    break;
+                }
+            }
+        }
+
+        if (! $hasEducation) {
+            return redirect()->back()->withInput()->withErrors(['educations' => 'Mohon tambahkan minimal 1 data pendidikan.']);
+        }
+
+        // Ensure database NOT NULL columns get a non-null value when fields are optional in the form
+        if (!isset($validated['LastName']) || is_null($validated['LastName'])) {
+            $validated['LastName'] = '';
+        }
+
         $applicant = Applicant::create($validated);
 
        
         if ($request->has('work_experiences')) {
             foreach ($request->work_experiences as $workExp) {
                 if (!empty($workExp['CompanyName'])) {
+                    $isCurrent = isset($workExp['is_current']) && $workExp['is_current'] == '1';
                     RequireWorkExperience::create([ 
                         'RequireID' => $applicant->RequireID,
                         'CompanyName' => $workExp['CompanyName'],
                         'JobLevel' => $workExp['JobLevel'],
                         'StartDate' => $workExp['StartDate'],
-                        'EndDate' => $workExp['EndDate'],
-                        'Salary' => $workExp['Salary'],
+                        'EndDate' => $isCurrent ? null : ($workExp['EndDate'] ?? null),
+                        'IsCurrent' => $isCurrent ? 1 : 0,
+                        'Salary' => $workExp['Salary'] ?? null,
                     ]);
                 }
             }

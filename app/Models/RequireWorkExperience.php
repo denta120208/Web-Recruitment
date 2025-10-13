@@ -17,6 +17,7 @@ class RequireWorkExperience extends Model
         'JobLevel',
         'StartDate',
         'EndDate',
+        'IsCurrent',
         'Salary'
     ];
 

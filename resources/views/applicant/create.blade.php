@@ -16,7 +16,7 @@
     }
     
     .section-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #009290;
         color: white;
         border-radius: 15px 15px 0 0;
         padding: 1.5rem;
@@ -113,18 +113,7 @@
     </div>
 
     <!-- Form Header -->
-    <div class="row mb-5">
-        <div class="col-lg-8 mx-auto text-center">
-            <h1 class="display-5 fw-bold text-primary mb-3">
-                <i class="bi bi-person-badge-fill me-3"></i>
-                Form Data Diri
-            </h1>
-            <p class="lead text-muted">
-                Lengkapi data diri Anda dengan informasi yang akurat dan terbaru
-            </p>
-        </div>
-    </div>
-
+    
     <form id="applicantForm" action="{{ route('applicant.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         
@@ -151,6 +140,7 @@
                                     @enderror
                                 </div>
                             </div>
+                        
                             <div class="col-md-4">
                                 <div class="form-floating">
                                     <input type="text" class="form-control @error('MiddleName') is-invalid @enderror" 
@@ -164,10 +154,10 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control @error('LastName') is-invalid @enderror" 
-                                           id="LastName" name="LastName" placeholder="Nama Belakang" 
-                                           value="{{ old('LastName') }}" required>
-                                    <label for="LastName">Nama Belakang *</label>
+                        <input type="text" class="form-control @error('LastName') is-invalid @enderror" 
+                                 id="LastName" name="LastName" placeholder="Nama Belakang" 
+                                 value="{{ old('LastName') }}">
+                             <label for="LastName">Nama Belakang</label>
                                     @error('LastName')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -400,14 +390,14 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>  
 
         <!-- Submit Button -->
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
                 <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                    <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
-                        <i class="bi bi-check-circle-fill me-2"></i>Kirim Lamaran
+                    <button type="submit" class="btn btn-success btn-lg px-5" id="submitBtn" style="background: #009290; border-color: #009290;">
+                        <i class="bi bi-check-circle-fill me-2"></i>Kirim Profil
                     </button>
                     <button type="button" class="btn btn-outline-secondary btn-lg px-5" onclick="history.back()">
                         <i class="bi bi-arrow-left-circle-fill me-2"></i>Kembali
@@ -432,7 +422,7 @@ $(document).ready(function() {
         let completedSections = 0;
         
         // Check personal info
-        if ($('#FirstName').val() && $('#LastName').val() && $('#Gender').val() && $('#DateOfBirth').val()) {
+        if ($('#FirstName').val() && $('#Gender').val() && $('#DateOfBirth').val()) {
             completedSections++;
         }
         
@@ -502,6 +492,12 @@ $(document).ready(function() {
                         <div class="form-floating">
                             <input type="number" class="form-control" name="work_experiences[${workExpCount}][Salary]" placeholder="Gaji" step="0.01">
                             <label>Gaji</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="is_current_${workExpCount}" name="work_experiences[${workExpCount}][is_current]" value="1" onchange="toggleCurrent(this, ${workExpCount})">
+                            <label class="form-check-label" for="is_current_${workExpCount}">Masih bekerja di sini</label>
                         </div>
                     </div>
                 </div>
@@ -697,7 +693,7 @@ $(document).ready(function() {
         let isValid = true;
 
         // Whitelist of required field IDs
-        const requiredIds = ['#FirstName', '#LastName', '#Gender', '#DateOfBirth', '#Gmail', '#Phone'];
+    const requiredIds = ['#FirstName', '#Gender', '#DateOfBirth', '#Gmail', '#Phone'];
 
         requiredIds.forEach(function(selector) {
             const el = $(selector);
@@ -712,6 +708,14 @@ $(document).ready(function() {
         // Validate files explicitly before submit
         const cvValid = validateFile(document.getElementById('CVPath'));
         const photoValid = validateFile(document.getElementById('PhotoPath'));
+
+        // Require at least one education entry
+        if ($('#educationContainer .dynamic-section').length === 0) {
+            isValid = false;
+            alert('Mohon tambahkan minimal 1 data pendidikan sebelum mengirim profil.');
+            e.preventDefault();
+            return false;
+        }
 
         if (!isValid || !cvValid || !photoValid) {
             e.preventDefault();
@@ -744,6 +748,17 @@ function removeWorkExperience(index) {
     updateProgress();
 }
 
+// Toggle EndDate disabled/cleared when 'is current' checkbox is checked
+function toggleCurrent(el, index) {
+    var $section = $(`.dynamic-section[data-index="${index}"]`);
+    var $end = $section.find(`input[name="work_experiences[${index}][EndDate]"]`);
+    if ($(el).is(':checked')) {
+        $end.val('').prop('disabled', true);
+    } else {
+        $end.prop('disabled', false);
+    }
+}
+
 function removeEducation(index) {
     $(`.dynamic-section[data-index="${index}"]`).remove();
     updateProgress();
@@ -758,7 +773,7 @@ function updateProgress() {
     const totalSections = 6;
     let completedSections = 0;
     
-    if ($('#FirstName').val() && $('#LastName').val() && $('#Gender').val() && $('#DateOfBirth').val()) {
+    if ($('#FirstName').val() && $('#Gender').val() && $('#DateOfBirth').val()) {
         completedSections++;
     }
     if ($('#Gmail').val() && $('#Phone').val()) {
@@ -779,6 +794,17 @@ function updateProgress() {
     
     const progress = (completedSections / totalSections) * 100;
     $('#progressBar').css('width', progress + '%');
+}
+
+// Toggle EndDate disabled/cleared when 'is current' checkbox is checked
+function toggleCurrent(el, index) {
+    var $section = $(`.dynamic-section[data-index="${index}"]`);
+    var $end = $section.find(`input[name="work_experiences[${index}][EndDate]"]`);
+    if ($(el).is(':checked')) {
+        $end.val('').prop('disabled', true);
+    } else {
+        $end.prop('disabled', false);
+    }
 }
 </script>
 @endsection

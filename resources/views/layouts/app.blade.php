@@ -6,8 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'Metland Recruitment')</title>
     <!-- Favicon / touch icon -->
-    <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo_metland.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo_metland.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('storage/applicants/logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('storage/applicants/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo.png') }}">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -33,6 +35,11 @@
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
+        }
+        .navbar-brand img {
+            height: 36px;
+            width: auto;
+            margin-right: 8px;
         }
 
         .hero-section {
@@ -233,17 +240,17 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--gradient-bg);">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{{ route('applicant.index') }}">
-                <img src="{{ asset('storage/applicants/logo_metland.png') }}" alt="Metland" style="height:32px;width:auto;margin-right:8px;border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,0.08)">
-                <span>Metland Recruitment</span>
+    <nav class="navbar navbar-expand-lg" style="background: white; padding-left: 0; padding-right: 0;">
+        <div class="container-fluid px-0">
+            <a class="navbar-brand d-flex align-items-center ms-3" href="{{ route('applicant.index') }}">
+              
+                <span style="color: #009290;">Metland Recruitment</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto" style="color: #222;">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('applicant.index') }}">
                            
@@ -257,7 +264,7 @@
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}" class="d-inline">
                             @csrf
-                            <button type="submit" class="nav-link btn btn-link text-light p-0">
+                            <button type="submit" class="nav-link btn btn-link text-dark p-0">
                                 <i class="bi bi-box-arrow-right me-1"></i>Logout
                             </button>
                         </form>
