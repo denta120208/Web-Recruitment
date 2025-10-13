@@ -102,6 +102,8 @@ class ApplicantsTable
                         'Female' => 'Perempuan',
                     ]),
             ])
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
             ->defaultSort('CreatedAt', 'desc');
     }
 }

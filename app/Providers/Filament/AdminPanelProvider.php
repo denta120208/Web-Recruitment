@@ -34,8 +34,13 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('admin')
             ->authPasswordBroker('admins')
             ->colors([
-                'primary' => Color::Blue,
+                // Sesuaikan nuansa brand recruitment (hijau-metland)
+                'primary' => Color::Emerald,
+                'gray' => Color::Zinc,
             ])
+            ->brandName('Metland Recruit Admin')
+            ->favicon(asset('favicon.ico'))
+            ->darkMode(true)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

@@ -9,3 +9,16 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Filament admin theming tweaks to match recruitment site */
+.fi-body { background-color: #0b1220; }
+.fi-topbar { background: linear-gradient(90deg, #065f46 0%, #047857 100%); }
+.fi-sidebar { background-color: #0f172a; }
+.fi-link { color: #a7f3d0; }
+.fi-btn-primary { background-color: #047857; border-color: #047857; }
+.fi-btn-primary:hover { background-color: #065f46; }
+.fi-badge-success { background-color: #065f46; }
+
+/* Login page accent */
+.fi-login-page { background: radial-gradient(ellipse at top, #0b1220, #0f172a); }
+.fi-login-card .fi-brand { color: #a7f3d0; }
