@@ -30,12 +30,17 @@ class Applicant extends Model
             'Gmail',
             'LinkedIn',
             'Instagram',
-            'Phone'
+            'Phone',
+            'status',
+            'admin_notes',
+            'status_updated_at',
+            'reviewed_by'
         ];
 
     protected $casts = [
         'CreatedAt' => 'datetime',
         'UpdatedAt' => 'datetime',
+        'status_updated_at' => 'datetime',
     ];
 
     /**
@@ -119,5 +124,37 @@ class Applicant extends Model
     public function trainings(): HasMany
     {
         return $this->hasMany(RequireTraining::class, 'RequireID', 'RequireID');
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(Admin::class, 'reviewed_by');
+    }
+
+    // Helper methods for status
+    public function getStatusLabelAttribute()
+    {
+        return match($this->status) {
+            'pending' => 'Menunggu Review',
+            'under_review' => 'Sedang Direview',
+            'interview_scheduled' => 'Interview Dijadwalkan',
+            'accepted' => 'Diterima',
+            'rejected' => 'Ditolak',
+            'hired' => 'Sudah Dipekerjakan',
+            default => 'Tidak Diketahui'
+        };
+    }
+
+    public function getStatusColorAttribute()
+    {
+        return match($this->status) {
+            'pending' => 'warning',
+            'under_review' => 'info',
+            'interview_scheduled' => 'primary',
+            'accepted' => 'success',
+            'rejected' => 'danger',
+            'hired' => 'success',
+            default => 'gray'
+        };
     }
 }
