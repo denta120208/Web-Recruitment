@@ -42,6 +42,43 @@
             margin-right: 8px;
         }
 
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-nav {
+            gap: 1rem;
+        }
+
+        .navbar-nav .nav-item {
+            margin: 0;
+        }
+
+        .navbar-nav .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(0, 146, 144, 0.1);
+            color: #009290 !important;
+        }
+
+        .navbar-nav .btn-link {
+            text-decoration: none;
+            border: none;
+            background: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .btn-link:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545 !important;
+        }
+
         .hero-section {
             background: var(--gradient-bg);
             color: white;
@@ -251,24 +288,50 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto" style="color: #222;">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('applicant.index') }}">
-                           
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('applicant.create') }}">
-                            
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                            @csrf
-                            <button type="submit" class="nav-link btn btn-link text-dark p-0">
-                                <i class="bi bi-box-arrow-right me-1"></i>Logout
-                            </button>
-                        </form>
-                    </li>
+                    @auth
+                        @php
+                            $hasProfile = \App\Models\Applicant::where('user_id', auth()->id())->exists();
+                        @endphp
+                        
+                        @if($hasProfile)
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('applicant.index') }}">
+                                    <i class="bi bi-house-fill me-1"></i>Beranda
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('applicant.create') }}">
+                                    <i class="bi bi-person-plus-fill me-1"></i>Data Diri
+                                </a>
+                            </li>
+                        @else
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('applicant.create') }}">
+                                    <i class="bi bi-person-plus-fill me-1"></i>Isi Data Diri
+                                </a>
+                            </li>
+                        @endif
+                        
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="nav-link btn btn-link text-dark p-0">
+                                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">
+                                <i class="bi bi-person-plus-fill me-1"></i>Daftar
+                            </a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>
@@ -276,6 +339,13 @@
 
     <!-- Main Content -->
     <main>
+        @if(session('warning'))
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="margin: 1rem; border-radius: 10px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('warning') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        
         @yield('content')
     </main>
 

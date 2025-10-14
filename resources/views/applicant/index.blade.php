@@ -17,9 +17,15 @@
                     Daftarkan diri Anda sekarang untuk peluang karir yang tak terbatas.
                 </p>
                 <div class="d-flex gap-3">
-                    <a href="{{ route('applicant.create') }}" class="btn btn-warning btn-lg px-4">
-                        <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
-                    </a>
+                    @auth
+                        <a href="{{ route('applicant.create') }}" class="btn btn-warning btn-lg px-4">
+                            <i class="bi bi-person-plus-fill me-2"></i>Isi Data Diri
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-warning btn-lg px-4">
+                            <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
+                        </a>
+                    @endauth
                     <a href="#features" class="btn btn-outline-light btn-lg px-4">
                         <i class="bi bi-info-circle-fill me-2"></i>Pelajari Lebih Lanjut
                     </a>
@@ -156,9 +162,15 @@
                             Jangan lewatkan kesempatan emas untuk bergabung dengan tim terbaik. 
                             Daftar sekarang dan wujudkan impian karir Anda!
                         </p>
-                        <a href="{{ route('applicant.create') }}" class="btn btn-warning btn-lg px-5">
-                            <i class="bi bi-rocket-takeoff-fill me-2"></i>Mulai Sekarang
-                        </a>
+                        @auth
+                            <a href="{{ route('applicant.create') }}" class="btn btn-warning btn-lg px-5">
+                                <i class="bi bi-rocket-takeoff-fill me-2"></i>Isi Data Diri
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-warning btn-lg px-5">
+                                <i class="bi bi-rocket-takeoff-fill me-2"></i>Daftar Sekarang
+                            </a>
+                        @endauth
                     </div>
                 </div>
             </div>

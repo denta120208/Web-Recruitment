@@ -34,7 +34,8 @@ class Applicant extends Model
             'status',
             'admin_notes',
             'status_updated_at',
-            'reviewed_by'
+            'reviewed_by',
+            'user_id'
         ];
 
     protected $casts = [
@@ -129,6 +130,11 @@ class Applicant extends Model
     public function reviewer()
     {
         return $this->belongsTo(Admin::class, 'reviewed_by');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Helper methods for status

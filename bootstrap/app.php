@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'check.existing.application' => \App\Http\Middleware\CheckExistingApplication::class,
+            'force.profile.completion' => \App\Http\Middleware\ForceProfileCompletion::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
