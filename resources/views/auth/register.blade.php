@@ -9,118 +9,7 @@
     <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo.png') }}">
     
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Terms Modal -->
-    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="termsModalLabel">Syarat &amp; Ketentuan Pengelolaan Data</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Dengan mencentang dan menyetujui syarat ini, Anda menyetujui bahwa data pribadi Anda akan dikelola oleh Metropolitan Land Tbk untuk keperluan proses rekrutmen dan administrasi terkait.</p>
-                    <p>Data yang dikumpulkan termasuk (tetapi tidak terbatas pada): nama, tanggal lahir, alamat, email, nomor telepon, CV, foto, riwayat pendidikan dan pekerjaan. Data akan disimpan sesuai dengan kebijakan privasi dan hanya digunakan untuk keperluan yang tercantum di atas.</p>
-                    <p>Jika Anda setuju, silakan centang kotak persetujuan pada formulir pendaftaran untuk melanjutkan.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // If the browser shows native validation message when submit is attempted while modal is open,
-        // ensure focus returns to the checkbox when modal closes so user can easily tick it.
-        var termsModal = document.getElementById('termsModal');
-        if (termsModal) {
-            termsModal.addEventListener('hidden.bs.modal', function () {
-                var cb = document.getElementById('acceptTerms');
-                if (cb) cb.focus();
-            });
-        }
-    </script>
-    <script>
-        // align toggle-password-btn vertically with its corresponding input
-        function alignToggleButtons(container) {
-            container = container || document;
-            var groups = container.querySelectorAll('.form-floating.position-relative');
-            groups.forEach(function(g){
-                var input = g.querySelector('input');
-                var btn = g.querySelector('.toggle-password-btn');
-                if (!input || !btn) return;
-                // compute offsetTop of input relative to group
-                var top = input.offsetTop + (input.clientHeight / 2);
-                btn.style.top = top + 'px';
-                btn.style.transform = 'translateY(-50%)';
-            });
-        }
-
-        window.addEventListener('load', function(){ alignToggleButtons(); });
-        window.addEventListener('resize', function(){ alignToggleButtons(); });
-    </script>
-    <script>
-        // Password strength indicator
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const strengthBar = document.getElementById('strengthBar');
-            
-            let strength = 0;
-            if (password.length >= 6) strength++;
-            if (password.match(/[a-z]/)) strength++;
-            if (password.match(/[A-Z]/)) strength++;
-            if (password.match(/[0-9]/)) strength++;
-            if (password.match(/[^a-zA-Z0-9]/)) strength++;
-            
-            strengthBar.className = 'password-strength-bar';
-            if (strength <= 1) {
-                strengthBar.classList.add('strength-weak');
-            } else if (strength <= 2) {
-                strengthBar.classList.add('strength-fair');
-            } else if (strength <= 3) {
-                strengthBar.classList.add('strength-good');
-            } else {
-                strengthBar.classList.add('strength-strong');
-            }
-        });
-        (function(){
-            const togglePwd = document.getElementById('toggleRegPassword');
-            const pwd = document.getElementById('password');
-            const iconPwd = document.getElementById('toggleRegPasswordIcon');
-            const toggleConfirm = document.getElementById('toggleRegConfirm');
-            const confirm = document.getElementById('password_confirmation');
-            const iconConfirm = document.getElementById('toggleRegConfirmIcon');
-
-            if (togglePwd && pwd) {
-                togglePwd.addEventListener('click', function(){
-                    if (pwd.type === 'password') {
-                        pwd.type = 'text';
-                        iconPwd.classList.remove('bi-eye'); iconPwd.classList.add('bi-eye-slash');
-                    } else {
-                        pwd.type = 'password';
-                        iconPwd.classList.remove('bi-eye-slash'); iconPwd.classList.add('bi-eye');
-                    }
-                });
-            }
-
-            if (toggleConfirm && confirm) {
-                toggleConfirm.addEventListener('click', function(){
-                    if (confirm.type === 'password') {
-                        confirm.type = 'text';
-                        iconConfirm.classList.remove('bi-eye'); iconConfirm.classList.add('bi-eye-slash');
-                    } else {
-                        confirm.type = 'password';
-                        iconConfirm.classList.remove('bi-eye-slash'); iconConfirm.classList.add('bi-eye');
-                    }
-                });
-            }
-        })();
-    </script>
-</body>
-</html CSS -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -422,7 +311,8 @@
             border: 1px solid #e9ecef;
             transition: all 0.3s ease;
             cursor: pointer;
-            z-index: 2;
+            z-index: 100;
+            pointer-events: auto;
         }
 
         .toggle-password-btn:hover {
@@ -661,6 +551,17 @@
         .form-floating {
             position: relative;
             z-index: 1;
+        }
+
+        .form-floating > label {
+            z-index: 3;
+            pointer-events: none;
+            color: #6c757d;
+        }
+
+        .form-floating > .form-control {
+            z-index: 2;
+            background-color: #ffffff !important;
         }
 
         /* Modal styling */
@@ -1026,4 +927,130 @@
         </div>
     </div>
 
-    <!-- Bootstrap 5
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Syarat &amp; Ketentuan Pengelolaan Data</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Dengan mencentang dan menyetujui syarat ini, Anda menyetujui bahwa data pribadi Anda akan dikelola oleh Metropolitan Land Tbk untuk keperluan proses rekrutmen dan administrasi terkait.</p>
+                    <p>Data yang dikumpulkan termasuk (tetapi tidak terbatas pada): nama, tanggal lahir, alamat, email, nomor telepon, CV, foto, riwayat pendidikan dan pekerjaan. Data akan disimpan sesuai dengan kebijakan privasi dan hanya digunakan untuk keperluan yang tercantum di atas.</p>
+                    <p>Jika Anda setuju, silakan centang kotak persetujuan pada formulir pendaftaran untuk melanjutkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Terms modal focus handler
+            var termsModal = document.getElementById('termsModal');
+            if (termsModal) {
+                termsModal.addEventListener('hidden.bs.modal', function () {
+                    var cb = document.getElementById('acceptTerms');
+                    if (cb) cb.focus();
+                });
+            }
+
+            // Password strength indicator
+            const passwordInput = document.getElementById('password');
+            const strengthBar = document.getElementById('strengthBar');
+            
+            if (passwordInput && strengthBar) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    
+                    let strength = 0;
+                    if (password.length >= 6) strength++;
+                    if (password.match(/[a-z]/)) strength++;
+                    if (password.match(/[A-Z]/)) strength++;
+                    if (password.match(/[0-9]/)) strength++;
+                    if (password.match(/[^a-zA-Z0-9]/)) strength++;
+                    
+                    strengthBar.className = 'password-strength-bar';
+                    if (strength <= 1) {
+                        strengthBar.classList.add('strength-weak');
+                    } else if (strength <= 2) {
+                        strengthBar.classList.add('strength-fair');
+                    } else if (strength <= 3) {
+                        strengthBar.classList.add('strength-good');
+                    } else {
+                        strengthBar.classList.add('strength-strong');
+                    }
+                });
+            }
+
+            // Toggle password visibility
+            const togglePwd = document.getElementById('toggleRegPassword');
+            const pwd = document.getElementById('password');
+            const iconPwd = document.getElementById('toggleRegPasswordIcon');
+            const toggleConfirm = document.getElementById('toggleRegConfirm');
+            const confirm = document.getElementById('password_confirmation');
+            const iconConfirm = document.getElementById('toggleRegConfirmIcon');
+
+            if (togglePwd && pwd && iconPwd) {
+                togglePwd.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Password toggle clicked'); // Debug log
+                    
+                    if (pwd.type === 'password') {
+                        pwd.type = 'text';
+                        iconPwd.classList.remove('bi-eye');
+                        iconPwd.classList.add('bi-eye-slash');
+                    } else {
+                        pwd.type = 'password';
+                        iconPwd.classList.remove('bi-eye-slash');
+                        iconPwd.classList.add('bi-eye');
+                    }
+                });
+            }
+
+            if (toggleConfirm && confirm && iconConfirm) {
+                toggleConfirm.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Confirm password toggle clicked'); // Debug log
+                    
+                    if (confirm.type === 'password') {
+                        confirm.type = 'text';
+                        iconConfirm.classList.remove('bi-eye');
+                        iconConfirm.classList.add('bi-eye-slash');
+                    } else {
+                        confirm.type = 'password';
+                        iconConfirm.classList.remove('bi-eye-slash');
+                        iconConfirm.classList.add('bi-eye');
+                    }
+                });
+            }
+
+            // Align toggle buttons vertically
+            function alignToggleButtons() {
+                var groups = document.querySelectorAll('.form-floating.position-relative');
+                groups.forEach(function(g){
+                    var input = g.querySelector('input');
+                    var btn = g.querySelector('.toggle-password-btn');
+                    if (!input || !btn) return;
+                    // compute offsetTop of input relative to group
+                    var top = input.offsetTop + (input.clientHeight / 2);
+                    btn.style.top = top + 'px';
+                    btn.style.transform = 'translateY(-50%)';
+                });
+            }
+
+            alignToggleButtons();
+            window.addEventListener('resize', alignToggleButtons);
+        });
+    </script>
+</body>
+</html>

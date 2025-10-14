@@ -406,7 +406,8 @@
                 <ul class="navbar-nav ms-auto me-3 align-items-lg-center" style="color: #222;">
                     @auth
                         @php
-                            $hasProfile = \App\Models\Applicant::where('user_id', auth()->id())->exists();
+                            $profile = \App\Models\Applicant::where('user_id', auth()->id())->first();
+                            $hasProfile = (bool) $profile;
                         @endphp
                         
                         @if($hasProfile)
@@ -416,7 +417,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('applicant.edit', \App\Models\Applicant::where('user_id', auth()->id())->first()->RequireID) }}">
+                                <a class="nav-link" href="{{ route('applicant.edit', $profile?->RequireID) }}">
                                     <i class="bi bi-person-plus-fill me-1"></i>Data Diri
                                 </a>
                             </li>
