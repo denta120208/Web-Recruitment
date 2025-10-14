@@ -48,6 +48,12 @@
         background: rgba(102, 126, 234, 0.05);
     }
     
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+    }
     
     .file-upload-wrapper {
         position: relative;
@@ -98,6 +104,92 @@
         border-radius: 10px;
         height: 100%;
         transition: width 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .section-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .form-floating > label {
+            font-size: 0.9rem;
+        }
+
+        .file-upload-label {
+            padding: 1.5rem;
+        }
+
+        .file-upload-label h6 {
+            font-size: 0.9rem;
+        }
+
+        .file-upload-label small {
+            font-size: 0.75rem;
+        }
+
+        .dynamic-section {
+            padding: 1rem;
+        }
+
+        .btn {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .section-header {
+            padding: 1rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        .form-floating > .form-control,
+        .form-floating > .form-select {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .form-floating > label {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .file-upload-label {
+            padding: 1rem;
+        }
+
+        .file-upload-label i {
+            font-size: 1.5rem !important;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-lg {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+        }
     }
 </style>
 @endsection
@@ -344,7 +436,10 @@
                     <div class="card-body p-4">
                         <div id="workExperienceContainer">
                             @foreach($workExperiences as $index => $workExp)
-                            <div class="dynamic-section" data-index="{{ $index }}">
+                            <div class="dynamic-section position-relative" data-index="{{ $index }}">
+                                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeWorkExperience(this)">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-floating">
@@ -383,9 +478,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeWorkExperience(this)" style="position: absolute; top: 10px; right: 10px;">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
                             </div>
                             @endforeach
                         </div>
@@ -410,7 +502,10 @@
                     <div class="card-body p-4">
                         <div id="educationContainer">
                             @foreach($educations as $index => $education)
-                            <div class="dynamic-section" data-index="{{ $index }}">
+                            <div class="dynamic-section position-relative" data-index="{{ $index }}">
+                                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeEducation(this)">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-floating">
@@ -418,12 +513,7 @@
                                             <label>Nama Institusi</label>
                         </div>
                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" name="educations[{{ $index }}][Degree]" placeholder="Jenjang Pendidikan" value="{{ $education->Degree }}">
-                                            <label>Jenjang Pendidikan</label>
-                                        </div>
-                                    </div>
+                                    
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" name="educations[{{ $index }}][Major]" placeholder="Jurusan" value="{{ $education->Major }}">
@@ -443,9 +533,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEducation(this)" style="position: absolute; top: 10px; right: 10px;">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
                             </div>
                             @endforeach
                         </div>
@@ -470,7 +557,10 @@
                     <div class="card-body p-4">
                         <div id="trainingContainer">
                             @foreach($trainings as $index => $training)
-                            <div class="dynamic-section" data-index="{{ $index }}">
+                            <div class="dynamic-section position-relative" data-index="{{ $index }}">
+                                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeTraining(this)">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-floating">
@@ -503,9 +593,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeTraining(this)" style="position: absolute; top: 10px; right: 10px;">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
                             </div>
                             @endforeach
                         </div>
@@ -583,8 +670,8 @@ $(document).ready(function() {
         workExpCount++;
         const workExpHtml = `
             <div class="dynamic-section position-relative" data-index="${workExpCount}">
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeWorkExperience(this)" style="position: absolute; top: 10px; right: 10px;">
-                    <i class="bi bi-x-circle"></i>
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeWorkExperience(this)">
+                    <i class="bi bi-x-circle-fill"></i>
                 </button>
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -635,8 +722,8 @@ $(document).ready(function() {
         educationCount++;
         const educationHtml = `
             <div class="dynamic-section position-relative" data-index="${educationCount}">
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEducation(this)" style="position: absolute; top: 10px; right: 10px;">
-                    <i class="bi bi-x-circle"></i>
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeEducation(this)">
+                    <i class="bi bi-x-circle-fill"></i>
                 </button>
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -645,12 +732,7 @@ $(document).ready(function() {
                             <label>Nama Institusi</label>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" name="educations[${educationCount}][Degree]" placeholder="Jenjang Pendidikan">
-                            <label>Jenjang Pendidikan</label>
-                        </div>
-                    </div>
+                    
                     <div class="col-md-6">
                         <div class="form-floating">
                             <input type="text" class="form-control" name="educations[${educationCount}][Major]" placeholder="Jurusan">
@@ -681,8 +763,8 @@ $(document).ready(function() {
         trainingCount++;
         const trainingHtml = `
             <div class="dynamic-section position-relative" data-index="${trainingCount}">
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeTraining(this)" style="position: absolute; top: 10px; right: 10px;">
-                    <i class="bi bi-x-circle"></i>
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeTraining(this)">
+                    <i class="bi bi-x-circle-fill"></i>
                 </button>
                 <div class="row g-3">
                     <div class="col-md-6">

@@ -22,7 +22,7 @@ Route::post('/register/verify', [AuthController::class, 'verifyRegister'])->name
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Applicant routes (protected by auth middleware)
-Route::prefix('applicant')->name('applicant.')->middleware(['auth', 'check.existing.application', 'force.profile.completion'])->group(function () {
+Route::prefix('applicant')->name('applicant.')->middleware(['auth', 'check.existing.application', 'profile.freshness', 'force.profile.completion'])->group(function () {
     Route::get('/', [ApplicantController::class, 'index'])->name('index');
     Route::get('/create', [ApplicantController::class, 'create'])->name('create');
     Route::post('/store', [ApplicantController::class, 'store'])->name('store');

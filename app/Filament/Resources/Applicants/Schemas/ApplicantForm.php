@@ -83,18 +83,6 @@ class ApplicantForm
                     ->label('CV'),
                 TextInput::make('PhotoPath')
                     ->label('Foto'),
-                Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending' => 'Menunggu Review',
-                        'under_review' => 'Sedang Direview',
-                        'interview_scheduled' => 'Interview Dijadwalkan',
-                        'accepted' => 'Diterima',
-                        'rejected' => 'Ditolak',
-                        'hired' => 'Sudah Dipekerjakan',
-                    ])
-                    ->default('pending')
-                    ->required(),
                 Textarea::make('admin_notes')
                     ->label('Catatan Admin'),
             ]);

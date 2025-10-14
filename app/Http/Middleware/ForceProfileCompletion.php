@@ -26,6 +26,11 @@ class ForceProfileCompletion
             if (!$hasProfile && !$request->routeIs('applicant.create') && !$request->routeIs('applicant.store')) {
                 return redirect()->route('applicant.create')->with('warning', 'Silakan lengkapi data diri Anda terlebih dahulu.');
             }
+            
+            // Jika sudah punya profil dan mencoba akses create, redirect ke index (landing page)
+            if ($hasProfile && $request->routeIs('applicant.create')) {
+                return redirect()->route('applicant.index');
+            }
         }
         
         return $next($request);

@@ -2,6 +2,115 @@
 
 @section('title', 'Beranda - Metland Recruitment')
 
+@section('styles')
+<style>
+    @media (max-width: 768px) {
+        .hero-section .display-4 {
+            font-size: 2rem;
+        }
+
+        .hero-section .lead {
+            font-size: 1rem;
+        }
+
+        .hero-section .d-flex {
+            flex-direction: column;
+            gap: 0.5rem !important;
+        }
+
+        .hero-section .btn {
+            width: 100%;
+        }
+
+        .hero-section .bi-briefcase-fill {
+            font-size: 8rem !important;
+            margin-top: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .card-body i {
+            font-size: 2rem !important;
+        }
+
+        .bg-primary, .bg-success, .bg-warning, .bg-info {
+            width: 60px !important;
+            height: 60px !important;
+        }
+
+        .bg-primary i, .bg-success i, .bg-warning i, .bg-info i {
+            font-size: 1.5rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-section {
+            padding: 1.5rem 0 !important;
+        }
+
+        .hero-section .display-4 {
+            font-size: 1.5rem;
+        }
+
+        .hero-section .lead {
+            font-size: 0.9rem;
+        }
+
+        .hero-section .bi-briefcase-fill {
+            font-size: 5rem !important;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        .card-title {
+            font-size: 1rem;
+        }
+
+        .card-text {
+            font-size: 0.85rem;
+        }
+
+        h5 {
+            font-size: 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+        }
+
+        .bg-primary, .bg-success, .bg-warning, .bg-info {
+            width: 50px !important;
+            height: 50px !important;
+        }
+
+        .bg-primary i, .bg-success i, .bg-warning i, .bg-info i {
+            font-size: 1.25rem !important;
+        }
+
+        .py-5 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+
+        .mb-5 {
+            margin-bottom: 2rem !important;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 <!-- Hero Section -->
 <section class="hero-section">
@@ -18,7 +127,7 @@
                 </p>
                 <div class="d-flex gap-3">
                     @auth
-                        <a href="{{ route('applicant.create') }}" class="btn btn-warning btn-lg px-4">
+                        <a href="{{ route('applicant.edit', \App\Models\Applicant::where('user_id', auth()->id())->first()->RequireID) }}" class="btn btn-warning btn-lg px-4">
                             <i class="bi bi-person-plus-fill me-2"></i>Isi Data Diri
                         </a>
                     @else

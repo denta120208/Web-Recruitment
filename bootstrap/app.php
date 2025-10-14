@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check.existing.application' => \App\Http\Middleware\CheckExistingApplication::class,
             'force.profile.completion' => \App\Http\Middleware\ForceProfileCompletion::class,
+            'profile.freshness' => \App\Http\Middleware\ProfileFreshnessCheck::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

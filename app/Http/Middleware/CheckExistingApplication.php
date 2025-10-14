@@ -23,12 +23,12 @@ class CheckExistingApplication
             $existingApplication = Applicant::where('user_id', $user->id)->first();
             
             if ($existingApplication) {
-                // Jika sudah ada, redirect ke halaman edit
+                // Jika sudah ada profil dan mencoba akses create, redirect ke landing page
                 if ($request->routeIs('applicant.create')) {
-                    return redirect()->route('applicant.edit', $existingApplication->RequireID);
+                    return redirect()->route('applicant.index');
                 }
             } else {
-                // Jika belum ada, redirect ke create
+                // Jika belum ada, redirect ke create jika mencoba akses edit
                 if ($request->routeIs('applicant.edit')) {
                     return redirect()->route('applicant.create');
                 }

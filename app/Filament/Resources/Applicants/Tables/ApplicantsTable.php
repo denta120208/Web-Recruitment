@@ -70,31 +70,12 @@ class ApplicantsTable
                 TextColumn::make('City')
                     ->label('Kota')
                     ->searchable(),
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->getStateUsing(fn ($record): string => $record->status_label)
-                    ->badge()
-                    ->color(fn ($record): string => $record->status_color),
                 TextColumn::make('CreatedAt')
                     ->label('Tanggal Lamaran')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
-                TextColumn::make('status_updated_at')
-                    ->label('Terakhir Diupdate')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending' => 'Menunggu Review',
-                        'under_review' => 'Sedang Direview',
-                        'interview_scheduled' => 'Interview Dijadwalkan',
-                        'accepted' => 'Diterima',
-                        'rejected' => 'Ditolak',
-                        'hired' => 'Sudah Dipekerjakan',
-                    ]),
                 SelectFilter::make('Gender')
                     ->label('Jenis Kelamin')
                     ->options([

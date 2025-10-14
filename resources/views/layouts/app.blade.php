@@ -30,6 +30,28 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--light-bg);
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container, .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
         }
 
         .navbar-brand {
@@ -39,7 +61,6 @@
         .navbar-brand img {
             height: 36px;
             width: auto;
-            margin-right: 8px;
         }
 
         .navbar {
@@ -258,6 +279,15 @@
             z-index: 1000;
         }
 
+        footer {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        footer .container {
+            max-width: 100%;
+        }
+
         @media (max-width: 768px) {
             .hero-section {
                 padding: 2rem 0;
@@ -271,23 +301,109 @@
             .step-line {
                 display: none;
             }
+
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .navbar-brand img {
+                height: 28px;
+            }
+
+            .navbar-brand span {
+                font-size: 0.9rem !important;
+            }
+
+            .navbar-nav {
+                gap: 0.5rem;
+                padding: 1rem 0;
+            }
+
+            .navbar-nav .nav-link {
+                padding: 0.5rem;
+            }
+
+            .card {
+                margin-bottom: 1rem;
+            }
+
+            .hero-section h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero-section .lead {
+                font-size: 1rem;
+            }
+
+            .hero-section .bi-briefcase-fill {
+                font-size: 8rem !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                margin-left: 0.5rem !important;
+            }
+
+            .navbar-toggler {
+                margin-right: 0.5rem;
+            }
+
+            .hero-section h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero-section .bi-briefcase-fill {
+                font-size: 5rem !important;
+            }
+
+            .btn-lg {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1rem !important;
+            }
+
+            footer h5 {
+                font-size: 1.1rem;
+            }
+
+            footer p {
+                font-size: 0.85rem;
+            }
+
+            footer .row {
+                text-align: center;
+            }
+
+            footer .text-md-end {
+                text-align: center !important;
+                margin-top: 1rem;
+            }
         }
     </style>
     @yield('styles')
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg" style="background: white; padding-left: 0; padding-right: 0;">
-        <div class="container-fluid px-0">
-            <a class="navbar-brand d-flex align-items-center ms-3" href="{{ route('applicant.index') }}">
+    <nav class="navbar navbar-expand-lg" style="background: white;">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex flex-column align-items-center" href="{{ route('applicant.index') }}">
               
-                <span style="color: #009290;">Metland Recruitment</span>
+                <img src="{{ asset('storage/applicants/Logo_Metland.png') }}" alt="Metland Logo" style="height: 36px; width: auto; margin-bottom: 4px;">
+                <span style="color: #009290; font-size: 1.2rem; font-weight: 600;">Recruitment</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto" style="color: #222;">
+                <ul class="navbar-nav ms-auto me-3 align-items-lg-center" style="color: #222;">
                     @auth
                         @php
                             $hasProfile = \App\Models\Applicant::where('user_id', auth()->id())->exists();
@@ -300,11 +416,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('applicant.create') }}">
+                                <a class="nav-link" href="{{ route('applicant.edit', \App\Models\Applicant::where('user_id', auth()->id())->first()->RequireID) }}">
                                     <i class="bi bi-person-plus-fill me-1"></i>Data Diri
                                 </a>
                             </li>
-                        @else
+                        @else   
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('applicant.create') }}">
                                     <i class="bi bi-person-plus-fill me-1"></i>Isi Data Diri
@@ -315,7 +431,7 @@
                         <li class="nav-item">
                             <form method="POST" action="{{ route('logout') }}" class="d-inline">
                                 @csrf
-                                <button type="submit" class="nav-link btn btn-link text-dark p-0">
+                                <button type="submit" class="nav-link btn btn-link text-dark">
                                     <i class="bi bi-box-arrow-right me-1"></i>Logout
                                 </button>
                             </form>

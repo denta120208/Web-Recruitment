@@ -98,6 +98,92 @@
         height: 100%;
         transition: width 0.3s ease;
     }
+
+    @media (max-width: 768px) {
+        .section-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.25rem;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .form-floating > label {
+            font-size: 0.9rem;
+        }
+
+        .file-upload-label {
+            padding: 1.5rem;
+        }
+
+        .file-upload-label h6 {
+            font-size: 0.9rem;
+        }
+
+        .file-upload-label small {
+            font-size: 0.75rem;
+        }
+
+        .dynamic-section {
+            padding: 1rem;
+        }
+
+        .btn {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .section-header {
+            padding: 1rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        .form-floating > .form-control,
+        .form-floating > .form-select {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .form-floating > label {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .file-upload-label {
+            padding: 1rem;
+        }
+
+        .file-upload-label i {
+            font-size: 1.5rem !important;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-lg {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
 </style>
 @endsection
 
