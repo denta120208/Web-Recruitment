@@ -47,7 +47,7 @@
             position: relative;
             overflow-x: hidden;
             width: 100%;
-            padding: 0;
+            padding: 10px;
             margin: 0;
         }
 
@@ -88,27 +88,25 @@
         .container {
             width: 100%;
             max-width: 100%;
-            padding-left: 15px;
-            padding-right: 15px;
+            padding: 0;
             margin: 0 auto;
         }
 
         .row {
-            margin-left: 0;
-            margin-right: 0;
+            margin: 0;
+            width: 100%;
         }
 
         .col-md-6, .col-lg-4 {
-            padding-left: 0;
-            padding-right: 0;
+            padding: 0;
         }
 
         .login-container {
             background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
-            border-radius: 30px;
+            border-radius: 20px;
             box-shadow: 
-                0 30px 60px rgba(0,0,0,0.08),
-                0 10px 20px rgba(0,0,0,0.04),
+                0 20px 40px rgba(0,0,0,0.08),
+                0 8px 16px rgba(0,0,0,0.04),
                 inset 0 1px 0 rgba(255,255,255,0.9);
             overflow: hidden;
             max-width: 440px;
@@ -118,7 +116,7 @@
             border: 1px solid rgba(0,146,144,0.1);
             animation: slideUp 0.6s ease-out;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            margin: 20px auto;
+            margin: 0 auto;
         }
 
         @keyframes slideUp {
@@ -170,18 +168,10 @@
             box-shadow: 0 0 20px rgba(0,146,144,0.5);
         }
 
-        .login-container:hover {
-            box-shadow: 
-                0 40px 80px rgba(0,0,0,0.12),
-                0 15px 35px rgba(0,146,144,0.08),
-                inset 0 1px 0 rgba(255,255,255,0.9);
-            transform: translateY(-5px);
-        }
-
         .login-header {
             background: linear-gradient(135deg, #009290 0%, #007c7a 100%);
             color: #ffffff;
-            padding: 2.5rem 2rem 1.5rem 2rem;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
             text-align: center;
             position: relative;
             z-index: 1;
@@ -199,16 +189,16 @@
         }
 
         .login-header::before {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             top: -20px;
             left: -20px;
             animation-delay: 0s;
         }
 
         .login-header::after {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             bottom: -20px;
             right: -20px;
             animation-delay: 3s;
@@ -220,7 +210,7 @@
         }
 
         .login-body {
-            padding: 2rem 2.5rem 2.5rem 2.5rem;
+            padding: 1.75rem 1.75rem 2rem 1.75rem;
             position: relative;
             z-index: 1;
             overflow: hidden;
@@ -251,12 +241,13 @@
         .form-control {
             border-radius: 12px;
             border: 2px solid #e9ecef;
-            padding: 0.85rem 1.2rem;
+            padding: 0.75rem 1rem;
             transition: all 0.3s ease;
             background: #ffffff;
             position: relative;
             z-index: 1;
             width: 100%;
+            font-size: 1rem;
         }
 
         .form-control:focus {
@@ -269,6 +260,7 @@
         .form-floating.position-relative { 
             position: relative;
             animation: fadeInUp 0.6s ease-out backwards;
+            margin-bottom: 1rem;
         }
 
         .form-floating:nth-child(1) { animation-delay: 0.1s; }
@@ -289,12 +281,12 @@
         .toggle-password-btn {
             position: absolute;
             top: 50%;
-            right: 12px;
+            right: 10px;
             transform: translateY(-50%);
             padding: 6px;
             border-radius: 10px;
-            height: 42px;
-            width: 42px;
+            height: 38px;
+            width: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -312,7 +304,7 @@
         }
 
         .toggle-password-btn i { 
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: transform 0.3s ease;
         }
 
@@ -325,7 +317,7 @@
             color: #ffffff;
             border: none;
             border-radius: 12px;
-            padding: 0.85rem 2rem;
+            padding: 0.75rem 1.5rem;
             font-weight: 600;
             transition: all 0.3s ease;
             position: relative;
@@ -351,12 +343,12 @@
 
         .btn-primary:hover {
             background: linear-gradient(135deg, #00a8a6 0%, #008f8d 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,146,144,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,146,144,0.3);
         }
 
         .btn-primary:active {
-            transform: translateY(-1px);
+            transform: translateY(0);
         }
 
         .btn-primary:focus {
@@ -369,7 +361,7 @@
             color: var(--secondary-color);
             background: transparent;
             border-radius: 12px;
-            padding: 0.85rem 2rem;
+            padding: 0.75rem 1.5rem;
             font-weight: 600;
             transition: all 0.3s ease;
             position: relative;
@@ -399,17 +391,18 @@
         .btn-outline-primary:hover {
             color: #ffffff;
             border-color: var(--secondary-color);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(52,152,219,0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52,152,219,0.25);
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
             animation: fadeIn 0.8s ease-out 0.2s both;
             position: relative;
             z-index: 1;
+            line-height: 1.2;
         }
 
         @keyframes fadeIn {
@@ -441,6 +434,9 @@
             animation: slideDown 0.4s ease-out;
             position: relative;
             z-index: 1;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
         }
 
         @keyframes slideDown {
@@ -475,6 +471,7 @@
 
         .form-check-label {
             cursor: pointer;
+            font-size: 0.95rem;
         }
 
         .d-grid {
@@ -507,8 +504,19 @@
             z-index: 1;
         }
 
-        /* Responsive adjustments */
+        /* Tablet Landscape */
+        @media (max-width: 991px) {
+            .login-container:hover {
+                transform: translateY(-2px);
+            }
+        }
+
+        /* Tablet Portrait & Mobile Landscape */
         @media (max-width: 768px) {
+            body {
+                padding: 15px 10px;
+            }
+
             body::before {
                 width: 300px;
                 height: 300px;
@@ -524,25 +532,24 @@
             }
 
             .login-container {
-                border-radius: 20px;
-                margin: 15px;
+                border-radius: 18px;
                 max-width: 100%;
             }
 
             .login-header {
-                padding: 2rem 1.5rem 1.25rem 1.5rem;
+                padding: 1.5rem 1.25rem 1.25rem 1.25rem;
             }
 
             .login-body {
-                padding: 1.5rem 1.75rem 2rem 1.75rem;
+                padding: 1.5rem 1.5rem 1.75rem 1.5rem;
             }
 
             .logo {
-                font-size: 1.75rem;
+                font-size: 1.6rem;
             }
 
             .logo div:first-child {
-                font-size: 1.75rem !important;
+                font-size: 1.6rem !important;
             }
 
             .logo div:last-child {
@@ -550,43 +557,41 @@
             }
 
             .subtitle {
-                font-size: 0.85rem;
+                font-size: 0.875rem;
             }
 
             .form-control {
-                padding: 0.75rem 1rem;
-                font-size: 0.95rem;
-            }
-
-            .btn-primary,
-            .btn-outline-primary {
-                padding: 0.75rem 1.5rem;
+                padding: 0.7rem 0.95rem;
                 font-size: 0.95rem;
             }
 
             .toggle-password-btn {
-                height: 38px;
-                width: 38px;
+                height: 36px;
+                width: 36px;
+                right: 8px;
+            }
+
+            .toggle-password-btn i {
+                font-size: 0.9rem;
             }
         }
 
-        @media (max-width: 480px) {
-            .container {
-                padding-left: 10px;
-                padding-right: 10px;
+        /* Mobile Portrait */
+        @media (max-width: 576px) {
+            body {
+                padding: 10px 8px;
             }
 
             .login-container {
-                border-radius: 15px;
-                margin: 10px;
+                border-radius: 16px;
             }
 
             .login-header {
-                padding: 1.5rem 1.25rem 1rem 1.25rem;
+                padding: 1.25rem 1rem 1rem 1rem;
             }
 
             .login-body {
-                padding: 1.25rem 1.5rem 1.75rem 1.5rem;
+                padding: 1.25rem 1.25rem 1.5rem 1.25rem;
             }
 
             .logo {
@@ -598,38 +603,37 @@
             }
 
             .logo div:last-child {
-                font-size: 0.9rem !important;
+                font-size: 0.95rem !important;
                 margin-top: 4px !important;
             }
 
             .subtitle {
-                font-size: 0.8rem;
+                font-size: 0.85rem;
             }
 
             .form-control {
-                padding: 0.7rem 0.9rem;
+                padding: 0.65rem 0.9rem;
                 font-size: 0.9rem;
                 border-radius: 10px;
             }
 
             .btn-primary,
             .btn-outline-primary {
-                padding: 0.7rem 1.25rem;
+                padding: 0.65rem 1.25rem;
                 font-size: 0.9rem;
                 border-radius: 10px;
             }
 
             .toggle-password-btn {
-                height: 36px;
-                width: 36px;
-                right: 10px;
-            }
-
-            .toggle-password-btn i {
-                font-size: 0.9rem;
+                height: 34px;
+                width: 34px;
             }
 
             .form-floating > label {
+                font-size: 0.9rem;
+            }
+
+            .form-check-label {
                 font-size: 0.9rem;
             }
 
@@ -639,40 +643,119 @@
 
             .alert {
                 font-size: 0.85rem;
-                padding: 0.75rem;
+                padding: 0.65rem 0.85rem;
             }
 
             .login-header::before {
-                width: 70px;
-                height: 70px;
-            }
-
-            .login-header::after {
                 width: 60px;
                 height: 60px;
             }
+
+            .login-header::after {
+                width: 50px;
+                height: 50px;
+            }
+
+            .form-floating {
+                margin-bottom: 0.85rem;
+            }
+
+            .form-floating.position-relative {
+                margin-bottom: 0.85rem;
+            }
         }
 
-        @media (max-width: 360px) {
+        /* Small Mobile */
+        @media (max-width: 400px) {
+            body {
+                padding: 8px 6px;
+            }
+
             .login-container {
-                border-radius: 12px;
-                margin: 8px;
+                border-radius: 14px;
             }
 
             .login-header {
-                padding: 1.25rem 1rem 0.75rem 1rem;
+                padding: 1rem 0.875rem 0.875rem 0.875rem;
             }
 
             .login-body {
-                padding: 1rem 1.25rem 1.5rem 1.25rem;
+                padding: 1rem 1rem 1.25rem 1rem;
             }
 
             .logo {
-                font-size: 1.35rem;
+                font-size: 1.4rem;
             }
 
             .logo div:first-child {
-                font-size: 1.35rem !important;
+                font-size: 1.4rem !important;
+            }
+
+            .logo div:last-child {
+                font-size: 0.9rem !important;
+            }
+
+            .subtitle {
+                font-size: 0.8rem;
+            }
+
+            .form-control {
+                padding: 0.6rem 0.85rem;
+                font-size: 0.875rem;
+            }
+
+            .btn-primary,
+            .btn-outline-primary {
+                padding: 0.6rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .toggle-password-btn {
+                height: 32px;
+                width: 32px;
+            }
+
+            .toggle-password-btn i {
+                font-size: 0.85rem;
+            }
+
+            .form-floating > label {
+                font-size: 0.875rem;
+            }
+
+            .form-check-label {
+                font-size: 0.875rem;
+            }
+
+            .text-muted {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Extra Small Mobile */
+        @media (max-width: 360px) {
+            body {
+                padding: 6px 4px;
+            }
+
+            .login-container {
+                border-radius: 12px;
+            }
+
+            .login-header {
+                padding: 0.875rem 0.75rem 0.75rem 0.75rem;
+            }
+
+            .login-body {
+                padding: 0.875rem 0.875rem 1rem 0.875rem;
+            }
+
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .logo div:first-child {
+                font-size: 1.3rem !important;
             }
 
             .logo div:last-child {
@@ -680,30 +763,22 @@
             }
 
             .form-control {
-                padding: 0.65rem 0.85rem;
+                padding: 0.55rem 0.75rem;
                 font-size: 0.85rem;
             }
 
             .btn-primary,
             .btn-outline-primary {
-                padding: 0.65rem 1rem;
+                padding: 0.55rem 0.875rem;
                 font-size: 0.85rem;
             }
 
-            .toggle-password-btn {
-                height: 34px;
-                width: 34px;
+            .form-floating {
+                margin-bottom: 0.75rem;
             }
 
-            .form-floating > label {
-                font-size: 0.85rem;
-            }
-        }
-
-        /* Prevent horizontal scroll */
-        @media (max-width: 991px) {
-            .login-container:hover {
-                transform: translateY(-2px);
+            .form-floating.position-relative {
+                margin-bottom: 0.75rem;
             }
         }
     </style>
@@ -715,8 +790,8 @@
                 <div class="login-container">
                     <div class="login-header">
                         <div class="logo" style="line-height:1; color: #ffffff;">
-                            <div style="font-size:2rem; font-weight:800;">Metland</div>
-                            <div style="font-size:1.1rem; font-weight:700; margin-top:6px;">Recruitment</div>
+                            <div style="font-weight:800;">Metland</div>
+                            <div style="font-weight:700; margin-top:6px;">Recruitment</div>
                         </div>
                         <div class="subtitle" style="color: rgba(255,255,255,0.95);">Masuk ke Akun Anda</div>
                     </div>
