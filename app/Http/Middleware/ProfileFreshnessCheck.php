@@ -30,15 +30,28 @@ class ProfileFreshnessCheck
             return $next($request);
         }
 
-        // Mark as stale when older than 3 months OR suspicious future timestamps (> now + 1 day)
-        $isStale = $updatedCarbon->lt(Carbon::now()->subMonthsNoOverflow(3)) || $updatedCarbon->gt(Carbon::now()->addDay());
+        // Get current time and 3 months ago threshold
+        $now = Carbon::now()->startOfDay();
+        $threeMonthsAgo = $now->copy()->subMonths(3)->startOfDay();
+
+        // Debug: Log the dates for checking
+        \Illuminate\Support\Facades\Log::info('Profile Check Dates', [
+            'UpdatedAt' => $updatedCarbon->copy()->startOfDay()->toDateString(),
+            'Current' => $now->toDateString(),
+            'ThreeMonthsAgo' => $threeMonthsAgo->toDateString(),
+            'Is Profile 3 Months or Older' => $updatedCarbon->copy()->startOfDay()->lte($threeMonthsAgo)
+        ]);
+
+        // Check if profile is exactly 3 months or older (compare only date)
+        $isStale = $updatedCarbon->copy()->startOfDay()->lte($threeMonthsAgo);
+        
         if ($isStale) {
-            // If profile is stale (>3 months), require update
+            // If profile is 3 months old or older, require update
             // Only redirect if user is not already on edit/update routes
             if (!$request->routeIs('applicant.edit') && !$request->routeIs('applicant.update')) {
                 return redirect()
                     ->route('applicant.edit', $applicant->RequireID)
-                    ->with('warning', 'Profil Anda berusia lebih dari 3 bulan. Mohon perbarui data Anda.');
+                    ->with('warning', "Profil Anda berusia lebih dari 3 bulan. Mohon perbarui data Anda.");
             }
         }
 

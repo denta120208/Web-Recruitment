@@ -3,11 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\JobVacancyController;
 use Illuminate\Http\Request;
 
-Route::get('/', function () {
-    return view('applicant.index');
-});
+Route::get('/', [JobVacancyController::class, 'index']);
 
 // Authentication routes
 Route::get('/login', function () {
@@ -21,9 +20,13 @@ Route::get('/register/verify', [AuthController::class, 'showVerifyForm'])->name(
 Route::post('/register/verify', [AuthController::class, 'verifyRegister'])->name('register.verify.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Job Vacancy routes
+Route::post('/job-vacancy/apply', [JobVacancyController::class, 'apply'])->name('job-vacancy.apply')->middleware('auth');
+Route::get('/job-vacancy/{id}', [JobVacancyController::class, 'show'])->name('job-vacancy.show');
+
 // Applicant routes (protected by auth middleware)
 Route::prefix('applicant')->name('applicant.')->middleware(['auth', 'check.existing.application', 'profile.freshness', 'force.profile.completion'])->group(function () {
-    Route::get('/', [ApplicantController::class, 'index'])->name('index');
+    Route::get('/', [JobVacancyController::class, 'index'])->name('index');
     Route::get('/create', [ApplicantController::class, 'create'])->name('create');
     Route::post('/store', [ApplicantController::class, 'store'])->name('store');
     Route::get('/edit/{id}', [ApplicantController::class, 'edit'])->name('edit');

@@ -132,4 +132,9 @@ class Applicant extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function applyJobs(): HasMany
+    {
+        return $this->hasMany(ApplyJob::class, 'RequireID', 'RequireID');
+    }
 }

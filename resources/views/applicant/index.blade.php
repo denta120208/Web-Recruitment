@@ -1,111 +1,120 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda - Metland Recruitment')
+@section('title', 'Lowongan Pekerjaan - Metland Recruitment')
 
 @section('styles')
 <style>
+    .job-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .job-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .job-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .job-level {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .job-desc {
+        color: #6c757d;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .job-spec {
+        color: #495057;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .apply-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        color: white;
+    }
+    
+    .apply-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .applied-badge {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0;
+    }
+    
+    .no-jobs {
+        text-align: center;
+        padding: 4rem 0;
+    }
+    
+    .no-jobs i {
+        font-size: 5rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
     @media (max-width: 768px) {
+        .hero-section {
+            padding: 2rem 0;
+        }
+        
         .hero-section .display-4 {
             font-size: 2rem;
         }
-
-        .hero-section .lead {
-            font-size: 1rem;
+        
+        .job-card {
+            margin-bottom: 1.5rem;
         }
-
-        .hero-section .d-flex {
-            flex-direction: column;
-            gap: 0.5rem !important;
-        }
-
-        .hero-section .btn {
+        
+        .apply-btn {
             width: 100%;
-        }
-
-        .hero-section .bi-briefcase-fill {
-            font-size: 8rem !important;
-            margin-top: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-        }
-
-        .card-body {
-            padding: 1.5rem !important;
-        }
-
-        .card-body i {
-            font-size: 2rem !important;
-        }
-
-        .bg-primary, .bg-success, .bg-warning, .bg-info {
-            width: 60px !important;
-            height: 60px !important;
-        }
-
-        .bg-primary i, .bg-success i, .bg-warning i, .bg-info i {
-            font-size: 1.5rem !important;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .hero-section {
-            padding: 1.5rem 0 !important;
-        }
-
-        .hero-section .display-4 {
-            font-size: 1.5rem;
-        }
-
-        .hero-section .lead {
-            font-size: 0.9rem;
-        }
-
-        .hero-section .bi-briefcase-fill {
-            font-size: 5rem !important;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-        }
-
-        .card-body {
-            padding: 1rem !important;
-        }
-
-        .card-title {
-            font-size: 1rem;
-        }
-
-        .card-text {
-            font-size: 0.85rem;
-        }
-
-        h5 {
-            font-size: 1rem;
-        }
-
-        h3 {
-            font-size: 1.5rem;
-        }
-
-        .bg-primary, .bg-success, .bg-warning, .bg-info {
-            width: 50px !important;
-            height: 50px !important;
-        }
-
-        .bg-primary i, .bg-success i, .bg-warning i, .bg-info i {
-            font-size: 1.25rem !important;
-        }
-
-        .py-5 {
-            padding-top: 2rem !important;
-            padding-bottom: 2rem !important;
-        }
-
-        .mb-5 {
-            margin-bottom: 2rem !important;
+            margin-top: 1rem;
         }
     }
 </style>
@@ -116,210 +125,177 @@
 <section class="hero-section">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-8 mx-auto text-center">
                 <h1 class="display-4 fw-bold mb-4">
-                    Temukan Karir Impian Anda
-                    <span class="text-warning">Bersama Kami</span>
+                    <i class="bi bi-briefcase-fill me-3"></i>
+                    Lowongan Pekerjaan Terbaru
                 </h1>
                 <p class="lead mb-4">
-                    Bergabunglah dengan tim profesional di Metland dan wujudkan potensi terbaik Anda. 
-                    Daftarkan diri Anda sekarang untuk peluang karir yang tak terbatas.
+                    Temukan kesempatan karir terbaik di Metland. 
+                    Pilih posisi yang sesuai dengan minat dan kemampuan Anda.
                 </p>
-                <div class="d-flex gap-3">
-                    @auth
-                        <a href="{{ route('applicant.edit', \App\Models\Applicant::where('user_id', auth()->id())->first()->RequireID) }}" class="btn btn-warning btn-lg px-4">
-                            <i class="bi bi-person-plus-fill me-2"></i>Isi Data Diri
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="btn btn-warning btn-lg px-4">
-                            <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
-                        </a>
-                    @endauth
-                    <a href="#features" class="btn btn-outline-light btn-lg px-4">
-                        <i class="bi bi-info-circle-fill me-2"></i>Pelajari Lebih Lanjut
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="text-center">
-                    <i class="bi bi-briefcase-fill" style="font-size: 15rem; opacity: 0.3;"></i>
-                </div>
+                @if(!auth()->check())
+                <a href="{{ route('login') }}" class="btn btn-warning btn-lg px-4">
+                    <i class="bi bi-person-plus-fill me-2"></i>Login untuk Melamar
+                </a>
+                @endif
             </div>
         </div>
     </div>
 </section>
 
-<!-- Features Section -->
-<section id="features" class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center mb-5">
-                <h2 class="section-title">Mengapa Memilih Kami?</h2>
-                <p class="text-muted">Platform rekrutmen terdepan dengan fitur-fitur unggulan</p>
-            </div>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <i class="bi bi-shield-check-fill text-primary" style="font-size: 3rem;"></i>
-                        </div>
-                        <h5 class="card-title">Aman & Terpercaya</h5>
-                        <p class="card-text text-muted">
-                            Data pribadi Anda dilindungi dengan enkripsi tingkat tinggi dan keamanan berlapis.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <i class="bi bi-lightning-fill text-warning" style="font-size: 3rem;"></i>
-                        </div>
-                        <h5 class="card-title">Proses Cepat</h5>
-                        <p class="card-text text-muted">
-                            Sistem otomatis yang memproses aplikasi Anda dengan cepat dan efisien.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <i class="bi bi-people-fill text-success" style="font-size: 3rem;"></i>
-                        </div>
-                        <h5 class="card-title">Tim Profesional</h5>
-                        <p class="card-text text-muted">
-                            Dikelola oleh tim HR berpengalaman yang memahami kebutuhan industri.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- How It Works Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center mb-5">
-                <h2 class="section-title">Cara Kerja Platform</h2>
-                <p class="text-muted">Langkah-langkah mudah untuk mendaftar</p>
-            </div>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-plus-fill" style="font-size: 2rem;"></i>
-                    </div>
-                    <h5>1. Daftar</h5>
-                    <p class="text-muted">Isi formulir pendaftaran dengan data diri lengkap</p>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-file-earmark-text-fill" style="font-size: 2rem;"></i>
-                    </div>
-                    <h5>2. Upload Dokumen</h5>
-                    <p class="text-muted">Upload CV, foto, dan dokumen pendukung lainnya</p>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-search" style="font-size: 2rem;"></i>
-                    </div>
-                    <h5>3. Review</h5>
-                    <p class="text-muted">Tim kami akan meninjau aplikasi Anda</p>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-telephone-fill" style="font-size: 2rem;"></i>
-                    </div>
-                    <h5>4. Interview</h5>
-                    <p class="text-muted">Jika lolos, Anda akan diundang untuk interview</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA Section -->
+<!-- Job Vacancies Section -->
 <section class="py-5">
+    <div class="container">
+        @if($jobVacancies->count() > 0)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="text-center mb-4">
+                        <i class="bi bi-list-ul me-2"></i>
+                        Daftar Lowongan Tersedia
+                    </h2>
+                    <p class="text-center text-muted">
+                        Menampilkan {{ $jobVacancies->count() }} lowongan pekerjaan yang sedang dibuka
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                @foreach($jobVacancies as $job)
+                <div class="col-lg-6 col-xl-4">
+                    <div class="card job-card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="job-title">{{ $job->job_vacancy_name }}</h5>
+                                <span class="job-level">{{ $job->job_vacancy_level_name }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6 class="text-primary mb-2">
+                                    <i class="bi bi-file-text me-1"></i>Deskripsi Pekerjaan:
+                                </h6>
+                                <p class="job-desc">{{ $job->job_vacancy_job_desc }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6 class="text-success mb-2">
+                                    <i class="bi bi-check-circle me-1"></i>Persyaratan:
+                                </h6>
+                                <p class="job-spec">{{ $job->job_vacancy_job_spec }}</p>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        Mulai: {{ $job->job_vacancy_start_date->format('d M Y') }}
+                                    </small>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        Berakhir: {{ $job->job_vacancy_end_date->format('d M Y') }}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-info">
+                                    <i class="bi bi-people me-1"></i>
+                                    {{ $job->job_vacancy_man_power }} posisi tersedia
+                                </small>
+                                
+                                @if($userHasApplied && $appliedJobId == $job->job_vacancy_id)
+                                    <span class="applied-badge">
+                                        <i class="bi bi-check-circle me-1"></i>Sudah Melamar
+                                    </span>
+                                @elseif($userHasApplied)
+                                    <button class="btn apply-btn" disabled>
+                                        <i class="bi bi-x-circle me-1"></i>Sudah Melamar Pekerjaan Lain
+                                    </button>
+                                @elseif(auth()->check())
+                                    <form method="POST" action="{{ route('job-vacancy.apply') }}" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="job_vacancy_id" value="{{ $job->job_vacancy_id }}">
+                                        <button type="submit" class="btn apply-btn" 
+                                                onclick="return confirm('Apakah Anda yakin ingin melamar untuk posisi {{ $job->job_vacancy_name }}?')">
+                                            <i class="bi bi-send me-1"></i>Lamar Sekarang
+                                        </button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn apply-btn">
+                                        <i class="bi bi-person-plus me-1"></i>Login untuk Melamar
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @else
+            <div class="no-jobs">
+                <i class="bi bi-briefcase"></i>
+                <h3 class="text-muted">Belum Ada Lowongan Tersedia</h3>
+                <p class="text-muted">Saat ini tidak ada lowongan pekerjaan yang sedang dibuka. 
+                Silakan kembali lagi nanti untuk melihat lowongan terbaru.</p>
+                @if(auth()->check())
+                <a href="{{ route('applicant.create') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-person-plus-fill me-2"></i>Lengkapi Data Diri
+                </a>
+                @else
+                <a href="{{ route('login') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-person-plus-fill me-2"></i>Login Terlebih Dahulu
+                </a>
+                @endif
+            </div>
+        @endif
+    </div>
+</section>
+
+<!-- Info Section -->
+@if($jobVacancies->count() > 0)
+<section class="py-5 bg-light">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
-                <div class="card border-0" style="background: var(--gradient-bg); color: white;">
+                <div class="card border-0 bg-primary text-white">
                     <div class="card-body p-5">
-                        <h2 class="mb-4">Siap Memulai Karir Baru?</h2>
-                        <p class="lead mb-4">
-                            Jangan lewatkan kesempatan emas untuk bergabung dengan tim terbaik. 
-                            Daftar sekarang dan wujudkan impian karir Anda!
-                        </p>
-                        @auth
-                            <a href="{{ route('applicant.create') }}" class="btn btn-warning btn-lg px-5">
-                                <i class="bi bi-rocket-takeoff-fill me-2"></i>Isi Data Diri
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="btn btn-warning btn-lg px-5">
-                                <i class="bi bi-rocket-takeoff-fill me-2"></i>Daftar Sekarang
-                            </a>
-                        @endauth
+                        <h3 class="mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Informasi Penting
+                        </h3>
+                        <div class="row text-start">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Satu user hanya bisa melamar satu pekerjaan
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Pastikan data diri sudah lengkap
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Lamaran akan diproses oleh tim HR
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Status akan diupdate secara berkala
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
-
-<!-- Statistics Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-md-3">
-                <div class="mb-3">
-                    <i class="bi bi-people-fill text-primary" style="font-size: 3rem;"></i>
-                </div>
-                <h3 class="fw-bold text-primary">500+</h3>
-                <p class="text-muted">Kandidat Terdaftar</p>
-            </div>
-            <div class="col-md-3">
-                <div class="mb-3">
-                    <i class="bi bi-building text-success" style="font-size: 3rem;"></i>
-                </div>
-                <h3 class="fw-bold text-success">50+</h3>
-                <p class="text-muted">Perusahaan Partner</p>
-            </div>
-            <div class="col-md-3">
-                <div class="mb-3">
-                    <i class="bi bi-briefcase-fill text-warning" style="font-size: 3rem;"></i>
-                </div>
-                <h3 class="fw-bold text-warning">200+</h3>
-                <p class="text-muted">Lowongan Tersedia</p>
-            </div>
-            <div class="col-md-3">
-                <div class="mb-3">
-                    <i class="bi bi-trophy-fill text-info" style="font-size: 3rem;"></i>
-                </div>
-                <h3 class="fw-bold text-info">95%</h3>
-                <p class="text-muted">Tingkat Kepuasan</p>
-            </div>
-        </div>
-    </div>
-</section>
+@endif
 @endsection

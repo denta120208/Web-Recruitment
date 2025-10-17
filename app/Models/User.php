@@ -50,4 +50,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relationships
+    public function applyJobs()
+    {
+        return $this->hasMany(ApplyJob::class, 'user_id', 'id');
+    }
+
+    public function applicant()
+    {
+        return $this->hasOne(Applicant::class, 'user_id', 'id');
+    }
 }
