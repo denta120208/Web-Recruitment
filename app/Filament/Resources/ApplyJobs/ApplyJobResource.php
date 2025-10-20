@@ -20,7 +20,7 @@ class ApplyJobResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'apply_Jobs_id';
+    protected static ?string $recordTitleAttribute = 'apply_jobs_id';
     
     protected static ?string $navigationLabel = 'Apply Jobs';
     
@@ -52,5 +52,29 @@ class ApplyJobResource extends Resource
             'create' => CreateApplyJob::route('/create'),
             'edit' => EditApplyJob::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        // Optimized: eager load relations and select only needed columns
+        return parent::getEloquentQuery()
+            ->select([
+                'apply_jobs_id',
+                'job_vacancy_id',
+                'user_id',
+                'apply_jobs_status',
+                'apply_jobs_psikotest_status',
+                'apply_jobs_interview_by',
+                'apply_jobs_interview_result',
+                'apply_jobs_interview_AI_result',
+                'apply_jobs_interview_status',
+                'apply_jobs_psikotest_iq_num',
+                'apply_jobs_psikotest_file',
+                'created_at',
+                'updated_at',
+                'RequireID',
+                'require_id',
+            ])
+            ->with(['jobVacancy', 'user']);
     }
 }

@@ -55,4 +55,33 @@ class ApplicantResource extends Resource
             'edit' => EditApplicant::route('/{record}/edit'),
         ];
     }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->select([
+                'RequireID',
+                'FirstName',
+                'MiddleName',
+                'LastName',
+                'Gender',
+                'DateOfBirth',
+                'CVPath',
+                'PhotoPath',
+                'IDCardPath',
+                'Address',
+                'City',
+                'Gmail',
+                'LinkedIn',
+                'Instagram',
+                'Phone',
+                'CreatedAt',
+                'UpdatedAt',
+                'admin_notes',
+                'status_updated_at',
+                'reviewed_by',
+                'user_id',
+            ])
+            ->with(['user']);
+    }
 }
