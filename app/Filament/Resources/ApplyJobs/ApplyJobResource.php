@@ -20,13 +20,13 @@ class ApplyJobResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'apply_jobs_id';
+    protected static ?string $recordTitleAttribute = 'apply_Jobs_id';
     
-    protected static ?string $navigationLabel = 'Lamaran Pekerjaan';
+    protected static ?string $navigationLabel = 'Apply Jobs';
     
-    protected static ?string $modelLabel = 'Lamaran Pekerjaan';
+    protected static ?string $modelLabel = 'Apply Jobs';
     
-    protected static ?string $pluralModelLabel = 'Lamaran Pekerjaan';
+    protected static ?string $pluralModelLabel = 'Apply Jobs';
 
     public static function form(Schema $schema): Schema
     {
