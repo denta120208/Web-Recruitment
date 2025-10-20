@@ -310,4 +310,92 @@ class ApplicantController extends Controller
         return redirect()->route('applicant.success')->with('success', 'Profil berhasil diperbarui!');
     }
 
+    public function serveFile(Request $request, string $type, string $filename)
+    {
+        // Only allow authenticated user to access their own files
+        $user = auth()->user();
+        if (!$user) {
+            abort(401);
+        }
+
+        $applicant = Applicant::where('user_id', $user->id)->first();
+        if (!$applicant) {
+            abort(404);
+        }
+
+        // Determine which path to serve based on requested type
+        if ($type === 'cv') {
+            $path = $applicant->CVPath;
+        } elseif ($type === 'photo') {
+            $path = $applicant->PhotoPath;
+        } else {
+            abort(404);
+        }
+
+        // Ensure path exists and is on the configured disk
+        if (empty($path) || !\Illuminate\Support\Facades\Storage::disk('mlnas')->exists($path)) {
+            abort(404);
+        }
+
+        // Stream the file inline (browser will render images/pdf)
+        // We ignore the provided $filename to prevent path tampering
+        $disk = Storage::disk('mlnas');
+        $stream = $disk->readStream($path);
+        if ($stream === false) {
+            abort(404);
+        }
+
+        $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+        $downloadName = basename($path);
+
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+        ]);
+    }
+
+    public function servePath(Request $request, string $path)
+    {
+        $user = auth()->user();
+        if (!$user) abort(401);
+
+        $applicant = Applicant::where('user_id', $user->id)->first();
+        if (!$applicant) abort(404);
+
+        // Only allow access if the requested path matches the user's saved file paths
+        $allowedPaths = array_filter([
+            $applicant->CVPath,
+            $applicant->PhotoPath,
+        ]);
+
+        // Normalize comparison
+        $normalizedRequested = ltrim($path, '/');
+        $isAllowed = collect($allowedPaths)->contains(function ($p) use ($normalizedRequested) {
+            return ltrim($p, '/') === $normalizedRequested;
+        });
+
+        if (!$isAllowed) abort(404);
+
+        $disk = Storage::disk('mlnas');
+        if (!$disk->exists($normalizedRequested)) abort(404);
+
+        $stream = $disk->readStream($normalizedRequested);
+        if ($stream === false) abort(404);
+
+        $mime = $disk->mimeType($normalizedRequested) ?: 'application/octet-stream';
+        $downloadName = basename($normalizedRequested);
+
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+            if (is_resource($stream)) fclose($stream);
+        }, 200, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+        ]);
+    }
 }

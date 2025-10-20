@@ -34,6 +34,12 @@ Route::prefix('applicant')->name('applicant.')->middleware(['auth', 'check.exist
     Route::get('/success', [ApplicantController::class, 'success'])->name('success');
 });
 
+// Route for serving files from mlnas disk (accept full path)
+Route::get('/file/{path}', [ApplicantController::class, 'servePath'])
+    ->where('path', '.*')
+    ->middleware('auth')
+    ->name('file.serve');
+
 // Terms routes (show and accept)
 Route::middleware('auth')->group(function(){
     Route::get('/terms', function(){

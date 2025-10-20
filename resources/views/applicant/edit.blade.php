@@ -397,6 +397,13 @@
                                     @error('CVPath')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
+                                            @if($applicant->CVPath)
+                                                <div class="mt-2">
+                                                    <a href="{{ route('file.serve', ['path' => $applicant->CVPath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                        <i class="bi bi-file-earmark-pdf"></i> Lihat CV Sebelumnya
+                                                    </a>
+                                                </div>
+                                            @endif
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -405,13 +412,20 @@
                                            id="PhotoPath" name="PhotoPath" accept="image/*">
                                     <label for="PhotoPath" class="file-upload-label">
                                         <i class="bi bi-camera-fill text-primary" style="font-size: 2rem;"></i>
-                                        <h6 class="mt-2">Upload Foto</h6>
+                                        <h6 class="mt-2">Upload Foto diri</h6>
                                         <small class="text-muted">IMAGE Only (Max 5MB)</small>
                                         <br><small class="text-info">❗Harap menamai file dengan nama Anda</small>
                                     </label>
                                     @error('PhotoPath')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
+                                            @if($applicant->PhotoPath)
+                                                <div class="mt-2">
+                                                    <a href="{{ route('file.serve', ['path' => $applicant->PhotoPath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                        <i class="bi bi-image"></i> Lihat Foto diri Sebelumnya
+                                                    </a>
+                                                </div>
+                                            @endif
                                 </div>
                             </div>
                         </div>
@@ -605,7 +619,7 @@
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
                 <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                    <button type="submit" class="btn btn-success btn-lg px-5" id="submitBtn" style="background: #009290; border-color: #009290;">
+                    <button type="submit" class="btn btn-success btn-lg px-5" id="submitBtn" style="background:rgb(32, 114, 221); border-color: #009290;">
                         <i class="bi bi-check-circle-fill me-2"></i>Update Profil
                     </button>
                     <button type="button" class="btn btn-outline-secondary btn-lg px-5" onclick="history.back()">

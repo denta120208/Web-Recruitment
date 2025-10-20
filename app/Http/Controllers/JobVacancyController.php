@@ -19,11 +19,18 @@ class JobVacancyController extends Controller
             ->orderBy('job_vacancy_start_date', 'desc')
             ->get();
 
-        // Check if user has already applied to any job
+        // Check if user has profile and if already applied to any job
         $userHasApplied = false;
         $appliedJobId = null;
+        $hasProfile = false;
+        $profileId = null;
         
         if (Auth::check()) {
+            $profile = Applicant::where('user_id', Auth::id())->first();
+            if ($profile) {
+                $hasProfile = true;
+                $profileId = $profile->RequireID;
+            }
             $existingApplication = ApplyJob::where('user_id', Auth::id())->first();
             if ($existingApplication) {
                 $userHasApplied = true;
@@ -31,7 +38,7 @@ class JobVacancyController extends Controller
             }
         }
 
-        return view('applicant.index', compact('jobVacancies', 'userHasApplied', 'appliedJobId'));
+        return view('applicant.index', compact('jobVacancies', 'userHasApplied', 'appliedJobId', 'hasProfile', 'profileId'));
     }
 
     public function apply(Request $request)

@@ -42,20 +42,13 @@
             background: #ffffff;
             min-height: 100vh;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
-            padding: 3rem 0;
+            padding: 1.5rem 0.5rem;
             position: relative;
             overflow-x: hidden;
             width: 100%;
             margin: 0;
-        }
-
-        @media (max-height: 900px) {
-            body {
-                align-items: flex-start;
-                padding: 2rem 0;
-            }
         }
 
         /* Decorative background elements */
@@ -95,19 +88,8 @@
         .container {
             width: 100%;
             max-width: 100%;
-            padding-left: 15px;
-            padding-right: 15px;
+            padding: 0 0.75rem;
             margin: 0 auto;
-        }
-
-        .row {
-            margin-left: 0;
-            margin-right: 0;
-        }
-
-        .col-md-6, .col-lg-5 {
-            padding-left: 0;
-            padding-right: 0;
         }
 
         .register-container {
@@ -118,7 +100,7 @@
                 0 10px 20px rgba(0,0,0,0.04),
                 inset 0 1px 0 rgba(255,255,255,0.9);
             overflow: hidden;
-            max-width: 480px;
+            max-width: 500px;
             width: 100%;
             position: relative;
             z-index: 1;
@@ -273,7 +255,7 @@
             transform: translateY(-2px);
         }
 
-        .form-floating.position-relative { 
+        .form-floating { 
             position: relative;
             animation: fadeInUp 0.6s ease-out backwards;
         }
@@ -548,11 +530,6 @@
             transform: translateX(3px);
         }
 
-        .form-floating {
-            position: relative;
-            z-index: 1;
-        }
-
         .form-floating > label {
             z-index: 3;
             pointer-events: none;
@@ -599,10 +576,20 @@
             z-index: 1;
         }
 
-        /* Responsive adjustments */
+        /* ========== RESPONSIVE STYLES ========== */
+        
+        /* Tablet & Small Desktop */
+        @media (max-width: 991px) {
+            .register-container:hover {
+                transform: translateY(-2px);
+            }
+        }
+
+        /* Tablet */
         @media (max-width: 768px) {
             body {
-                padding: 2rem 0;
+                padding: 1.5rem 0.5rem;
+                align-items: flex-start;
             }
 
             body::before {
@@ -621,7 +608,6 @@
 
             .register-container {
                 border-radius: 20px;
-                margin: 0 15px;
                 max-width: 100%;
             }
 
@@ -662,19 +648,18 @@
             }
         }
 
-        @media (max-width: 480px) {
+        /* Mobile Large */
+        @media (max-width: 576px) {
             body {
-                padding: 1.5rem 0;
+                padding: 1rem 0.5rem;
             }
 
             .container {
-                padding-left: 10px;
-                padding-right: 10px;
+                padding: 0 0.5rem;
             }
 
             .register-container {
-                border-radius: 15px;
-                margin: 0 10px;
+                border-radius: 18px;
             }
 
             .register-header {
@@ -756,14 +741,18 @@
             }
         }
 
-        @media (max-width: 360px) {
+        /* Mobile Medium */
+        @media (max-width: 400px) {
             body {
-                padding: 1rem 0;
+                padding: 0.75rem 0.25rem;
+            }
+
+            .container {
+                padding: 0 0.25rem;
             }
 
             .register-container {
-                border-radius: 12px;
-                margin: 0 8px;
+                border-radius: 15px;
             }
 
             .register-header {
@@ -778,20 +767,35 @@
                 font-size: 1.25rem;
             }
 
+            .logo i {
+                font-size: 1.1rem;
+            }
+
+            .subtitle {
+                font-size: 0.75rem;
+            }
+
             .form-control {
                 padding: 0.65rem 0.85rem;
-                font-size: 0.85rem;
+                font-size: 0.875rem;
+                border-radius: 9px;
             }
 
             .btn-primary,
             .btn-outline-primary {
                 padding: 0.65rem 1rem;
-                font-size: 0.85rem;
+                font-size: 0.875rem;
+                border-radius: 9px;
             }
 
             .toggle-password-btn {
                 height: 34px;
                 width: 34px;
+                right: 8px;
+            }
+
+            .toggle-password-btn i {
+                font-size: 0.85rem;
             }
 
             .form-floating > label {
@@ -801,12 +805,147 @@
             small {
                 font-size: 0.7rem;
             }
+
+            .form-check-label {
+                font-size: 0.8rem;
+            }
+
+            .register-header::before {
+                width: 60px;
+                height: 60px;
+            }
+
+            .register-header::after {
+                width: 50px;
+                height: 50px;
+            }
         }
 
-        /* Prevent horizontal scroll */
-        @media (max-width: 991px) {
-            .register-container:hover {
-                transform: translateY(-2px);
+        /* Mobile Small */
+        @media (max-width: 360px) {
+            body {
+                padding: 0.5rem 0.25rem;
+            }
+
+            .register-container {
+                border-radius: 12px;
+            }
+
+            .register-header {
+                padding: 1rem 0.85rem 0.65rem 0.85rem;
+            }
+
+            .register-body {
+                padding: 0.85rem 1rem 1.25rem 1rem;
+            }
+
+            .logo {
+                font-size: 1.15rem;
+            }
+
+            .logo i {
+                font-size: 1rem;
+            }
+
+            .subtitle {
+                font-size: 0.7rem;
+            }
+
+            .form-control {
+                padding: 0.6rem 0.75rem;
+                font-size: 0.85rem;
+                border-radius: 8px;
+            }
+
+            .btn-primary,
+            .btn-outline-primary {
+                padding: 0.6rem 0.9rem;
+                font-size: 0.85rem;
+                border-radius: 8px;
+            }
+
+            .toggle-password-btn {
+                height: 32px;
+                width: 32px;
+                right: 6px;
+            }
+
+            .toggle-password-btn i {
+                font-size: 0.8rem;
+            }
+
+            .form-floating > label {
+                font-size: 0.8rem;
+            }
+
+            small {
+                font-size: 0.65rem;
+            }
+
+            .form-check-label {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Height responsive for short screens */
+        @media (max-height: 800px) {
+            body {
+                align-items: flex-start;
+                padding-top: 1rem;
+            }
+
+            .register-header {
+                padding-top: 1.5rem;
+                padding-bottom: 1rem;
+            }
+
+            .register-body {
+                padding-top: 1.25rem;
+                padding-bottom: 1.75rem;
+            }
+
+            .form-floating {
+                margin-bottom: 0.85rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            body {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .register-header {
+                padding: 1.25rem 1.5rem 0.85rem 1.5rem;
+            }
+
+            .register-body {
+                padding: 1rem 1.5rem 1.5rem 1.5rem;
+            }
+
+            .form-floating {
+                margin-bottom: 0.75rem;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+            }
+        }
+
+        @media (max-height: 650px) and (max-width: 576px) {
+            body {
+                padding: 0.5rem 0.25rem;
+            }
+
+            .register-header {
+                padding: 1rem 1.25rem 0.75rem 1.25rem;
+            }
+
+            .register-body {
+                padding: 0.85rem 1.25rem 1.25rem 1.25rem;
+            }
+
+            .form-floating {
+                margin-bottom: 0.65rem;
             }
         }
     </style>
@@ -894,18 +1033,18 @@
                                 @enderror
                             </div>
 
-                            <div class="d-grid mb-3">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
-                                </button>
-                            </div>
-
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" value="1" id="acceptTerms" name="accepted_terms" required>
                                 <label class="form-check-label small ms-2" for="acceptTerms">
                                     Saya menyetujui <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Syarat &amp; Ketentuan Pengelolaan Data</a> yang berlaku.
                                 </label>
                                 <div class="invalid-feedback">Anda harus menyetujui syarat & ketentuan untuk melanjutkan.</div>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
+                                </button>
                             </div>
                         </form>
 
