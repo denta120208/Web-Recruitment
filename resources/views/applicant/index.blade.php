@@ -150,8 +150,8 @@
                 @if(!auth()->check())
                 <a href="{{ route('login') }}" class="btn btn-warning btn-lg px-4">
                     <i class="bi bi-person-plus-fill me-2"></i>Login untuk Melamar
-                </a>
-                @else
+                        </a>
+                    @else
                     @if(!isset($hasProfile) || !$hasProfile)
                     <a href="{{ route('applicant.create') }}" class="btn btn-warning btn-lg px-4">
                         <i class="bi bi-person-plus-fill me-2"></i>Lengkapi Data Diri
@@ -306,18 +306,18 @@
                 <div class="cm-header">
                     <h5 class="m-0" id="cm-title"></h5>
                     <button class="cm-close" aria-label="Close" id="cm-close">×</button>
-                </div>
+            </div>
                 <div class="cm-body">
                     <div class="mb-2"><span class="job-level" id="cm-level"></span></div>
                     <h6 class="text-primary mb-2">Deskripsi Pekerjaan</h6>
                     <div class="mb-3" id="cm-desc" style="white-space: pre-line;"></div>
                     <h6 class="text-success mb-2">Persyaratan</h6>
                     <div class="mb-3" id="cm-spec" style="white-space: pre-line;"></div>
-                </div>
+        </div>
                 <div class="cm-footer">
                     <small class="text-muted" id="cm-dates"></small>
                     <div id="cm-actions"></div>
-                </div>
+                    </div>
             </div>`;
         document.body.appendChild(overlay);
 

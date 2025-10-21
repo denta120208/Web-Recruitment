@@ -40,6 +40,11 @@ Route::get('/file/{path}', [ApplicantController::class, 'servePath'])
     ->middleware('auth')
     ->name('file.serve');
 
+// Admin-only streaming for applicant files by RequireID
+Route::get('/admin/file/applicant/{requireId}/{type}', [ApplicantController::class, 'serveApplicantFileAdmin'])
+    ->where(['requireId' => '[0-9]+', 'type' => 'cv|photo'])
+    ->name('admin.file.applicant');
+
 // Terms routes (show and accept)
 Route::middleware('auth')->group(function(){
     Route::get('/terms', function(){

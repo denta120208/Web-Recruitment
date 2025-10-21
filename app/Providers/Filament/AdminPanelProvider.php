@@ -41,6 +41,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Metland Recruit Admin')
             ->favicon(asset('favicon.ico'))
             ->darkMode(true)
+            // Hide theme toggle and force dark scheme without external assets
+            ->renderHook('panels::head.start', fn () => new \Illuminate\Support\HtmlString(
+                '<style>:root{color-scheme:dark}.fi-theme-toggle,[data-theme-toggle]{display:none!important}</style>'
+            ))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

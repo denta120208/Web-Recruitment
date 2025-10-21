@@ -9,6 +9,7 @@ use App\Models\RequireEducation;
 use App\Models\RequireTraining;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Filament\Facades\Filament;
 
 class ApplicantController extends Controller
 {
@@ -396,6 +397,52 @@ class ApplicantController extends Controller
         }, 200, [
             'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+        ]);
+    }
+
+    public function serveApplicantFileAdmin(Request $request, int $requireId, string $type)
+    {
+        // Only allow authenticated Filament admin users
+        if (! Filament::auth()->check()) {
+            abort(401);
+        }
+
+        $applicant = Applicant::where('RequireID', $requireId)->firstOrFail();
+
+        if ($type === 'cv') {
+            $path = $applicant->CVPath;
+        } elseif ($type === 'photo') {
+            $path = $applicant->PhotoPath;
+        } else {
+            abort(404);
+        }
+
+        if (empty($path)) {
+            abort(404);
+        }
+
+        $disk = Storage::disk('mlnas');
+        if (! $disk->exists($path)) {
+            abort(404);
+        }
+
+        $stream = $disk->readStream($path);
+        if ($stream === false) {
+            abort(404);
+        }
+
+        $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+        $downloadName = basename($path);
+
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type' => $mime,
+            // CV should download, photo should open inline in a new tab
+            'Content-Disposition' => ($type === 'cv' ? 'attachment' : 'inline') . '; filename="' . $downloadName . '"',
         ]);
     }
 }

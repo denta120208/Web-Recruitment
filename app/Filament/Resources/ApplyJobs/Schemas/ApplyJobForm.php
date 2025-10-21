@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
+// no additional imports needed
 
 class ApplyJobForm
 {
@@ -22,7 +23,8 @@ class ApplyJobForm
                     ->relationship('user', 'name')
                     ->required()
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->disabledOn('edit'),
                 Select::make('apply_jobs_status')
                     ->label('Status Lamaran')
                     ->options([
@@ -38,7 +40,8 @@ class ApplyJobForm
                 Textarea::make('apply_jobs_interview_result')
                     ->columnSpanFull(),
                 Textarea::make('apply_jobs_interview_AI_result')
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->disabled(),
                 TextInput::make('apply_jobs_interview_status')
                     ->required()
                     ->numeric()

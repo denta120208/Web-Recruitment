@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ApplyJobs\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -94,6 +95,10 @@ class ApplyJobsTable
                     ->preload(),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('View Applicant')
+                    ->url(fn ($record) => route('filament.admin.resources.applicants.view', $record->require_id))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([
