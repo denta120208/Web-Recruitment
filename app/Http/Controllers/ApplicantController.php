@@ -24,7 +24,7 @@ class ApplicantController extends Controller
         $existingApplication = Applicant::where('user_id', $user->id)->first();
         
         if ($existingApplication) {
-            return redirect()->route('applicant.edit', $existingApplication->RequireID);
+            return redirect()->route('applicant.edit', $existingApplication->getKey());
         }
         
         return view('applicant.create');
@@ -125,8 +125,25 @@ class ApplicantController extends Controller
             $validated['LastName'] = '';
         }
 
-        $validated['user_id'] = auth()->id();
-        $applicant = Applicant::create($validated);
+        // Map PascalCase form inputs to lowercase model attributes for PostgreSQL
+        $modelData = [
+            'firstname' => $validated['FirstName'],
+            'middlename' => $validated['MiddleName'] ?? null,
+            'lastname' => $validated['LastName'],
+            'gender' => $validated['Gender'],
+            'dateofbirth' => $validated['DateOfBirth'],
+            'address' => $validated['Address'],
+            'city' => $validated['City'],
+            'gmail' => $validated['Gmail'],
+            'linkedin' => $validated['LinkedIn'] ?? null,
+            'instagram' => $validated['Instagram'] ?? null,
+            'phone' => $validated['Phone'],
+            'cvpath' => $validated['CVPath'] ?? null,
+            'photopath' => $validated['PhotoPath'] ?? null,
+            'user_id' => auth()->id(),
+        ];
+
+        $applicant = Applicant::create($modelData);
 
        
         if ($request->has('work_experiences')) {
@@ -134,13 +151,13 @@ class ApplicantController extends Controller
                 if (!empty($workExp['CompanyName'])) {
                     $isCurrent = isset($workExp['is_current']) && $workExp['is_current'] == '1';
                     RequireWorkExperience::create([ 
-                        'RequireID' => $applicant->RequireID,
-                        'CompanyName' => $workExp['CompanyName'],
-                        'JobLevel' => $workExp['JobLevel'],
-                        'StartDate' => $workExp['StartDate'],
-                        'EndDate' => $isCurrent ? null : ($workExp['EndDate'] ?? null),
-                        'IsCurrent' => $isCurrent ? 1 : 0,
-                        'Salary' => $workExp['Salary'] ?? null,
+                        'requireid' => $applicant->getKey(),
+                        'companyname' => $workExp['CompanyName'],
+                        'joblevel' => $workExp['JobLevel'],
+                        'startdate' => $workExp['StartDate'],
+                        'enddate' => $isCurrent ? null : ($workExp['EndDate'] ?? null),
+                        'iscurrent' => $isCurrent ? 1 : 0,
+                        'salary' => $workExp['Salary'] ?? null,
                     ]);
                 }
             }
@@ -151,11 +168,11 @@ class ApplicantController extends Controller
             foreach ($request->educations as $education) {
                 if (!empty($education['InstitutionName'])) {
                     RequireEducation::create([
-                        'RequireID' => $applicant->RequireID,
-                        'InstitutionName' => $education['InstitutionName'],
-                        'Major' => $education['Major'],
-                        'StartDate' => $education['StartDate'],
-                        'EndDate' => $education['EndDate'],
+                        'requireid' => $applicant->getKey(),
+                        'institutionname' => $education['InstitutionName'],
+                        'major' => $education['Major'],
+                        'startdate' => $education['StartDate'],
+                        'enddate' => $education['EndDate'],
                     ]);
                 }
             }
@@ -166,11 +183,11 @@ class ApplicantController extends Controller
             foreach ($request->trainings as $training) {
                 if (!empty($training['TrainingName'])) {
                     RequireTraining::create([
-                        'RequireID' => $applicant->RequireID,
-                        'TrainingName' => $training['TrainingName'],
-                        'CertificateNo' => $training['CertificateNo'],
-                        'StartTrainingDate' => $training['StartTrainingDate'],
-                        'EndTrainingDate' => $training['EndTrainingDate'],
+                        'requireid' => $applicant->getKey(),
+                        'trainingname' => $training['TrainingName'],
+                        'certificateno' => $training['CertificateNo'],
+                        'starttrainingdate' => $training['StartTrainingDate'],
+                        'endtrainingdate' => $training['EndTrainingDate'],
                     ]);
                 }
             }
@@ -187,7 +204,7 @@ class ApplicantController extends Controller
     public function edit($id)
     {
         $user = auth()->user();
-        $applicant = Applicant::where('RequireID', $id)
+        $applicant = Applicant::where('requireid', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
             
@@ -197,7 +214,7 @@ class ApplicantController extends Controller
     public function update(Request $request, $id)
     {
         $user = auth()->user();
-        $applicant = Applicant::where('RequireID', $id)
+        $applicant = Applicant::where('requireid', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
 
@@ -254,7 +271,30 @@ class ApplicantController extends Controller
             $validated['LastName'] = '';
         }
 
-        $applicant->update($validated);
+        // Map PascalCase form inputs to lowercase model attributes for PostgreSQL
+        $modelData = [
+            'firstname' => $validated['FirstName'],
+            'middlename' => $validated['MiddleName'] ?? null,
+            'lastname' => $validated['LastName'],
+            'gender' => $validated['Gender'],
+            'dateofbirth' => $validated['DateOfBirth'],
+            'address' => $validated['Address'],
+            'city' => $validated['City'],
+            'gmail' => $validated['Gmail'],
+            'linkedin' => $validated['LinkedIn'] ?? null,
+            'instagram' => $validated['Instagram'] ?? null,
+            'phone' => $validated['Phone'],
+        ];
+
+        // Only update file paths if new files were uploaded
+        if (isset($validated['CVPath'])) {
+            $modelData['cvpath'] = $validated['CVPath'];
+        }
+        if (isset($validated['PhotoPath'])) {
+            $modelData['photopath'] = $validated['PhotoPath'];
+        }
+
+        $applicant->update($modelData);
 
         // Update work experiences
         if ($request->has('work_experiences')) {
@@ -263,13 +303,13 @@ class ApplicantController extends Controller
                 if (!empty($workExp['CompanyName'])) {
                     $isCurrent = isset($workExp['is_current']) && $workExp['is_current'] == '1';
                     RequireWorkExperience::create([ 
-                        'RequireID' => $applicant->RequireID,
-                        'CompanyName' => $workExp['CompanyName'],
-                        'JobLevel' => $workExp['JobLevel'],
-                        'StartDate' => $workExp['StartDate'],
-                        'EndDate' => $isCurrent ? null : ($workExp['EndDate'] ?? null),
-                        'IsCurrent' => $isCurrent ? 1 : 0,
-                        'Salary' => $workExp['Salary'] ?? null,
+                        'requireid' => $applicant->getKey(),
+                        'companyname' => $workExp['CompanyName'],
+                        'joblevel' => $workExp['JobLevel'],
+                        'startdate' => $workExp['StartDate'],
+                        'enddate' => $isCurrent ? null : ($workExp['EndDate'] ?? null),
+                        'iscurrent' => $isCurrent ? 1 : 0,
+                        'salary' => $workExp['Salary'] ?? null,
                     ]);
                 }
             }
@@ -281,11 +321,11 @@ class ApplicantController extends Controller
             foreach ($request->educations as $education) {
                 if (!empty($education['InstitutionName'])) {
                     RequireEducation::create([
-                        'RequireID' => $applicant->RequireID,
-                        'InstitutionName' => $education['InstitutionName'],
-                        'Major' => $education['Major'],
-                        'StartDate' => $education['StartDate'],
-                        'EndDate' => $education['EndDate'],
+                        'requireid' => $applicant->getKey(),
+                        'institutionname' => $education['InstitutionName'],
+                        'major' => $education['Major'],
+                        'startdate' => $education['StartDate'],
+                        'enddate' => $education['EndDate'],
                     ]);
                 }
             }
@@ -297,11 +337,11 @@ class ApplicantController extends Controller
             foreach ($request->trainings as $training) {
                 if (!empty($training['TrainingName'])) {
                     RequireTraining::create([
-                        'RequireID' => $applicant->RequireID,
-                        'TrainingName' => $training['TrainingName'],
-                        'CertificateNo' => $training['CertificateNo'],
-                        'StartTrainingDate' => $training['StartTrainingDate'],
-                        'EndTrainingDate' => $training['EndTrainingDate'],
+                        'requireid' => $applicant->getKey(),
+                        'trainingname' => $training['TrainingName'],
+                        'certificateno' => $training['CertificateNo'],
+                        'starttrainingdate' => $training['StartTrainingDate'],
+                        'endtrainingdate' => $training['EndTrainingDate'],
                     ]);
                 }
             }
@@ -325,9 +365,9 @@ class ApplicantController extends Controller
 
         // Determine which path to serve based on requested type
         if ($type === 'cv') {
-            $path = $applicant->CVPath;
+            $path = $applicant->cvpath;
         } elseif ($type === 'photo') {
-            $path = $applicant->PhotoPath;
+            $path = $applicant->photopath;
         } else {
             abort(404);
         }
@@ -369,8 +409,8 @@ class ApplicantController extends Controller
 
         // Only allow access if the requested path matches the user's saved file paths
         $allowedPaths = array_filter([
-            $applicant->CVPath,
-            $applicant->PhotoPath,
+            $applicant->cvpath,
+            $applicant->photopath,
         ]);
 
         // Normalize comparison
@@ -406,12 +446,12 @@ class ApplicantController extends Controller
             abort(401);
         }
 
-        $applicant = Applicant::where('RequireID', $requireId)->firstOrFail();
+        $applicant = Applicant::where('requireid', $requireId)->firstOrFail();
 
         if ($type === 'cv') {
-            $path = $applicant->CVPath;
+            $path = $applicant->cvpath;
         } elseif ($type === 'photo') {
-            $path = $applicant->PhotoPath;
+            $path = $applicant->photopath;
         } else {
             abort(404);
         }

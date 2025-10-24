@@ -22,8 +22,8 @@ class ProfileFreshnessCheck
             return $next($request);
         }
 
-        // Fields are named CreatedAt/UpdatedAt on the table; cast present in model
-        $updatedAt = $applicant->UpdatedAt; // model already casts to datetime
+        // Fields are named createdat/updatedat on the table; cast present in model
+        $updatedAt = $applicant->updatedat; // model already casts to datetime
         try {
             $updatedCarbon = $updatedAt instanceof Carbon ? $updatedAt : Carbon::parse((string) $updatedAt);
         } catch (\Throwable $e) {
@@ -50,7 +50,7 @@ class ProfileFreshnessCheck
             // Only redirect if user is not already on edit/update routes
             if (!$request->routeIs('applicant.edit') && !$request->routeIs('applicant.update')) {
                 return redirect()
-                    ->route('applicant.edit', $applicant->RequireID)
+                    ->route('applicant.edit', $applicant->getKey())
                     ->with('warning', "Profil Anda berusia lebih dari 3 bulan. Mohon perbarui data Anda.");
             }
         }

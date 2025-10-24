@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Profil - ' . $applicant->FirstName . ' ' . $applicant->LastName)
+@section('title', 'Edit Profil - ' . $applicant->firstname . ' ' . $applicant->lastname)
 
 @php
     $workExperiences = $applicant->workExperiences ?? collect();
@@ -207,7 +207,7 @@
 
     <!-- Form Header -->
     
-    <form id="applicantForm" action="{{ route('applicant.update', $applicant->RequireID) }}" method="POST" enctype="multipart/form-data">
+    <form id="applicantForm" action="{{ route('applicant.update', $applicant->getKey()) }}" method="POST" enctype="multipart/form-data">
         @method('PUT')
         @csrf
         
@@ -227,7 +227,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control @error('FirstName') is-invalid @enderror" 
                                            id="FirstName" name="FirstName" placeholder="Nama Depan" 
-                                           value="{{ old('FirstName', $applicant->FirstName) }}" required>
+                                           value="{{ old('FirstName', $applicant->firstname) }}" required>
                                     <label for="FirstName">Nama Depan *</label>
                                     @error('FirstName')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -239,7 +239,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control @error('MiddleName') is-invalid @enderror" 
                                            id="MiddleName" name="MiddleName" placeholder="Nama Tengah" 
-                                           value="{{ old('MiddleName', $applicant->MiddleName) }}">
+                                           value="{{ old('MiddleName', $applicant->middlename) }}">
                                     <label for="MiddleName">Nama Tengah</label>
                                     @error('MiddleName')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -250,7 +250,7 @@
                                 <div class="form-floating">
                         <input type="text" class="form-control @error('LastName') is-invalid @enderror" 
                                  id="LastName" name="LastName" placeholder="Nama Belakang" 
-                                           value="{{ old('LastName', $applicant->LastName) }}">
+                                           value="{{ old('LastName', $applicant->lastname) }}">
                              <label for="LastName">Nama Belakang</label>
                                     @error('LastName')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -262,8 +262,8 @@
                                     <select class="form-select @error('Gender') is-invalid @enderror" 
                                             id="Gender" name="Gender" required>
                                         <option value="">Pilih Jenis Kelamin</option>
-                                        <option value="Male" {{ old('Gender', $applicant->Gender) == 'Male' ? 'selected' : '' }}>Laki-laki</option>
-                                        <option value="Female" {{ old('Gender', $applicant->Gender) == 'Female' ? 'selected' : '' }}>Perempuan</option>
+                                        <option value="Male" {{ old('Gender', $applicant->gender) == 'Male' ? 'selected' : '' }}>Laki-laki</option>
+                                        <option value="Female" {{ old('Gender', $applicant->gender) == 'Female' ? 'selected' : '' }}>Perempuan</option>
                                     </select>
                                     <label for="Gender">Jenis Kelamin *</label>
                                     @error('Gender')
@@ -275,7 +275,7 @@
                                 <div class="form-floating">
                                     <input type="date" class="form-control @error('DateOfBirth') is-invalid @enderror" 
                                            id="DateOfBirth" name="DateOfBirth" 
-                                           value="{{ old('DateOfBirth', $applicant->DateOfBirth ? $applicant->DateOfBirth->format('Y-m-d') : '') }}" required>
+                                           value="{{ old('DateOfBirth', $applicant->dateofbirth ? $applicant->dateofbirth->format('Y-m-d') : '') }}" required>
                                     <label for="DateOfBirth">Tanggal Lahir *</label>
                                     @error('DateOfBirth')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -286,7 +286,7 @@
                                 <div class="form-floating">
                                     <textarea class="form-control @error('Address') is-invalid @enderror" 
                                               id="Address" name="Address" placeholder="Alamat Lengkap" 
-                                              style="height: 100px" required>{{ old('Address', $applicant->Address) }}</textarea>
+                                              style="height: 100px" required>{{ old('Address', $applicant->address) }}</textarea>
                                     <label for="Address">Alamat Lengkap *</label>
                                     @error('Address')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -297,7 +297,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control @error('City') is-invalid @enderror" 
                                            id="City" name="City" placeholder="Kota" 
-                                           value="{{ old('City', $applicant->City) }}" required>
+                                           value="{{ old('City', $applicant->city) }}" required>
                                     <label for="City">Kota *</label>
                                     @error('City')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -308,7 +308,7 @@
                                 <div class="form-floating">
                                     <input type="tel" class="form-control @error('Phone') is-invalid @enderror" 
                                            id="Phone" name="Phone" placeholder="Nomor Telepon" 
-                                           value="{{ old('Phone', $applicant->Phone) }}" required>
+                                           value="{{ old('Phone', $applicant->phone) }}" required>
                                     <label for="Phone">Nomor Telepon *</label>
                                     @error('Phone')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -337,7 +337,7 @@
                                 <div class="form-floating">
                                     <input type="email" class="form-control @error('Gmail') is-invalid @enderror" 
                                            id="Gmail" name="Gmail" placeholder="Email" 
-                                           value="{{ old('Gmail', $applicant->Gmail) }}" required>
+                                           value="{{ old('Gmail', $applicant->gmail) }}" required>
                                     <label for="Gmail">Email *</label>
                                     @error('Gmail')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -348,7 +348,7 @@
                                 <div class="form-floating">
                                     <input type="url" class="form-control @error('LinkedIn') is-invalid @enderror" 
                                            id="LinkedIn" name="LinkedIn" placeholder="LinkedIn URL" 
-                                           value="{{ old('LinkedIn', $applicant->LinkedIn) }}">
+                                           value="{{ old('LinkedIn', $applicant->linkedin) }}">
                                     <label for="LinkedIn">LinkedIn URL</label>
                                     @error('LinkedIn')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -359,7 +359,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control @error('Instagram') is-invalid @enderror" 
                                            id="Instagram" name="Instagram" placeholder="Instagram Username" 
-                                           value="{{ old('Instagram', $applicant->Instagram) }}">
+                                           value="{{ old('Instagram', $applicant->instagram) }}">
                                     <label for="Instagram">Instagram Username</label>
                                     @error('Instagram')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -397,9 +397,9 @@
                                     @error('CVPath')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
-                                            @if($applicant->CVPath)
+                                            @if($applicant->cvpath)
                                                 <div class="mt-2">
-                                                    <a href="{{ route('file.serve', ['path' => $applicant->CVPath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <a href="{{ route('file.serve', ['path' => $applicant->cvpath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                                         <i class="bi bi-file-earmark-pdf"></i> Lihat CV Sebelumnya
                                                     </a>
                                                 </div>
@@ -419,9 +419,9 @@
                                     @error('PhotoPath')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
-                                            @if($applicant->PhotoPath)
+                                            @if($applicant->photopath)
                                                 <div class="mt-2">
-                                                    <a href="{{ route('file.serve', ['path' => $applicant->PhotoPath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <a href="{{ route('file.serve', ['path' => $applicant->photopath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                                         <i class="bi bi-image"></i> Lihat Foto diri Sebelumnya
                                                     </a>
                                                 </div>
@@ -433,6 +433,64 @@
                 </div>
             </div>
         </div>
+
+
+
+
+   <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-mortarboard-fill me-2"></i>
+                            Pendidikan
+                        </h3>
+                        <button type="button" class="btn btn-light btn-sm" id="addEducation">
+                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="educationContainer">
+                            @foreach($educations as $index => $education)
+                            <div class="dynamic-section position-relative" data-index="{{ $index }}">
+                                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeEducation(this)">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" name="educations[{{ $index }}][InstitutionName]" placeholder="Nama Institusi" value="{{ $education->institutionname }}">
+                                            <label>Nama Institusi</label>
+                        </div>
+                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" name="educations[{{ $index }}][Major]" placeholder="Jurusan" value="{{ $education->major }}">
+                                            <label>Jurusan</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="date" class="form-control" name="educations[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ $education->startdate }}">
+                                            <label>Tanggal Mulai</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="date" class="form-control" name="educations[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ $education->enddate }}">
+                                            <label>Tanggal Selesai</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Work Experience Section -->
         <div class="row">
@@ -457,37 +515,37 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" name="work_experiences[{{ $index }}][CompanyName]" placeholder="Nama Perusahaan" value="{{ $workExp->CompanyName }}">
+                                            <input type="text" class="form-control" name="work_experiences[{{ $index }}][CompanyName]" placeholder="Nama Perusahaan" value="{{ $workExp->companyname }}">
                                             <label>Nama Perusahaan</label>
                         </div>
                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" name="work_experiences[{{ $index }}][JobLevel]" placeholder="Posisi/Jabatan" value="{{ $workExp->JobLevel }}">
+                                            <input type="text" class="form-control" name="work_experiences[{{ $index }}][JobLevel]" placeholder="Posisi/Jabatan" value="{{ $workExp->joblevel }}">
                                             <label>Posisi/Jabatan</label>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ $workExp->StartDate }}">
+                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ $workExp->startdate }}">
                                             <label>Tanggal Mulai</label>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ $workExp->EndDate }}" {{ $workExp->IsCurrent ? 'disabled' : '' }}>
+                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ $workExp->enddate }}" {{ $workExp->iscurrent ? 'disabled' : '' }}>
                                             <label>Tanggal Selesai</label>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input type="number" class="form-control" name="work_experiences[{{ $index }}][Salary]" placeholder="Gaji" step="0.01" value="{{ $workExp->Salary }}">
+                                            <input type="number" class="form-control" name="work_experiences[{{ $index }}][Salary]" placeholder="Gaji" step="0.01" value="{{ $workExp->salary }}">
                                             <label>Gaji</label>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <div class="form-check mt-2">
-                                            <input class="form-check-input" type="checkbox" id="is_current_{{ $index }}" name="work_experiences[{{ $index }}][is_current]" value="1" onchange="toggleCurrent(this, {{ $index }})" {{ $workExp->IsCurrent ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" id="is_current_{{ $index }}" name="work_experiences[{{ $index }}][is_current]" value="1" onchange="toggleCurrent(this, {{ $index }})" {{ $workExp->iscurrent ? 'checked' : '' }}>
                                             <label class="form-check-label" for="is_current_{{ $index }}">Masih bekerja di sini</label>
                                         </div>
                                     </div>
@@ -501,60 +559,7 @@
         </div>
 
         <!-- Education Section -->
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card section-card">
-                    <div class="section-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">
-                            <i class="bi bi-mortarboard-fill me-2"></i>
-                            Pendidikan
-                        </h3>
-                        <button type="button" class="btn btn-light btn-sm" id="addEducation">
-                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
-                        </button>
-                    </div>
-                    <div class="card-body p-4">
-                        <div id="educationContainer">
-                            @foreach($educations as $index => $education)
-                            <div class="dynamic-section position-relative" data-index="{{ $index }}">
-                                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeEducation(this)">
-                                    <i class="bi bi-x-circle-fill"></i>
-                                </button>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" name="educations[{{ $index }}][InstitutionName]" placeholder="Nama Institusi" value="{{ $education->InstitutionName }}">
-                                            <label>Nama Institusi</label>
-                        </div>
-                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" name="educations[{{ $index }}][Major]" placeholder="Jurusan" value="{{ $education->Major }}">
-                                            <label>Jurusan</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="date" class="form-control" name="educations[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ $education->StartDate }}">
-                                            <label>Tanggal Mulai</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="date" class="form-control" name="educations[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ $education->EndDate }}">
-                                            <label>Tanggal Selesai</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+     
         <!-- Training Section -->
         <div class="row">
             <div class="col-lg-8 mx-auto">
@@ -578,32 +583,26 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" name="trainings[{{ $index }}][TrainingName]" placeholder="Nama Pelatihan" value="{{ $training->TrainingName }}">
+                                            <input type="text" class="form-control" name="trainings[{{ $index }}][TrainingName]" placeholder="Nama Pelatihan" value="{{ $training->trainingname }}">
                                             <label>Nama Pelatihan</label>
                         </div>
                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" name="trainings[{{ $index }}][InstitutionName]" placeholder="Nama Institusi" value="{{ $training->InstitutionName }}">
-                                            <label>Nama Institusi</label>
+                                            <input type="text" class="form-control" name="trainings[{{ $index }}][CertificateNo]" placeholder="No. Sertifikat" value="{{ $training->certificateno }}">
+                                            <label>No. Sertifikat</label>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="trainings[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ $training->StartDate }}">
+                                            <input type="date" class="form-control" name="trainings[{{ $index }}][StartTrainingDate]" placeholder="Tanggal Mulai" value="{{ $training->starttrainingdate }}">
                                             <label>Tanggal Mulai</label>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="trainings[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ $training->EndDate }}">
+                                            <input type="date" class="form-control" name="trainings[{{ $index }}][EndTrainingDate]" placeholder="Tanggal Selesai" value="{{ $training->endtrainingdate }}">
                                             <label>Tanggal Selesai</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-floating">
-                                            <textarea class="form-control" name="trainings[{{ $index }}][Description]" placeholder="Deskripsi" style="height: 100px">{{ $training->Description }}</textarea>
-                                            <label>Deskripsi</label>
                                         </div>
                                     </div>
                                 </div>

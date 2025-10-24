@@ -14,27 +14,27 @@ class ApplicantForm
     {
         return $schema
             ->components([
-                TextInput::make('FirstName')
+                TextInput::make('firstname')
                     ->label('Nama Depan')
                     ->required(),
-                TextInput::make('MiddleName')
+                TextInput::make('middlename')
                     ->label('Nama Tengah'),
-                TextInput::make('LastName')
+                TextInput::make('lastname')
                     ->label('Nama Belakang'),
-                Select::make('Gender')
+                Select::make('gender')
                     ->label('Jenis Kelamin')
                     ->options([
                         'Male' => 'Laki-laki',
                         'Female' => 'Perempuan',
                     ])
                     ->required(),
-                TextInput::make('DateOfBirth')
+                TextInput::make('dateofbirth')
                     ->label('Tanggal Lahir')
                     ->type('date')
                     ->formatStateUsing(function ($state, $record) {
                         if (! $record) return $state;
                         try {
-                            $raw = $record->getRawOriginal('DateOfBirth');
+                            $raw = $record->getRawOriginal('dateofbirth');
                             if (empty($raw)) return $state;
                             return Crypt::decryptString($raw);
                         } catch (\Throwable $e) {
@@ -42,12 +42,12 @@ class ApplicantForm
                         }
                     })
                     ->required(),
-                TextInput::make('Phone')
+                TextInput::make('phone')
                     ->label('Nomor Telepon')
                     ->formatStateUsing(function ($state, $record) {
                         if (! $record) return $state;
                         try {
-                            $raw = $record->getRawOriginal('Phone');
+                            $raw = $record->getRawOriginal('phone');
                             if (empty($raw)) return $state;
                             return Crypt::decryptString($raw);
                         } catch (\Throwable $e) {
@@ -55,13 +55,13 @@ class ApplicantForm
                         }
                     })
                     ->required(),
-                TextInput::make('Gmail')
+                TextInput::make('gmail')
                     ->label('Email')
                     ->email()
                     ->formatStateUsing(function ($state, $record) {
                         if (! $record) return $state;
                         try {
-                            $raw = $record->getRawOriginal('Gmail');
+                            $raw = $record->getRawOriginal('gmail');
                             if (empty($raw)) return $state;
                             return Crypt::decryptString($raw);
                         } catch (\Throwable $e) {
@@ -69,19 +69,19 @@ class ApplicantForm
                         }
                     })
                     ->required(),
-                Textarea::make('Address')
+                Textarea::make('address')
                     ->label('Alamat Lengkap')
                     ->required(),
-                TextInput::make('City')
+                TextInput::make('city')
                     ->label('Kota')
                     ->required(),
-                TextInput::make('LinkedIn')
+                TextInput::make('linkedin')
                     ->label('LinkedIn'),
-                TextInput::make('Instagram')
+                TextInput::make('instagram')
                     ->label('Instagram'),
-                TextInput::make('CVPath')
+                TextInput::make('cvpath')
                     ->label('CV'),
-                TextInput::make('PhotoPath')
+                TextInput::make('photopath')
                     ->label('Foto'),
                 Textarea::make('admin_notes')
                     ->label('Catatan Admin'),

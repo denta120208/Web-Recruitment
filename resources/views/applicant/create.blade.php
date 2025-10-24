@@ -412,6 +412,28 @@
             </div>
         </div>
 
+
+
+ <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-mortarboard-fill me-2"></i>
+                            Pendidikan
+                        </h3>
+                        <button type="button" class="btn btn-light btn-sm" id="addEducation">
+                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="educationContainer">
+                            <!-- Education items will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Work Experience Section -->
         <div class="row">
             <div class="col-lg-8 mx-auto">
@@ -435,26 +457,7 @@
         </div>
 
         <!-- Education Section -->
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card section-card">
-                    <div class="section-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">
-                            <i class="bi bi-mortarboard-fill me-2"></i>
-                            Pendidikan
-                        </h3>
-                        <button type="button" class="btn btn-light btn-sm" id="addEducation">
-                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
-                        </button>
-                    </div>
-                    <div class="card-body p-4">
-                        <div id="educationContainer">
-                            <!-- Education items will be added here dynamically -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+       
 
         <!-- Training Section -->
         <div class="row">

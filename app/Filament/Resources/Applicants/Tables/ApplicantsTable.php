@@ -13,28 +13,28 @@ class ApplicantsTable
     {
         return $table
             ->columns([
-                TextColumn::make('RequireID')
+                TextColumn::make('requireid')
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('full_name')
                     ->label('Nama Lengkap')
                     ->getStateUsing(function ($record): string {
-                        return trim($record->FirstName . ' ' . $record->MiddleName . ' ' . $record->LastName);
+                        return trim($record->firstname . ' ' . $record->middlename . ' ' . $record->lastname);
                     })
-                    ->searchable(['FirstName', 'MiddleName', 'LastName']),
-                TextColumn::make('Gender')
+                    ->searchable(['firstname', 'middlename', 'lastname']),
+                TextColumn::make('gender')
                     ->label('Jenis Kelamin')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Male' => 'info',
                         'Female' => 'success',
                     }),
-                TextColumn::make('Phone')
+                TextColumn::make('phone')
                     ->label('Telepon')
                     ->getStateUsing(function ($record) {
                         try {
-                            $raw = $record->getRawOriginal('Phone');
+                            $raw = $record->getRawOriginal('phone');
                             if (empty($raw)) return null;
                             return Crypt::decryptString($raw);
                         } catch (\Throwable $e) {
@@ -42,11 +42,11 @@ class ApplicantsTable
                         }
                     })
                     ->searchable(),
-                TextColumn::make('Gmail')
+                TextColumn::make('gmail')
                     ->label('Email')
                     ->getStateUsing(function ($record) {
                         try {
-                            $raw = $record->getRawOriginal('Gmail');
+                            $raw = $record->getRawOriginal('gmail');
                             if (empty($raw)) return null;
                             return Crypt::decryptString($raw);
                         } catch (\Throwable $e) {
@@ -54,11 +54,11 @@ class ApplicantsTable
                         }
                     })
                     ->searchable(),
-                TextColumn::make('DateOfBirth')
+                TextColumn::make('dateofbirth')
                     ->label('Tanggal Lahir')
                     ->getStateUsing(function ($record) {
                         try {
-                            $raw = $record->getRawOriginal('DateOfBirth');
+                            $raw = $record->getRawOriginal('dateofbirth');
                             if (empty($raw)) return null;
                             $decrypted = Crypt::decryptString($raw);
                             return \Illuminate\Support\Carbon::parse($decrypted)->format('d/m/Y');
@@ -67,16 +67,16 @@ class ApplicantsTable
                         }
                     })
                     ->sortable(),
-                TextColumn::make('City')
+                TextColumn::make('city')
                     ->label('Kota')
                     ->searchable(),
-                TextColumn::make('CreatedAt')
+                TextColumn::make('createdat')
                     ->label('Tanggal Lamaran')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('Gender')
+                SelectFilter::make('gender')
                     ->label('Jenis Kelamin')
                     ->options([
                         'Male' => 'Laki-laki',
@@ -85,6 +85,6 @@ class ApplicantsTable
             ])
             ->persistFiltersInSession()
             ->persistSearchInSession()
-            ->defaultSort('CreatedAt', 'desc');
+            ->defaultSort('createdat', 'desc');
     }
 }

@@ -12,11 +12,11 @@ class RequireTraining extends Model
     public $timestamps = false;
     
     protected $fillable = [
-        'RequireID',
-        'TrainingName',
-        'CertificateNo',
-        'StartTrainingDate',
-        'EndTrainingDate'
+        'requireid',
+        'trainingname',
+        'certificateno',
+        'starttrainingdate',
+        'endtrainingdate'
     ];
 
     protected $casts = [

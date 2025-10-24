@@ -66,7 +66,7 @@
                         <a href="{{ route('applicant.index') }}" class="btn btn-primary btn-lg px-4">
                             <i class="bi bi-house-fill me-2"></i>Kembali ke Beranda
                         </a>
-                        <a href="{{ route('applicant.edit', \App\Models\Applicant::where('user_id', auth()->id())->first()->RequireID) }}" class="btn btn-outline-primary btn-lg px-4">
+                        <a href="{{ route('applicant.edit', \App\Models\Applicant::where('user_id', auth()->id())->first()->getKey()) }}" class="btn btn-outline-primary btn-lg px-4">
                             <i class="bi bi-plus-circle-fill me-2"></i>Edit Profil
                         </a>
                     </div>

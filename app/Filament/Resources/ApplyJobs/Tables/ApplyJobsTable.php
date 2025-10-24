@@ -15,7 +15,7 @@ class ApplyJobsTable
     {
         return $table
             ->columns([
-                TextColumn::make('RequireID')
+                TextColumn::make('requireid')
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
@@ -104,7 +104,7 @@ class ApplyJobsTable
             ->recordActions([
                 ViewAction::make()
                     ->label('View Applicant')
-                    ->url(fn ($record) => route('filament.admin.resources.applicants.view', $record->RequireID))
+                    ->url(fn ($record) => route('filament.admin.resources.applicants.view', $record->requireid))
                     ->openUrlInNewTab(),
                 EditAction::make(),
             ])

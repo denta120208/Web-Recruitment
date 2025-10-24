@@ -29,7 +29,7 @@ class JobVacancyController extends Controller
             $profile = Applicant::where('user_id', Auth::id())->first();
             if ($profile) {
                 $hasProfile = true;
-                $profileId = $profile->RequireID;
+                $profileId = $profile->getKey();
             }
             $existingApplication = ApplyJob::where('user_id', Auth::id())->first();
             if ($existingApplication) {
@@ -80,8 +80,8 @@ class JobVacancyController extends Controller
                 'job_vacancy_id' => $request->job_vacancy_id,
                 'user_id' => $user->id,
                 'apply_jobs_status' => 1, // Status: Review Aplicant
-                'RequireID' => $applicant->RequireID,
-                'require_id' => $applicant->RequireID,
+                'requireid' => $applicant->getKey(),
+                'require_id' => $applicant->getKey(),
             ]);
 
             DB::commit();

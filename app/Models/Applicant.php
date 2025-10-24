@@ -17,23 +17,24 @@ class Applicant extends Model
     const CREATED_AT = 'createdat';
     const UPDATED_AT = 'updatedat';
     
-        protected $fillable = [
-            'FirstName',
-            'MiddleName',
-            'LastName',
-            'Gender',
-            'DateOfBirth',
-            'CVPath',
-            'PhotoPath',
-            'Address',
-            'City',
-            'Gmail',
-            'LinkedIn',
-            'Instagram',
-            'Phone',
-            'admin_notes',
-            'user_id'
-        ];
+       protected $fillable = [
+    'firstname',
+    'middlename',
+    'lastname',
+    'gender',
+    'dateofbirth',
+    'address',
+    'city',
+    'gmail',
+    'linkedin',
+    'instagram',
+    'phone',
+    'cvpath',
+    'photopath',
+    'user_id',
+    'createdat',
+    'updatedat'
+];
 
     protected $casts = [
         'createdat' => 'datetime',
@@ -46,13 +47,13 @@ class Applicant extends Model
     public function setDateOfBirthAttribute($value)
     {
         if (is_null($value)) {
-            $this->attributes['DateOfBirth'] = null;
+            $this->attributes['dateofbirth'] = null;
             return;
         }
 
         // accept Carbon/Date or string input; store RFC3339 string encrypted
         $date = $value instanceof \DateTime ? Carbon::parse($value)->toDateString() : (string) $value;
-        $this->attributes['DateOfBirth'] = Crypt::encryptString($date);
+        $this->attributes['dateofbirth'] = Crypt::encryptString($date);
     }
 
     /**
@@ -76,7 +77,7 @@ class Applicant extends Model
      */
     public function setGmailAttribute($value)
     {
-        $this->attributes['Gmail'] = is_null($value) ? null : Crypt::encryptString((string) $value);
+        $this->attributes['gmail'] = is_null($value) ? null : Crypt::encryptString((string) $value);
     }
 
     public function getGmailAttribute($value)
@@ -94,7 +95,7 @@ class Applicant extends Model
      */
     public function setPhoneAttribute($value)
     {
-        $this->attributes['Phone'] = is_null($value) ? null : Crypt::encryptString((string) $value);
+        $this->attributes['phone'] = is_null($value) ? null : Crypt::encryptString((string) $value);
     }
 
     public function getPhoneAttribute($value)

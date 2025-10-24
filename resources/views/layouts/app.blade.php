@@ -417,7 +417,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('applicant.edit', $profile?->RequireID) }}">
+                                <a class="nav-link" href="{{ route('applicant.edit', $profile?->getKey()) }}">
                                     <i class="bi bi-person-plus-fill me-1"></i>Data Diri
                                 </a>
                             </li>

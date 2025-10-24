@@ -39,7 +39,7 @@ class ApplyJobForm
                 TextInput::make('apply_jobs_interview_by'),
                 Textarea::make('apply_jobs_interview_result')
                     ->columnSpanFull(),
-                Textarea::make('apply_jobs_interview_AI_result')
+                Textarea::make('apply_jobs_interview_ai_result')
                     ->columnSpanFull()
                     ->disabled(),
                 Select::make('apply_jobs_interview_status')

@@ -66,13 +66,13 @@ class ApplyJobResource extends Resource
                 'apply_jobs_psikotest_status',
                 'apply_jobs_interview_by',
                 'apply_jobs_interview_result',
-                'apply_jobs_interview_AI_result',
+                'apply_jobs_interview_ai_result',
                 'apply_jobs_interview_status',
                 'apply_jobs_psikotest_iq_num',
                 'apply_jobs_psikotest_file',
                 'created_at',
                 'updated_at',
-                'RequireID',
+                'requireid',
                 'require_id',
             ])
             ->with(['jobVacancy', 'user']);

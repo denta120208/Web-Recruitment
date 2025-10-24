@@ -12,13 +12,13 @@ class RequireWorkExperience extends Model
     public $timestamps = false;
     
     protected $fillable = [
-        'RequireID',
-        'CompanyName',
-        'JobLevel',
-        'StartDate',
-        'EndDate',
-        'IsCurrent',
-        'Salary'
+        'requireid',
+        'companyname',
+        'joblevel',
+        'startdate',
+        'enddate',
+        'iscurrent',
+        'salary'
     ];
 
     protected $casts = [

@@ -17,12 +17,12 @@ class ApplyJob extends Model
         'apply_jobs_status',
         'apply_jobs_interview_by',
         'apply_jobs_interview_result',
-        'apply_jobs_interview_AI_result',
+        'apply_jobs_interview_ai_result',
         'apply_jobs_interview_status',
         'apply_jobs_psikotest_iq_num',
         'apply_jobs_psikotest_file',
         'apply_jobs_psikotest_status',
-        'RequireID',
+        'requireid',
         'require_id',
     ];
 
@@ -45,7 +45,7 @@ class ApplyJob extends Model
 
     public function applicant(): BelongsTo
     {
-        return $this->belongsTo(Applicant::class, 'RequireID', 'RequireID');
+        return $this->belongsTo(Applicant::class, 'requireid', 'requireid');
     }
 
     public function interviewStatus(): BelongsTo

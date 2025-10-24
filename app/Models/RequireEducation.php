@@ -12,11 +12,11 @@ class RequireEducation extends Model
     public $timestamps = false;
     
     protected $fillable = [
-        'RequireID',
-        'InstitutionName',
-        'Major',
-        'StartDate',
-        'EndDate'
+        'requireid',
+        'institutionname',
+        'major',
+        'startdate',
+        'enddate'
     ];
 
     protected $casts = [
