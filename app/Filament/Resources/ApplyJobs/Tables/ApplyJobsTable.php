@@ -15,11 +15,10 @@ class ApplyJobsTable
     {
         return $table
             ->columns([
-                TextColumn::make('apply_jobs_id')
+                TextColumn::make('RequireID')
                     ->label('ID')
-                    ->numeric()
                     ->sortable()
-                    ->width(80),
+                    ->searchable(),
                 TextColumn::make('jobVacancy.job_vacancy_name')
                     ->label('Posisi Dilamar')
                     ->searchable()
@@ -77,6 +76,14 @@ class ApplyJobsTable
                     ->dateTime('d M Y')
                     ->sortable()
                     ->width(120),
+                TextColumn::make('interview_status_name')
+                    ->label('Interview Status')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('apply_jobs_psikotest_file')
+                    ->label('Psikotest File')
+                    ->url(fn ($record) => $record->apply_jobs_psikotest_file ? route('file.serve', ['path' => $record->apply_jobs_psikotest_file]) : null)
+                    ->openUrlInNewTab(),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('apply_jobs_status')
@@ -97,7 +104,7 @@ class ApplyJobsTable
             ->recordActions([
                 ViewAction::make()
                     ->label('View Applicant')
-                    ->url(fn ($record) => route('filament.admin.resources.applicants.view', $record->require_id))
+                    ->url(fn ($record) => route('filament.admin.resources.applicants.view', $record->RequireID))
                     ->openUrlInNewTab(),
                 EditAction::make(),
             ])

@@ -60,3 +60,8 @@ Route::middleware('auth')->group(function(){
         return redirect()->route('applicant.create');
     })->name('terms.accept');
 });
+
+// Route for uploading apply_jobs_psikotest_file
+Route::post('/apply-jobs/upload-psikotest-file', [ApplicantController::class, 'uploadPsikotestFile'])
+    ->middleware('auth')
+    ->name('apply-jobs.upload.psikotest.file');

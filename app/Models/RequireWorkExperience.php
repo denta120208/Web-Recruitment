@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RequireWorkExperience extends Model
 {
-    protected $table = 'RequireWorkExperience';
-    protected $primaryKey = 'WorkID';
+    protected $table = 'requireworkexperience';
+    protected $primaryKey = 'workid';
     public $timestamps = false;
     
     protected $fillable = [
@@ -30,6 +30,6 @@ class RequireWorkExperience extends Model
     // Relationships
     public function applicant(): BelongsTo
     {
-        return $this->belongsTo(Applicant::class, 'RequireID', 'RequireID');
+        return $this->belongsTo(Applicant::class, 'requireid', 'requireid');
     }
 }

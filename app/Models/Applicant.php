@@ -9,13 +9,13 @@ use Illuminate\Support\Carbon;
 
 class Applicant extends Model
 {
-    protected $table = 'Require';
-    protected $primaryKey = 'RequireID';
+    protected $table = 'require';
+    protected $primaryKey = 'requireid';
     public $timestamps = true;
     protected $dateFormat = 'Y-m-d H:i:s';
     
-    const CREATED_AT = 'CreatedAt';
-    const UPDATED_AT = 'UpdatedAt';
+    const CREATED_AT = 'createdat';
+    const UPDATED_AT = 'updatedat';
     
         protected $fillable = [
             'FirstName',
@@ -36,8 +36,8 @@ class Applicant extends Model
         ];
 
     protected $casts = [
-        'CreatedAt' => 'datetime',
-        'UpdatedAt' => 'datetime',
+        'createdat' => 'datetime',
+        'updatedat' => 'datetime',
     ];
 
     /**
@@ -110,17 +110,17 @@ class Applicant extends Model
     // Relationships
     public function workExperiences(): HasMany
     {
-        return $this->hasMany(RequireWorkExperience::class, 'RequireID', 'RequireID');
+        return $this->hasMany(RequireWorkExperience::class, 'requireid', 'requireid');
     }
 
     public function educations(): HasMany
     {
-        return $this->hasMany(RequireEducation::class, 'RequireID', 'RequireID');
+        return $this->hasMany(RequireEducation::class, 'requireid', 'requireid');
     }
 
     public function trainings(): HasMany
     {
-        return $this->hasMany(RequireTraining::class, 'RequireID', 'RequireID');
+        return $this->hasMany(RequireTraining::class, 'requireid', 'requireid');
     }
 
     public function reviewer()
@@ -135,6 +135,6 @@ class Applicant extends Model
 
     public function applyJobs(): HasMany
     {
-        return $this->hasMany(ApplyJob::class, 'RequireID', 'RequireID');
+        return $this->hasMany(ApplyJob::class, 'requireid', 'requireid');
     }
 }

@@ -49,7 +49,6 @@ class ApplicantController extends Controller
             'PhotoPath' => 'required|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-       
         $uploaded = [];
 
         if ($request->hasFile('CVPath')) {
@@ -444,5 +443,35 @@ class ApplicantController extends Controller
             // CV should download, photo should open inline in a new tab
             'Content-Disposition' => ($type === 'cv' ? 'attachment' : 'inline') . '; filename="' . $downloadName . '"',
         ]);
+    }
+
+    public function uploadPsikotestFile(Request $request)
+    {
+        $validated = $request->validate([
+            'apply_jobs_psikotest_file' => 'required|file|mimes:pdf|max:5120',
+        ]);
+
+        $file = $request->file('apply_jobs_psikotest_file');
+        $originalName = $file->getClientOriginalName();
+        $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
+
+        try {
+            $path = $file->storeAs('apply-jobs/psikotest-files', $sanitized, 'mlnas');
+            if ($path === false) {
+                throw new \Exception('Storage returned false');
+            }
+
+            return response()->json([
+                'success' => true,
+                'path' => $path,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('MLNAS Psikotest file upload failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload file to storage. Please try again or contact admin.',
+            ], 500);
+        }
     }
 }

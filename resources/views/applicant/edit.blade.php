@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Profil Lamaran - Metland Recruitment')
+@section('title', 'Edit Profil - ' . $applicant->FirstName . ' ' . $applicant->LastName)
 
 @php
     $workExperiences = $applicant->workExperiences ?? collect();

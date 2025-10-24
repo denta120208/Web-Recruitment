@@ -47,4 +47,9 @@ class ApplyJob extends Model
     {
         return $this->belongsTo(Applicant::class, 'RequireID', 'RequireID');
     }
+
+    public function interviewStatus(): BelongsTo
+    {
+        return $this->belongsTo(InterviewStatus::class, 'apply_jobs_interview_status', 'interview_status_id');
+    }
 }

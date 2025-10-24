@@ -5,8 +5,8 @@ namespace App\Filament\Resources\ApplyJobs\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
-// no additional imports needed
 
 class ApplyJobForm
 {
@@ -42,15 +42,26 @@ class ApplyJobForm
                 Textarea::make('apply_jobs_interview_AI_result')
                     ->columnSpanFull()
                     ->disabled(),
-                TextInput::make('apply_jobs_interview_status')
-                    ->required()
-                    ->numeric()
+                Select::make('apply_jobs_interview_status')
+                    ->label('Interview Status')
+                    ->relationship('interviewStatus', 'interview_status_name')
+                    ->searchable()
+                    ->preload()
                     ->default(0),
                 TextInput::make('apply_jobs_psikotest_iq_num')
                     ->required()
                     ->numeric()
                     ->default(0),
-                TextInput::make('apply_jobs_psikotest_file'),
+                FileUpload::make('apply_jobs_psikotest_file')
+                    ->label('File Psikotest')
+                    ->disk('mlnas')
+                    ->directory('psikotest-files')
+                    ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/*'])
+                    ->maxSize(10240)
+                    ->downloadable()
+                    ->openable()
+                    ->previewable(false)
+                    ->visibility('public'),
                 Select::make('apply_jobs_psikotest_status')
                     ->label('Status Psikotes')
                     ->options([

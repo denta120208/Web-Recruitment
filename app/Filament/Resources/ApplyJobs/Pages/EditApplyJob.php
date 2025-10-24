@@ -16,4 +16,10 @@ class EditApplyJob extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    public function getTitle(): string
+    {
+        $applicantName = $this->record->user?->name ?? 'Unknown';
+        return "Edit - {$applicantName}";
+    }
 }
