@@ -195,7 +195,7 @@
                                 <h6 class="text-primary mb-2">
                                     <i class="bi bi-file-text me-1"></i>Deskripsi Pekerjaan:
                                 </h6>
-                                <p class="job-desc">{{ $job->job_vacancy_job_desc }}</p>
+                                <div class="job-desc">{!! $job->job_vacancy_job_desc !!}</div>
                                 <button type="button" class="btn btn-link p-0" onclick="openJobDetail({
                                     id: '{{ $job->job_vacancy_id }}',
                                     name: @js($job->job_vacancy_name),
@@ -217,7 +217,7 @@
                                 <h6 class="text-success mb-2">
                                     <i class="bi bi-check-circle me-1"></i>Persyaratan:
                                 </h6>
-                                <p class="job-spec">{{ $job->job_vacancy_job_spec }}</p>
+                                <div class="job-spec">{!! $job->job_vacancy_job_spec !!}</div>
                         </div>
                             
                             <div class="row mb-3">
@@ -328,8 +328,8 @@
         window.openJobDetail = function(data){
             document.getElementById('cm-title').textContent = data.name;
             document.getElementById('cm-level').textContent = data.level || '';
-            document.getElementById('cm-desc').textContent = data.desc || '';
-            document.getElementById('cm-spec').textContent = data.spec || '';
+            document.getElementById('cm-desc').innerHTML = data.desc || '';
+            document.getElementById('cm-spec').innerHTML = data.spec || '';
             document.getElementById('cm-dates').innerHTML = `
                 <i class="bi bi-calendar-event me-1"></i> Mulai: ${data.start}
                 &nbsp;&nbsp;

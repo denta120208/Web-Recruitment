@@ -9,6 +9,7 @@ use App\Models\RequireEducation;
 use App\Models\RequireTraining;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Filament\Facades\Filament;
 
 class ApplicantController extends Controller
@@ -485,33 +486,65 @@ class ApplicantController extends Controller
         ]);
     }
 
-    public function uploadPsikotestFile(Request $request)
+    public function serveApplyJobFile(Request $request)
     {
-        $validated = $request->validate([
-            'apply_jobs_psikotest_file' => 'required|file|mimes:pdf|max:5120',
-        ]);
+        // Only allow authenticated Filament admin users
+        if (! Filament::auth()->check()) {
+            abort(401);
+        }
 
-        $file = $request->file('apply_jobs_psikotest_file');
-        $originalName = $file->getClientOriginalName();
-        $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
+        $path = $request->query('path');
+        
+        if (empty($path)) {
+            abort(404, 'File path is empty');
+        }
+
+        $disk = Storage::disk('mlnas');
+        
+        // Log untuk debugging
+        \Log::info('Trying to serve apply job file', [
+            'path' => $path,
+            'exists' => $disk->exists($path)
+        ]);
+        
+        if (! $disk->exists($path)) {
+            abort(404, 'File not found: ' . $path);
+        }
 
         try {
-            $path = $file->storeAs('apply-jobs/psikotest-files', $sanitized, 'mlnas');
-            if ($path === false) {
-                throw new \Exception('Storage returned false');
+            $stream = $disk->readStream($path);
+            if ($stream === false) {
+                abort(404, 'Cannot read file stream');
             }
 
-            return response()->json([
-                'success' => true,
-                'path' => $path,
+            // Get mime type
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $mimeTypes = [
+                'pdf' => 'application/pdf',
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+            ];
+            $mime = $mimeTypes[strtolower($extension)] ?? 'application/octet-stream';
+            
+            $downloadName = basename($path);
+
+            return response()->stream(function () use ($stream) {
+                fpassthru($stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+            }, 200, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'attachment; filename="' . $downloadName . '"',
             ]);
         } catch (\Exception $e) {
-            \Log::error('MLNAS Psikotest file upload failed: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to upload file to storage. Please try again or contact admin.',
-            ], 500);
+            \Log::error('Error serving apply job file', [
+                'path' => $path,
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Error serving file: ' . $e->getMessage());
         }
     }
 }

@@ -20,14 +20,18 @@ class ApplyJob extends Model
         'apply_jobs_interview_ai_result',
         'apply_jobs_interview_status',
         'apply_jobs_psikotest_iq_num',
-        'apply_jobs_psikotest_file',
         'apply_jobs_psikotest_status',
+        'apply_jobs_psikotest_file',
+        'apply_jobs_mcu_file',
+        'apply_jobs_offering_letter_file',
+        'is_generated_employee',
         'requireid',
         'require_id',
     ];
 
     protected $casts = [
         'apply_jobs_psikotest_iq_num' => 'integer',
+        'is_generated_employee' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

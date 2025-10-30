@@ -70,11 +70,14 @@ class ApplyJobResource extends Resource
                 'apply_jobs_interview_status',
                 'apply_jobs_psikotest_iq_num',
                 'apply_jobs_psikotest_file',
+                'apply_jobs_mcu_file',
+                'apply_jobs_offering_letter_file',
+                'is_generated_employee',
                 'created_at',
                 'updated_at',
                 'requireid',
                 'require_id',
             ])
-            ->with(['jobVacancy', 'user']);
+            ->with(['jobVacancy', 'user', 'interviewStatus']);
     }
 }

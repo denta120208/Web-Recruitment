@@ -82,6 +82,6 @@ class ApplicantResource extends Resource
                 'reviewed_by',
                 'user_id',
             ])
-            ->with(['user']);
+            ->with(['user', 'educations', 'workExperiences', 'trainings']);
     }
 }

@@ -45,6 +45,10 @@ Route::get('/admin/file/applicant/{requireId}/{type}', [ApplicantController::cla
     ->where(['requireId' => '[0-9]+', 'type' => 'cv|photo'])
     ->name('admin.file.applicant');
 
+// Download apply job files (psikotest, mcu, offering letter)
+Route::get('/admin/file/apply-job', [ApplicantController::class, 'serveApplyJobFile'])
+    ->name('admin.file.apply-job');
+
 // Terms routes (show and accept)
 Route::middleware('auth')->group(function(){
     Route::get('/terms', function(){
@@ -60,8 +64,3 @@ Route::middleware('auth')->group(function(){
         return redirect()->route('applicant.create');
     })->name('terms.accept');
 });
-
-// Route for uploading apply_jobs_psikotest_file
-Route::post('/apply-jobs/upload-psikotest-file', [ApplicantController::class, 'uploadPsikotestFile'])
-    ->middleware('auth')
-    ->name('apply-jobs.upload.psikotest.file');
