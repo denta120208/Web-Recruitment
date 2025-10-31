@@ -9,6 +9,9 @@ use App\Models\Applicant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 
 class JobVacancyController extends Controller
 {
@@ -24,6 +27,8 @@ class JobVacancyController extends Controller
         $appliedJobId = null;
         $hasProfile = false;
         $profileId = null;
+        $isHired = false;
+        $applyJobStatus = null;
         
         if (Auth::check()) {
             $profile = Applicant::where('user_id', Auth::id())->first();
@@ -35,10 +40,13 @@ class JobVacancyController extends Controller
             if ($existingApplication) {
                 $userHasApplied = true;
                 $appliedJobId = $existingApplication->job_vacancy_id;
+                $applyJobStatus = $existingApplication->apply_jobs_status;
+                // Check if user is hired (status 5)
+                $isHired = ($existingApplication->apply_jobs_status == 5);
             }
         }
 
-        return view('applicant.index', compact('jobVacancies', 'userHasApplied', 'appliedJobId', 'hasProfile', 'profileId'));
+        return view('applicant.index', compact('jobVacancies', 'userHasApplied', 'appliedJobId', 'hasProfile', 'profileId', 'isHired', 'applyJobStatus'));
     }
 
     public function apply(Request $request)
@@ -82,7 +90,11 @@ class JobVacancyController extends Controller
                 'apply_jobs_status' => 1, // Status: Review Aplicant
                 'requireid' => $applicant->getKey(),
                 'require_id' => $applicant->getKey(),
+                'apply_date' => now()->toDateString(),
             ]);
+
+            // Kirim ke HRIS eksternal akan dihandle oleh ApplyJobObserver
+            // Observer akan otomatis memanggil HRIS API saat ApplyJob created
 
             DB::commit();
 

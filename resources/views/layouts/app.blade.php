@@ -408,7 +408,17 @@
                         @php
                             $profile = \App\Models\Applicant::where('user_id', auth()->id())->first();
                             $hasProfile = (bool) $profile;
+                            $applyJob = \App\Models\ApplyJob::where('user_id', auth()->id())->first();
+                            $isHired = $applyJob && $applyJob->apply_jobs_status == 5;
                         @endphp
+                        
+                        @if($isHired)
+                            <li class="nav-item">
+                                <span class="badge bg-success text-white px-3 py-2 d-flex align-items-center" style="border-radius: 20px; font-size: 0.875rem;">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Sudah Menjadi Karyawan
+                                </span>
+                            </li>
+                        @endif
                         
                         @if($hasProfile)
                             <li class="nav-item">

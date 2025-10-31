@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\JobVacancyController;
+use App\Http\Controllers\TestHrisController;
 use Illuminate\Http\Request;
 
 Route::get('/', [JobVacancyController::class, 'index']);
@@ -64,3 +65,7 @@ Route::middleware('auth')->group(function(){
         return redirect()->route('applicant.create');
     })->name('terms.accept');
 });
+
+// Test HRIS Connection
+Route::get('/test-hris', [TestHrisController::class, 'testConnection']);
+Route::get('/test-hris', [\App\Http\Controllers\TestHrisController::class, 'testSendCandidate']);

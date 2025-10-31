@@ -29,6 +29,10 @@ class ApplyJobsTable
                     ->searchable()
                     ->sortable()
                     ->limit(30),
+                TextColumn::make('apply_date')
+                    ->label('Tanggal Apply (User)')
+                    ->date('d M Y')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Tanggal Lamar')
                     ->dateTime('d M Y')

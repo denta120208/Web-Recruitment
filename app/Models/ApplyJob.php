@@ -27,11 +27,13 @@ class ApplyJob extends Model
         'is_generated_employee',
         'requireid',
         'require_id',
+        'apply_date',
     ];
 
     protected $casts = [
         'apply_jobs_psikotest_iq_num' => 'integer',
         'is_generated_employee' => 'boolean',
+        'apply_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

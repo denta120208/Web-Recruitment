@@ -147,6 +147,14 @@
                     Temukan kesempatan karir terbaik di Metland. 
                     Pilih posisi yang sesuai dengan minat dan kemampuan Anda.
                 </p>
+                
+                @if(auth()->check() && isset($isHired) && $isHired)
+                    <div class="alert alert-success d-inline-flex align-items-center px-4 py-3 mb-4" style="border-radius: 20px; font-size: 1.1rem;">
+                        <i class="bi bi-check-circle-fill me-2" style="font-size: 1.5rem;"></i>
+                        <strong>Selamat! Anda sudah menjadi Karyawan Metland</strong>
+                    </div>
+                @endif
+                
                 @if(!auth()->check())
                 <a href="{{ route('login') }}" class="btn btn-warning btn-lg px-4">
                     <i class="bi bi-person-plus-fill me-2"></i>Login untuk Melamar
