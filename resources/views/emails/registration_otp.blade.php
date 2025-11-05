@@ -302,7 +302,7 @@
         <div class="sparkle"></div>
         <div class="sparkle"></div>
         
-       
+        <div class="logo-section">
             <h1>Verifikasi Akun Anda</h1>
             <p class="subtitle">Terima kasih telah bergabung dengan <strong>Metland Recruitment</strong></p>
         </div>

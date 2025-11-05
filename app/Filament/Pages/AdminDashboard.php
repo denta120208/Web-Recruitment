@@ -10,6 +10,8 @@ class AdminDashboard extends BaseDashboard
 
     protected static ?string $title = 'Dashboard Admin';
 
+    protected static ?int $navigationSort = 0;
+
     public function getWidgets(): array
     {
         return [

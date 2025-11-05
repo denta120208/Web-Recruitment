@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobVacancy;
+use App\Services\HrisApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -62,7 +63,13 @@ class JobVacancyApiController extends Controller
                 ], 422);
             }
 
-            $jobVacancy = JobVacancy::create($request->all());
+            // Prepare data for creation
+            $data = $request->all();
+            
+            // Remove location from data since column doesn't exist yet
+            unset($data['location']);
+
+            $jobVacancy = JobVacancy::create($data);
 
             Log::info('Job vacancy created from HRIS', [
                 'job_vacancy_id' => $jobVacancy->job_vacancy_id,
@@ -137,7 +144,13 @@ class JobVacancyApiController extends Controller
                 ], 422);
             }
 
-            $jobVacancy->update($request->all());
+            // Prepare data for update
+            $data = $request->all();
+            
+            // Remove location from data since column doesn't exist yet
+            unset($data['location']);
+
+            $jobVacancy->update($data);
 
             Log::info('Job vacancy updated from HRIS', [
                 'job_vacancy_id' => $jobVacancy->job_vacancy_id,

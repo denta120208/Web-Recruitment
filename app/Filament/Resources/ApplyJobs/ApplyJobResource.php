@@ -28,6 +28,8 @@ class ApplyJobResource extends Resource
     
     protected static ?string $pluralModelLabel = 'Apply Jobs';
 
+    protected static ?int $navigationSort = 3;
+
     public static function form(Schema $schema): Schema
     {
         return ApplyJobForm::configure($schema);

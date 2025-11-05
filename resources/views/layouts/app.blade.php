@@ -390,7 +390,7 @@
     </style>
     @yield('styles')
 </head>
-<body>
+<body oncontextmenu="return false">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg" style="background: white;">
         <div class="container-fluid">
@@ -497,5 +497,29 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     @yield('scripts')
+    
+    <!-- Disable Inspect Element Protection -->
+    <script type="text/javascript">
+        document.onkeydown = (e) => {
+            if (e.key === 123) {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === 'U') {
+                e.preventDefault();
+            }
+            if (e.key === 'F12') {
+                e.preventDefault();
+            }
+        };
+    </script>
 </body>
 </html>

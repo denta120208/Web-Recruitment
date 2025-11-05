@@ -28,7 +28,10 @@ class ApplicantController extends Controller
             return redirect()->route('applicant.edit', $existingApplication->getKey());
         }
         
-        return view('applicant.create');
+        // Pass user email for auto-fill
+        $userEmail = $user->email ?? '';
+        
+        return view('applicant.create', compact('userEmail'));
     }
 
     public function store(Request $request)

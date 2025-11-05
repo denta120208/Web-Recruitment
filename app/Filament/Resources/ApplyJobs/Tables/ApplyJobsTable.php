@@ -147,13 +147,14 @@ class ApplyJobsTable
                     ->url(fn ($record) => route('filament.admin.resources.applicants.view', $record->requireid))
                     ->openUrlInNewTab(),
                 Action::make('generate_employee')
-                    ->label('Generate Employee')
+                    ->label('Add Data Employee')
                     ->icon('heroicon-o-user-plus')
                     ->color('success')
                     ->visible(fn ($record) => $record->apply_jobs_status == 5 && !$record->is_generated_employee)
                     ->requiresConfirmation()
                     ->modalHeading('Generate Employee')
-                    ->modalDescription('Apakah Anda yakin ingin generate employee untuk pelamar ini? Setelah di-generate, data tidak dapat diedit lagi.')
+                    ->modalDescription('kandidat ini sudah lolos data akan masuk ke system hris apakah anda yakin menlanjutkan proses ini?
+')
                     ->modalSubmitActionLabel('Ya, Generate')
                     ->modalCancelActionLabel('Batal')
                     ->action(function ($record) {

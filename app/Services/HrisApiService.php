@@ -19,9 +19,18 @@ class HrisApiService
     }
 
     /**
+     * Get base URL (public for external access)
+     */
+    public function getBaseUrl()
+    {
+        return $this->baseUrl;
+    }
+
+
+    /**
      * Get headers for HRIS API request
      */
-    protected function getHeaders()
+    public function getHeaders()
     {
         $headers = [
             'Content-Type' => 'application/json',
@@ -35,6 +44,186 @@ class HrisApiService
         }
 
         return $headers;
+    }
+
+    /**
+     * Get all locations from HRIS
+     */
+    public function getAllLocations()
+    {
+        try {
+            $response = Http::withHeaders($this->getHeaders())
+                ->timeout($this->timeout)
+                ->get($this->baseUrl . '/locations');
+
+            if ($response->successful()) {
+                $data = $response->json();
+                // If response is array of locations, return as [id => name] format
+                if (is_array($data) && isset($data[0])) {
+                    $locations = [];
+                    foreach ($data as $location) {
+                        if (isset($location['id']) && isset($location['name'])) {
+                            $locations[$location['id']] = $location['name'];
+                        }
+                    }
+                    return $locations;
+                }
+                // If response is object with data property
+                if (isset($data['data']) && is_array($data['data'])) {
+                    $locations = [];
+                    foreach ($data['data'] as $location) {
+                        if (isset($location['id']) && isset($location['name'])) {
+                            $locations[$location['id']] = $location['name'];
+                        }
+                    }
+                    return $locations;
+                }
+            }
+
+            Log::warning('Failed to fetch locations from HRIS API', [
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Error fetching locations from HRIS: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Sync all locations from HRIS to local database
+     */
+    public function syncLocations()
+    {
+        try {
+            $allLocations = $this->getAllLocations();
+            
+            if (!$allLocations || !is_array($allLocations)) {
+                // If getAllLocations returns null, try to fetch individual locations
+                // Or use static data as fallback
+                return false;
+            }
+
+            $synced = 0;
+            foreach ($allLocations as $locationId => $locationName) {
+                \App\Models\Location::updateOrCreate(
+                    ['hris_location_id' => $locationId],
+                    ['name' => $locationName]
+                );
+                $synced++;
+            }
+
+            Log::info('Locations synced from HRIS', ['count' => $synced]);
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error syncing locations from HRIS: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get location name from HRIS by location_id
+     * First checks local database, then tries HRIS API, then uses static mapping
+     */
+    public function getLocationName($locationId)
+    {
+        if (!$locationId) {
+            return null;
+        }
+
+        // First: Check local database (locations table)
+        try {
+            $localLocation = \App\Models\Location::getNameByHrisId($locationId);
+            if ($localLocation) {
+                return $localLocation;
+            }
+        } catch (\Exception $e) {
+            // Table might not exist yet, continue to API
+            Log::debug('Local location table not available yet', [
+                'location_id' => $locationId
+            ]);
+        }
+
+        // Second: Try to fetch from HRIS API
+        try {
+            $response = Http::withHeaders($this->getHeaders())
+                ->timeout($this->timeout)
+                ->get($this->baseUrl . '/location/' . $locationId);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                // Try different response formats
+                $locationName = $data['name'] 
+                    ?? $data['location_name'] 
+                    ?? ($data['data']['name'] ?? null)
+                    ?? ($data['data']['location_name'] ?? null);
+                    
+                if ($locationName) {
+                    // Save to local database for future use
+                    try {
+                        \App\Models\Location::updateOrCreate(
+                            ['hris_location_id' => $locationId],
+                            ['name' => $locationName]
+                        );
+                    } catch (\Exception $e) {
+                        // Table might not exist, ignore
+                    }
+                    return $locationName;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to fetch location from HRIS API, trying fallback', [
+                'location_id' => $locationId,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Third: Fallback to static mapping (from HRIS database - tabel location)
+        // Mapping berdasarkan tabel location di HRIS dengan 28 rows
+        $locationMap = [
+            1 => 'Kantor Pusat',
+            2 => 'Metland Transyogi',
+            3 => 'Metland Cileungsi',
+            4 => 'Metland Tambun',
+            5 => 'Metland Cibitung',
+            6 => 'Metland Menteng',
+            7 => 'Metland Puri',
+            8 => 'Metland Cyber Puri',
+            9 => 'Mal Metropolitan Bekasi',
+            10 => 'M Gold Tower',
+            11 => 'Grand Metropolitan Mall',
+            12 => 'Mal Metropolitan Cileungsi',
+            13 => 'Kaliana Apartment',
+            14 => 'Metland Hotel Cirebon',
+            15 => 'Hotel Horison Ultima Bekasi',
+            16 => 'Hotel Horison Ultima Seminyak',
+            17 => 'Plaza Metropolitan',
+            18 => 'Metland Hotel Bekasi',
+            19 => 'Kantor Pusat - MT Haryono',
+            20 => 'Kantor Pusat - Hotel Division',
+            21 => 'Metland Smara Kertajati',
+            22 => 'Metland Cikarang',
+            23 => 'One District Puri',
+            24 => 'Metland Venya Ubud',
+            25 => 'Recreation & Sport Facility',
+            26 => 'Koperasi Metland Maju Bersama',
+            27 => 'Metland Kertajati',
+            28 => 'DIUBUD',
+            // Mapping sesuai dengan data aktual dari tabel location HRIS
+        ];
+
+        // Return mapped location if exists
+        if (isset($locationMap[$locationId])) {
+            return $locationMap[$locationId];
+        }
+
+        Log::warning('Location ID not found in any source', [
+            'location_id' => $locationId
+        ]);
+
+        return null;
     }
 
     /**

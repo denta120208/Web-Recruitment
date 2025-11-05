@@ -950,7 +950,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
@@ -1173,6 +1173,51 @@
                 });
             }
 
+            // Real-time password confirmation validation
+            function validatePasswordMatch() {
+                if (!pwd || !confirm) return;
+                
+                const passwordValue = pwd.value;
+                const confirmValue = confirm.value;
+                
+                // Remove existing error message
+                let existingError = confirm.parentElement.querySelector('.password-match-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                // Remove invalid class
+                confirm.classList.remove('is-invalid', 'is-valid');
+                
+                // Only validate if confirm field has value
+                if (confirmValue.length > 0) {
+                    if (passwordValue !== confirmValue) {
+                        // Passwords don't match
+                        confirm.classList.add('is-invalid');
+                        confirm.classList.remove('is-valid');
+                        
+                        // Add error message
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback password-match-error';
+                        errorDiv.textContent = 'Konfirmasi password tidak cocok dengan password.';
+                        confirm.parentElement.appendChild(errorDiv);
+                    } else {
+                        // Passwords match
+                        confirm.classList.add('is-valid');
+                        confirm.classList.remove('is-invalid');
+                    }
+                }
+            }
+
+            // Add event listeners for real-time validation
+            if (pwd && confirm) {
+                pwd.addEventListener('input', validatePasswordMatch);
+                confirm.addEventListener('input', validatePasswordMatch);
+                
+                // Also validate on blur
+                confirm.addEventListener('blur', validatePasswordMatch);
+            }
+
             // Align toggle buttons vertically
             function alignToggleButtons() {
                 var groups = document.querySelectorAll('.form-floating.position-relative');
@@ -1190,6 +1235,30 @@
             alignToggleButtons();
             window.addEventListener('resize', alignToggleButtons);
         });
+    </script>
+    
+    <!-- Disable Inspect Element Protection -->
+    <script type="text/javascript">
+        document.onkeydown = (e) => {
+            if (e.key === 123) {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === 'U') {
+                e.preventDefault();
+            }
+            if (e.key === 'F12') {
+                e.preventDefault();
+            }
+        };
     </script>
 </body>
 </html>

@@ -67,6 +67,7 @@ class AuthController extends Controller
         ], [
             'password.regex' => 'Password harus mengandung huruf besar, huruf kecil, angka, dan karakter spesial.',
             'password.min' => 'Password harus setidaknya 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok dengan password.',
         ]);
 
         if ($validator->fails()) {

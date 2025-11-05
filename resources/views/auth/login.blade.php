@@ -783,7 +783,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4">
@@ -909,6 +909,30 @@
 
         window.addEventListener('load', function(){ alignToggleButtons(); });
         window.addEventListener('resize', function(){ alignToggleButtons(); });
+    </script>
+    
+    <!-- Disable Inspect Element Protection -->
+    <script type="text/javascript">
+        document.onkeydown = (e) => {
+            if (e.key === 123) {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === 'U') {
+                e.preventDefault();
+            }
+            if (e.key === 'F12') {
+                e.preventDefault();
+            }
+        };
     </script>
 </body>
 </html>

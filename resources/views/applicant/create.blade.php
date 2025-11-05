@@ -329,7 +329,7 @@
                                 <div class="form-floating">
                                     <input type="email" class="form-control @error('Gmail') is-invalid @enderror" 
                                            id="Gmail" name="Gmail" placeholder="Email" 
-                                           value="{{ old('Gmail') }}" required>
+                                           value="{{ old('Gmail', $userEmail ?? '') }}" required>
                                     <label for="Gmail">Email *</label>
                                     @error('Gmail')
                                         <div class="invalid-feedback">{{ $message }}</div>

@@ -84,7 +84,7 @@ class ApplyJobForm
                     ->acceptedFileTypes(['application/pdf', 'image/*'])
                     ->maxSize(10240)
                     ->preserveFilenames()
-                    ->visible(fn ($get) => $get('apply_jobs_status') == 4)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [4, 5]))
                     ->helperText(fn ($record) => $record && $record->apply_jobs_mcu_file 
                         ? new \Illuminate\Support\HtmlString('Upload file hasil MCU (PDF atau gambar, max 10MB) | <a href="' . route('admin.file.apply-job', ['path' => $record->apply_jobs_mcu_file]) . '" class="text-primary-600 hover:underline font-semibold">📥 Download File Saat Ini</a>')
                         : 'Upload file hasil MCU (PDF atau gambar, max 10MB)'
@@ -96,7 +96,7 @@ class ApplyJobForm
                     ->acceptedFileTypes(['application/pdf', 'image/*'])
                     ->maxSize(10240)
                     ->preserveFilenames()
-                    ->visible(fn ($get) => $get('apply_jobs_status') == 4)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [4, 5]))
                     ->helperText(fn ($record) => $record && $record->apply_jobs_offering_letter_file 
                         ? new \Illuminate\Support\HtmlString('Upload file offering letter (PDF atau gambar, max 10MB) | <a href="' . route('admin.file.apply-job', ['path' => $record->apply_jobs_offering_letter_file]) . '" class="text-primary-600 hover:underline font-semibold">📥 Download File Saat Ini</a>')
                         : 'Upload file offering letter (PDF atau gambar, max 10MB)'

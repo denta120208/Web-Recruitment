@@ -66,12 +66,16 @@ class JobVacancyForm
                 DatePicker::make('job_vacancy_start_date')
                     ->label('Tanggal Mulai')
                     ->required()
-                    ->default(now()),
+                    ->default(now())
+                    ->displayFormat('d/m/Y')
+                    ->native(false),
                 
                 DatePicker::make('job_vacancy_end_date')
                     ->label('Tanggal Berakhir')
                     ->required()
-                    ->after('job_vacancy_start_date'),
+                    ->after('job_vacancy_start_date')
+                    ->displayFormat('d/m/Y')
+                    ->native(false),
                 
                 TextInput::make('job_vacancy_man_power')
                     ->label('Jumlah Kebutuhan')

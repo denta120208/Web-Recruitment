@@ -8,6 +8,16 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border: none;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .job-card .card-body {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        padding: 1.5rem;
     }
     
     .job-card:hover {
@@ -18,36 +28,74 @@
     .job-title {
         color: #2c3e50;
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        flex: 1;
     }
     
     .job-level {
         background: #009290;
         color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
         font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+    
+    .job-card .card-body > div:first-of-type {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    .job-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
     }
     
     .job-desc {
         color: #6c757d;
         font-size: 0.9rem;
         line-height: 1.5;
+        max-height: 4.5em;
+        overflow: hidden;
+        text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
-        overflow: hidden;
+        word-break: break-word;
+        margin-bottom: 0.5rem;
     }
     
     .job-spec {
         color: #495057;
         font-size: 0.85rem;
         line-height: 1.4;
+        max-height: 3em;
+        overflow: hidden;
+        text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        overflow: hidden;
+        word-break: break-word;
+        margin-bottom: 0.5rem;
+    }
+    
+    .job-card .card-body > div:last-of-type {
+        margin-top: auto;
+        padding-top: 1rem;
+        flex-shrink: 0;
+        border-top: 1px solid #e9ecef;
     }
     
     .apply-btn {
@@ -193,62 +241,79 @@
                 @foreach($jobVacancies as $job)
                 <div class="col-lg-6 col-xl-4">
                     <div class="card job-card h-100">
-                    <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="job-title">{{ $job->job_vacancy_name }}</h5>
                                 <span class="job-level">{{ $job->job_vacancy_level_name }}</span>
                             </div>
                             
-                        <div class="mb-3">
-                                <h6 class="text-primary mb-2">
-                                    <i class="bi bi-file-text me-1"></i>Deskripsi Pekerjaan:
-                                </h6>
-                                <div class="job-desc">{!! $job->job_vacancy_job_desc !!}</div>
-                                <button type="button" class="btn btn-link p-0" onclick="openJobDetail({
-                                    id: '{{ $job->job_vacancy_id }}',
-                                    name: @js($job->job_vacancy_name),
-                                    level: @js($job->job_vacancy_level_name),
-                                    desc: @js($job->job_vacancy_job_desc),
-                                    spec: @js($job->job_vacancy_job_spec),
-                                    start: '{{ $job->job_vacancy_start_date->format('d M Y') }}',
-                                    end: '{{ $job->job_vacancy_end_date->format('d M Y') }}',
-                                    canApply: {{ auth()->check() ? ($userHasApplied ? 'false' : 'true') : 'false' }},
-                                    appliedThis: {{ ($userHasApplied && $appliedJobId == $job->job_vacancy_id) ? 'true' : 'false' }},
-                                    isLoggedIn: {{ auth()->check() ? 'true' : 'false' }},
-                                    vacancyId: '{{ $job->job_vacancy_id }}'
-                                })">
-                                    Lihat detail
-                                </button>
-            </div>
-            
-                        <div class="mb-3">
-                                <h6 class="text-success mb-2">
-                                    <i class="bi bi-check-circle me-1"></i>Persyaratan:
-                                </h6>
-                                <div class="job-spec">{!! $job->job_vacancy_job_spec !!}</div>
-                        </div>
+                            @php
+                                $locationDisplay = $job->location; // This will trigger accessor
+                            @endphp
+                            @if($locationDisplay)
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt-fill me-1 text-primary"></i>
+                                    <strong>Lokasi:</strong> {{ $locationDisplay }}
+                                </small>
+                            </div>
+                            @endif
                             
-                            <div class="row mb-3">
-                                <div class="col-6">
-                                    <small class="text-muted">
-                                        <i class="bi bi-calendar-event me-1"></i>
-                                        Mulai: {{ $job->job_vacancy_start_date->format('d M Y') }}
-                                    </small>
-                    </div>
-                                <div class="col-6">
-                                    <small class="text-muted">
-                                        <i class="bi bi-calendar-check me-1"></i>
-                                        Berakhir: {{ $job->job_vacancy_end_date->format('d M Y') }}
-                                    </small>
-                </div>
-                
-                <!-- inline container removed; custom modal will render content -->
-            </div>
-            
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="job-content mb-2" style="flex: 1; overflow: hidden;">
+                                <div class="mb-2">
+                                    <h6 class="text-primary mb-1" style="font-size: 0.9rem;">
+                                        <i class="bi bi-file-text me-1"></i>Deskripsi Pekerjaan:
+                                    </h6>
+                                    <div class="job-desc">{!! $job->job_vacancy_job_desc !!}</div>
+                                    <button type="button" class="btn btn-link p-0 mt-1" style="font-size: 0.85rem;" onclick="openJobDetail({
+                                        id: '{{ $job->job_vacancy_id }}',
+                                        name: @js($job->job_vacancy_name),
+                                        level: @js($job->job_vacancy_level_name),
+                                        desc: @js($job->job_vacancy_job_desc),
+                                        spec: @js($job->job_vacancy_job_spec),
+                                        start: '{{ $job->job_vacancy_start_date->format('d M Y') }}',
+                                        end: '{{ $job->job_vacancy_end_date->format('d M Y') }}',
+                                        canApply: {{ auth()->check() ? ($userHasApplied ? 'false' : 'true') : 'false' }},
+                                        appliedThis: {{ ($userHasApplied && $appliedJobId == $job->job_vacancy_id) ? 'true' : 'false' }},
+                                        isLoggedIn: {{ auth()->check() ? 'true' : 'false' }},
+                                        vacancyId: '{{ $job->job_vacancy_id }}'
+                                    })">
+                                        Lihat detail
+                                    </button>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <h6 class="text-success mb-1" style="font-size: 0.9rem;">
+                                        <i class="bi bi-check-circle me-1"></i>Persyaratan:
+                                    </h6>
+                                    <div class="job-spec">{!! $job->job_vacancy_job_spec !!}</div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-event me-1"></i>
+                                            Mulai: {{ $job->job_vacancy_start_date->format('d M Y') }}
+                                        </small>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-check me-1"></i>
+                                            Berakhir: {{ $job->job_vacancy_end_date->format('d M Y') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <small class="text-info">
                                     <i class="bi bi-people me-1"></i>
-                                    {{ $job->job_vacancy_man_power }} posisi tersedia
+                                    @php
+                                        $hiredCount = $job->hired_count ?? 0;
+                                        $manPower = $job->job_vacancy_man_power ?? 0;
+                                        $available = max(0, $manPower - $hiredCount);
+                                    @endphp
+                                    {{ $available }} posisi tersedia
                                 </small>
                                 
                                 @if($userHasApplied && $appliedJobId == $job->job_vacancy_id)

@@ -154,7 +154,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false">
     <div class="card otp-card p-0">
         <div class="card-header-custom">
             <div class="otp-icon">🔐</div>
@@ -194,5 +194,29 @@
             </div>
         </div>
     </div>
+    
+    <!-- Disable Inspect Element Protection -->
+    <script type="text/javascript">
+        document.onkeydown = (e) => {
+            if (e.key === 123) {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === 'U') {
+                e.preventDefault();
+            }
+            if (e.key === 'F12') {
+                e.preventDefault();
+            }
+        };
+    </script>
 </body>
 </html>

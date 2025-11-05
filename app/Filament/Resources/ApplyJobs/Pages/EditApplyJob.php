@@ -77,6 +77,9 @@ class EditApplyJob extends EditRecord
 
     protected function afterSave(): void
     {
+        // Refresh record to get latest data after save
+        $this->record->refresh();
+        
         // Sync to HRIS when status changed (includes status 1-5)
         $newStatus = $this->record->apply_jobs_status;
         
@@ -132,6 +135,11 @@ class EditApplyJob extends EditRecord
                         'apply_job_id' => $this->record->apply_jobs_id,
                         'response' => $result['data'] ?? null
                     ]);
+                    
+                    // If status changed to Hired (5), redirect to show Generate Employee button
+                    if ($newStatus == 5) {
+                        $this->redirect(static::getUrl(['record' => $this->record->apply_jobs_id]));
+                    }
                 } else {
                     Notification::make()
                         ->title('Gagal sinkronisasi ke HRIS')
@@ -181,19 +189,22 @@ class EditApplyJob extends EditRecord
         
         $actions = parent::getFormActions();
         
+        // Refresh record to ensure we have latest status
+        $this->record->refresh();
+        
         // Add Generate Employee button if conditions are met (Status Hired)
         if ($this->record->apply_jobs_status == 5 && // Hired status
             !$this->record->is_generated_employee &&
             $this->record->requireid) {
             
             $actions[] = Action::make('generate_employee')
-                ->label('Generate Employee')
+                ->label('Add Data Employee')
                 ->icon('heroicon-o-user-plus')
                 ->color('success')
                 ->requiresConfirmation()
-                ->modalHeading('Generate Employee')
-                ->modalDescription('Kirim data employee ke HRIS dan generate employee. Setelah di-generate, apply jobs ini tidak bisa diedit lagi.')
-                ->modalSubmitActionLabel('Ya, Generate')
+                ->modalHeading('Add Data Employee')
+                ->modalDescription('Kandidat ini sudah lolos data akan masuk ke system HRIS. Apakah anda yakin melanjutkan proses ini?')
+                ->modalSubmitActionLabel('Ya, Lanjutkan')
                 ->action(function (HrisApiService $hrisService) {
                     $applicant = $this->record->applicant;
                     

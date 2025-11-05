@@ -18,9 +18,45 @@ class JobVacancyController extends Controller
     public function index()
     {
         // Get active job vacancies (status 1,2,3,4 and within date range)
+        // Load count of hired candidates for each job vacancy
         $jobVacancies = JobVacancy::active()
+            ->select([
+                'job_vacancy_id',
+                'job_vacancy_name',
+                'job_vacancy_level_name',
+                'job_vacancy_job_desc',
+                'job_vacancy_job_spec',
+                'job_vacancy_start_date',
+                'job_vacancy_end_date',
+                'job_vacancy_man_power',
+                'job_vacancy_hris_location_id',
+                'job_vacancy_status_id',
+            ])
+            ->withCount([
+                'applyJobs as hired_count' => function($query) {
+                    $query->where('apply_jobs_status', 5); // Status Hired
+                }
+            ])
             ->orderBy('job_vacancy_start_date', 'desc')
-            ->get();
+            ->get()
+            ->filter(function($job) {
+                // Filter out jobs with no available positions
+                $hiredCount = $job->hired_count ?? 0;
+                $manPower = $job->job_vacancy_man_power ?? 0;
+                $available = max(0, $manPower - $hiredCount);
+                return $available > 0; // Only show jobs with available positions
+            })
+            ->map(function($job) {
+                // Attach location name from HRIS mapping
+                if (!empty($job->job_vacancy_hris_location_id)) {
+                    $hrisService = new \App\Services\HrisApiService();
+                    $locationName = $hrisService->getLocationName($job->job_vacancy_hris_location_id);
+                    // Add location as dynamic attribute
+                    $job->location = $locationName;
+                }
+                return $job;
+            })
+            ->values(); // Re-index array after filtering
 
         // Check if user has profile and if already applied to any job
         $userHasApplied = false;

@@ -55,4 +55,22 @@ class JobVacancy extends Model
                $this->job_vacancy_start_date <= Carbon::now() &&
                $this->job_vacancy_end_date >= Carbon::now();
     }
+
+    // Get count of hired candidates (status 5)
+    public function getHiredCountAttribute()
+    {
+        return $this->applyJobs()
+            ->where('apply_jobs_status', 5) // Status Hired
+            ->count();
+    }
+
+    // Get available positions (man_power - hired count)
+    public function getAvailablePositionsAttribute()
+    {
+        $hiredCount = $this->hired_count;
+        $manPower = $this->job_vacancy_man_power ?? 0;
+        $available = max(0, $manPower - $hiredCount); // Ensure non-negative
+        return $available;
+    }
+
 }

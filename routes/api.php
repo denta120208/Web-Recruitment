@@ -34,3 +34,9 @@ Route::prefix('hris')->group(function () {
     // Reject Candidate
     Route::post('/reject-candidate', [HrisIntegrationController::class, 'rejectCandidate']);
 });
+
+// Job Vacancy Sync Check Routes
+Route::prefix('sync')->group(function () {
+    Route::get('/check', [\App\Http\Controllers\Api\JobVacancySyncController::class, 'checkSync']);
+    Route::get('/public-jobs', [\App\Http\Controllers\Api\JobVacancySyncController::class, 'getPublicJobs']);
+});
