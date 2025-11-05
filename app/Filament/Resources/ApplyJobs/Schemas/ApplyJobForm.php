@@ -7,6 +7,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Schema;
 
 class ApplyJobForm
@@ -33,26 +35,44 @@ class ApplyJobForm
                         2 => 'Interview User',
                         3 => 'Psikotest',
                         4 => 'Offering Letter',
+                        6 => 'MCU',
                         5 => 'Hired'
                     ])
                     ->required()
                     ->default(1)
                     ->live(),
                 TextInput::make('apply_jobs_interview_by')
-                    ->label('Apply Jobs Interview by'),
+                    ->label('Apply Jobs Interview by')
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
                 Textarea::make('apply_jobs_interview_result')
                     ->label('Apply Jobs Interview Result')
-                    ->columnSpanFull(),
-                Textarea::make('apply_jobs_interview_ai_result')
-                    ->label('Apply Jobs Interview AI Result')
                     ->columnSpanFull()
-                    ->disabled(),
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
                 Select::make('apply_jobs_interview_status')
                     ->label('Interview Status')
                     ->relationship('interviewStatus', 'interview_status_name')
                     ->searchable()
                     ->preload()
-                    ->default(0),
+                    ->default(0)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
+                Textarea::make('apply_jobs_interview_ai_result')
+                    ->label('Apply Jobs Interview AI Result')
+                    ->columnSpanFull()
+                    ->disabled()
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
+                TextInput::make('apply_jobs_interview_location')
+                    ->label('Interview Location')
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
+                DatePicker::make('apply_jobs_interview_date')
+                    ->label('Interview Date')
+                    ->native(false)
+                    ->displayFormat('d/m/Y')
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
+                TimePicker::make('apply_jobs_interview_time')
+                    ->label('Interview Time')
+                    ->native(false)
+                    ->seconds(false)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
                 Select::make('apply_jobs_psikotest_status')
                     ->label('Status Psikotes')
                     ->options([
@@ -60,12 +80,13 @@ class ApplyJobForm
                         2 => 'Considered',
                         3 => 'Reject'
                     ])
-                    ->default(0),
+                    ->default(0)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [3, 5])),
                 TextInput::make('apply_jobs_psikotest_iq_num')
                     ->label('Apply Jobs Psikotest IQ Num')
-                    ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [3, 5])),
                 FileUpload::make('apply_jobs_psikotest_file')
                     ->label('File Psikotes')
                     ->disk('mlnas')
@@ -73,24 +94,25 @@ class ApplyJobForm
                     ->acceptedFileTypes(['application/pdf', 'image/*'])
                     ->maxSize(10240)
                     ->preserveFilenames()
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [3, 5]))
                     ->helperText(fn ($record) => $record && $record->apply_jobs_psikotest_file 
                         ? new \Illuminate\Support\HtmlString('Upload file hasil psikotes (PDF atau gambar, max 10MB) | <a href="' . route('admin.file.apply-job', ['path' => $record->apply_jobs_psikotest_file]) . '" class="text-primary-600 hover:underline font-semibold">📥 Download File Saat Ini</a>')
                         : 'Upload file hasil psikotes (PDF atau gambar, max 10MB)'
                     ),
                 FileUpload::make('apply_jobs_mcu_file')
-                    ->label('File MCU')
+                    ->label('Upload MCU')
                     ->disk('mlnas')
                     ->directory('mcu')
                     ->acceptedFileTypes(['application/pdf', 'image/*'])
                     ->maxSize(10240)
                     ->preserveFilenames()
-                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [4, 5]))
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [6, 5]))
                     ->helperText(fn ($record) => $record && $record->apply_jobs_mcu_file 
                         ? new \Illuminate\Support\HtmlString('Upload file hasil MCU (PDF atau gambar, max 10MB) | <a href="' . route('admin.file.apply-job', ['path' => $record->apply_jobs_mcu_file]) . '" class="text-primary-600 hover:underline font-semibold">📥 Download File Saat Ini</a>')
                         : 'Upload file hasil MCU (PDF atau gambar, max 10MB)'
                     ),
                 FileUpload::make('apply_jobs_offering_letter_file')
-                    ->label('File Offering Letter')
+                    ->label('Upload Offering')
                     ->disk('mlnas')
                     ->directory('offering_letter')
                     ->acceptedFileTypes(['application/pdf', 'image/*'])

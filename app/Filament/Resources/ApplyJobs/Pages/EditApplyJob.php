@@ -10,20 +10,40 @@ use Filament\Notifications\Notification;
 use App\Services\HrisApiService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InterviewInvitation;
+use App\Mail\RejectionNotification;
+use App\Jobs\SendInterviewReminderJob;
+use Carbon\Carbon;
 
 class EditApplyJob extends EditRecord
 {
     protected static string $resource = ApplyJobResource::class;
     
     protected $originalStatus;
+    protected $originalInterviewStatus;
 
     protected function getHeaderActions(): array
     {
-        // Hide delete button in view-only mode
-        if ($this->isViewOnly()) {
-            return [];
+        $actions = [];
+        
+        // If in view-only mode and rejected, add resend rejection email button
+        if ($this->isViewOnly() && $this->isInterviewRejected()) {
+            $actions[] = Action::make('resend_rejection_email')
+                ->label('Resend Rejection Email')
+                ->icon('heroicon-o-envelope')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('Resend Rejection Email')
+                ->modalDescription('Apakah Anda yakin ingin mengirim ulang email penolakan ke kandidat?')
+                ->action(function () {
+                    $this->sendRejectionEmail();
+                });
+            
+            return $actions;
         }
         
+        // Normal mode - show delete button
         $actions = [
             DeleteAction::make(),
         ];
@@ -71,6 +91,7 @@ class EditApplyJob extends EditRecord
         
         // Store original status before save for comparison in afterSave
         $this->originalStatus = $this->record->apply_jobs_status;
+        $this->originalInterviewStatus = $this->record->apply_jobs_interview_status;
         
         return $data;
     }
@@ -80,10 +101,34 @@ class EditApplyJob extends EditRecord
         // Refresh record to get latest data after save
         $this->record->refresh();
         
-        // Sync to HRIS when status changed (includes status 1-5)
+        // Sync to HRIS when status changed (includes status 1-6)
         $newStatus = $this->record->apply_jobs_status;
         
-        // Check if status changed (all statuses including Hired)
+        // Handle email notifications for Interview User status (2)
+        if ($newStatus == 2 && $this->originalStatus != $newStatus) {
+            $this->sendInterviewInvitation();
+        }
+        
+        // Handle rejection email when interview status CHANGED to Reject
+        $newInterviewStatus = $this->record->apply_jobs_interview_status;
+        
+        Log::info('Checking rejection email condition', [
+            'apply_job_id' => $this->record->apply_jobs_id,
+            'newStatus' => $newStatus,
+            'newInterviewStatus' => $newInterviewStatus,
+            'originalInterviewStatus' => $this->originalInterviewStatus,
+            'isInterviewRejected' => $this->isInterviewRejected(),
+            'statusChanged' => $this->originalInterviewStatus != $newInterviewStatus
+        ]);
+        
+        if ($newStatus == 2 && $this->isInterviewRejected() && $this->originalInterviewStatus != $newInterviewStatus) {
+            Log::info('Sending rejection email', [
+                'apply_job_id' => $this->record->apply_jobs_id
+            ]);
+            $this->sendRejectionEmail();
+        }
+        
+        // Check if status changed (all statuses including Hired and MCU)
         if ($this->originalStatus != $newStatus && $this->record->requireid) {
             $hrisService = app(HrisApiService::class);
             
@@ -169,6 +214,164 @@ class EditApplyJob extends EditRecord
         return strtolower($statusName) === 'reject' || strtolower($statusName) === 'rejected';
     }
     
+    protected function sendInterviewInvitation(): void
+    {
+        try {
+            $applicant = $this->record->applicant;
+            $user = $this->record->user;
+            $jobVacancy = $this->record->jobVacancy;
+            
+            if (!$applicant || !$user || !$jobVacancy) {
+                Log::warning('Cannot send interview invitation - missing data', [
+                    'apply_job_id' => $this->record->apply_jobs_id
+                ]);
+                return;
+            }
+            
+            // Get candidate email from user table
+            $candidateEmail = $user->email;
+            $candidateName = trim(
+                ($applicant->firstname ?? '') . ' ' . 
+                ($applicant->middlename ?? '') . ' ' . 
+                ($applicant->lastname ?? '')
+            );
+            
+            $jobTitle = $jobVacancy->job_vacancy_name ?? 'Unknown Position';
+            $interviewDate = $this->record->apply_jobs_interview_date 
+                ? Carbon::parse($this->record->apply_jobs_interview_date)->format('d F Y')
+                : 'TBA';
+            $interviewTime = $this->record->apply_jobs_interview_time 
+                ? Carbon::parse($this->record->apply_jobs_interview_time)->format('H:i')
+                : 'TBA';
+            $interviewLocation = $this->record->apply_jobs_interview_location ?? 'TBA';
+            $interviewBy = $this->record->apply_jobs_interview_by ?? 'HRD Team';
+            
+            // Send interview invitation email
+            Mail::to($candidateEmail)->send(
+                new InterviewInvitation(
+                    $candidateName,
+                    $jobTitle,
+                    $interviewDate,
+                    $interviewTime,
+                    $interviewLocation,
+                    $interviewBy
+                )
+            );
+            
+            Log::info('Interview invitation sent', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'email' => $candidateEmail,
+                'candidate' => $candidateName
+            ]);
+            
+            // Schedule H-1 reminder if interview date is set
+            if ($this->record->apply_jobs_interview_date) {
+                $interviewDateTime = Carbon::parse($this->record->apply_jobs_interview_date);
+                $reminderDateTime = $interviewDateTime->copy()->subDay()->setTime(9, 0); // H-1 at 9 AM
+                
+                // Only schedule if reminder date is in the future
+                if ($reminderDateTime->isFuture()) {
+                    // Get interviewer email from users table if available
+                    $interviewerEmail = $this->record->apply_jobs_interview_user_email;
+                    
+                    SendInterviewReminderJob::dispatch(
+                        $candidateEmail,
+                        $candidateName,
+                        $jobTitle,
+                        $interviewDate,
+                        $interviewTime,
+                        $interviewLocation,
+                        $interviewBy,
+                        $interviewerEmail
+                    )->delay($reminderDateTime);
+                    
+                    Log::info('Interview reminder scheduled', [
+                        'apply_job_id' => $this->record->apply_jobs_id,
+                        'reminder_date' => $reminderDateTime->toDateTimeString(),
+                        'candidate_email' => $candidateEmail,
+                        'interviewer_email' => $interviewerEmail
+                    ]);
+                }
+            }
+            
+            Notification::make()
+                ->title('Email undangan interview berhasil dikirim')
+                ->body('Email telah dikirim ke ' . $candidateEmail)
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            Log::error('Failed to send interview invitation', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            Notification::make()
+                ->title('Gagal mengirim email')
+                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+    
+    protected function sendRejectionEmail(): void
+    {
+        try {
+            $applicant = $this->record->applicant;
+            $user = $this->record->user;
+            $jobVacancy = $this->record->jobVacancy;
+            
+            if (!$applicant || !$user || !$jobVacancy) {
+                Log::warning('Cannot send rejection email - missing data', [
+                    'apply_job_id' => $this->record->apply_jobs_id
+                ]);
+                return;
+            }
+            
+            // Get candidate email from user table
+            $candidateEmail = $user->email;
+            $candidateName = trim(
+                ($applicant->firstname ?? '') . ' ' . 
+                ($applicant->middlename ?? '') . ' ' . 
+                ($applicant->lastname ?? '')
+            );
+            
+            $jobTitle = $jobVacancy->job_vacancy_name ?? 'Unknown Position';
+            
+            // Send rejection email
+            Mail::to($candidateEmail)->send(
+                new RejectionNotification(
+                    $candidateName,
+                    $jobTitle
+                )
+            );
+            
+            Log::info('Rejection email sent', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'email' => $candidateEmail,
+                'candidate' => $candidateName
+            ]);
+            
+            Notification::make()
+                ->title('Email penolakan berhasil dikirim')
+                ->body('Email telah dikirim ke ' . $candidateEmail)
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            Log::error('Failed to send rejection email', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            Notification::make()
+                ->title('Gagal mengirim email')
+                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+    
     protected function isViewOnly(): bool
     {
         // Centralized method to check if record should be view-only
@@ -228,6 +431,50 @@ class EditApplyJob extends EditRecord
                     $genderValue = strtolower($applicant->gender ?? 'male');
                     $gender = ($genderValue === 'female' || $genderValue === 'perempuan' || $genderValue === 'f' || $genderValue === 'p' || $genderValue === '2') ? 2 : 1;
                     
+                    // Get education list from HRIS untuk mapping
+                    $hrisEducations = $hrisService->getAllEducations() ?? [];
+                    
+                    // Prepare data education
+                    $dataEducation = [];
+                    foreach ($applicant->educations as $edu) {
+                        // Pastikan field wajib tidak null
+                        // Field wajib: institute, year, score, start_date
+                        if (!empty($edu->institutionname) && !empty($edu->year) && !empty($edu->score) && !empty($edu->startdate)) {
+                            $dataEducation[] = [
+                                'education_id' => $edu->education_id ?? null,
+                                'institute' => $edu->institutionname, // Wajib
+                                'major' => $edu->major ?? null, // Optional
+                                'year' => $edu->year, // Wajib
+                                'score' => $edu->score, // Wajib
+                                'start_date' => $edu->startdate->format('Y-m-d'), // Wajib
+                                'end_date' => $edu->enddate ? $edu->enddate->format('Y-m-d') : null, // Optional
+                            ];
+                        }
+                    }
+                    
+                    // Prepare data work experience
+                    $dataWorkExperience = [];
+                    foreach ($applicant->workExperiences as $workExp) {
+                        $dataWorkExperience[] = [
+                            'eexp_employer' => $workExp->companyname ?? null,
+                            'eexp_jobtit' => $workExp->joblevel ?? null,
+                            'eexp_from_date' => $workExp->startdate ? $workExp->startdate->format('Y-m-d') : null,
+                            'eexp_to_date' => $workExp->enddate ? $workExp->enddate->format('Y-m-d') : null,
+                            'eexp_comments' => $workExp->eexp_comments ?? null,
+                        ];
+                    }
+                    
+                    // Prepare data training
+                    $dataTraining = [];
+                    foreach ($applicant->trainings as $training) {
+                        $dataTraining[] = [
+                            'train_name' => $training->trainingname ?? null,
+                            'license_no' => $training->certificateno ?? null,
+                            'license_issued_date' => $training->starttrainingdate ? $training->starttrainingdate->format('Y-m-d') : null,
+                            'license_expiry_date' => $training->endtrainingdate ? $training->endtrainingdate->format('Y-m-d') : null,
+                        ];
+                    }
+                    
                     // Prepare data for HRIS - pastikan semua field wajib ada dan optional null
                     $data = [
                         // Required fields dari recruitment
@@ -255,11 +502,27 @@ class EditApplyJob extends EditRecord
                         'bpjs_ks' => null,
                         'bpjs_tk' => null,
                         'npwp' => null,
-                        // work_station removed - not supported by HRIS API
+                        // Photo path - kirim path lengkap dengan nama file dan extension
+                        // Format: path beserta nama & ext filenya (contoh: applicants/photos/filename.jpg)
+                        // Pastikan path sudah include nama file dan extension
+                        'image_profile_path' => !empty($applicant->photopath) 
+                            ? (strpos($applicant->photopath, '/') !== false ? $applicant->photopath : 'applicants/photos/' . $applicant->photopath)
+                            : null,
+                        
+                        // Data arrays
+                        'data_education' => !empty($dataEducation) ? $dataEducation : null,
+                        'data_work_experience' => !empty($dataWorkExperience) ? $dataWorkExperience : null,
+                        'data_training' => !empty($dataTraining) ? $dataTraining : null,
                     ];
                     
                     Log::info('Generate Employee - Sending to HRIS', [
                         'apply_job_id' => $this->record->apply_jobs_id,
+                        'applicant_id' => $applicant->requireid,
+                        'education_count' => count($dataEducation),
+                        'work_experience_count' => count($dataWorkExperience),
+                        'training_count' => count($dataTraining),
+                        'photo_path' => $data['image_profile_path'],
+                        'data_education' => $dataEducation,
                         'data' => $data
                     ]);
                     
@@ -284,15 +547,29 @@ class EditApplyJob extends EditRecord
                     // Redirect to refresh the page and apply view-only mode
                     return redirect()->route('filament.admin.resources.apply-jobs.edit', ['record' => $this->record]);
                     } else {
+                        // Ambil error message dari response
+                        $errorMessage = 'Unknown error';
+                        if (isset($result['error'])) {
+                            $errorMessage = $result['error'];
+                        } elseif (isset($result['data']['message'])) {
+                            $errorMessage = $result['data']['message'];
+                        } elseif (isset($result['data']['error'])) {
+                            $errorMessage = $result['data']['error'];
+                        } elseif (isset($result['data'])) {
+                            $errorMessage = is_string($result['data']) ? $result['data'] : json_encode($result['data']);
+                        }
+                        
                         Notification::make()
                             ->title('Gagal sinkronisasi ke HRIS')
-                            ->body($result['error'] ?? 'Unknown error')
+                            ->body('Status: ' . ($result['status'] ?? 'N/A') . '. Error: ' . $errorMessage)
                             ->danger()
                             ->send();
                         
                         Log::error('Generate Employee - Failed', [
                             'apply_job_id' => $this->record->apply_jobs_id,
-                            'error' => $result['error'] ?? 'Unknown error'
+                            'status' => $result['status'] ?? null,
+                            'error' => $errorMessage,
+                            'full_result' => $result
                         ]);
                     }
                 });

@@ -13,15 +13,18 @@ class RequireEducation extends Model
     
     protected $fillable = [
         'requireid',
+        'education_id',
         'institutionname',
         'major',
+        'year',
+        'score',
         'startdate',
         'enddate'
     ];
 
     protected $casts = [
-        'StartDate' => 'date',
-        'EndDate' => 'date'
+        'startdate' => 'date',
+        'enddate' => 'date'
     ];
 
     // Relationships

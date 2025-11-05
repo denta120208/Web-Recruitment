@@ -501,6 +501,9 @@
 @section('scripts')
 <script>
 $(document).ready(function() {
+    // Education data from HRIS API
+    const educationsData = @json($hrisEducations ?? []);
+    
     let workExpCount = 0;
     let educationCount = 0;
     let trainingCount = 0;
@@ -584,6 +587,12 @@ $(document).ready(function() {
                         </div>
                     </div>
                     <div class="col-12">
+                        <div class="form-floating">
+                            <textarea class="form-control" name="work_experiences[${workExpCount}][Comments]" placeholder="Keterangan" style="height: 100px"></textarea>
+                            <label>Keterangan</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
                         <div class="form-check mt-2">
                             <input class="form-check-input" type="checkbox" id="is_current_${workExpCount}" name="work_experiences[${workExpCount}][is_current]" value="1" onchange="toggleCurrent(this, ${workExpCount})">
                             <label class="form-check-label" for="is_current_${workExpCount}">Masih bekerja di sini</label>
@@ -607,8 +616,19 @@ $(document).ready(function() {
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="text" class="form-control" name="educations[${educationCount}][InstitutionName]" placeholder="Nama Institusi">
-                            <label>Nama Institusi</label>
+                            <select class="form-select" name="educations[${educationCount}][EducationId]">
+                                <option value="">Pilih Tingkat Pendidikan</option>
+                                ${Object.entries(educationsData).map(([id, name]) => 
+                                    `<option value="${id}">${name}</option>`
+                                ).join('')}
+                            </select>
+                            <label>Tingkat Pendidikan</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="educations[${educationCount}][InstitutionName]" placeholder="Nama Institusi" required>
+                            <label>Nama Institusi <span class="text-danger">*</span></label>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -619,8 +639,20 @@ $(document).ready(function() {
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="date" class="form-control" name="educations[${educationCount}][StartDate]" placeholder="Tanggal Mulai">
-                            <label>Tanggal Mulai</label>
+                            <input type="number" class="form-control" name="educations[${educationCount}][Year]" placeholder="Tahun Lulus" min="1950" max="2100" required>
+                            <label>Tahun Lulus <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" name="educations[${educationCount}][Score]" placeholder="IPK/Nilai" step="0.01" min="0" max="100" required>
+                            <label>IPK/Nilai <span class="text-danger">*</span></label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="date" class="form-control" name="educations[${educationCount}][StartDate]" placeholder="Tanggal Mulai" required>
+                            <label>Tanggal Mulai <span class="text-danger">*</span></label>
                         </div>
                     </div>
                     <div class="col-md-6">

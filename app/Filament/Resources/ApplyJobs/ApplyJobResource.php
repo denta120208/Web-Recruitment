@@ -67,6 +67,10 @@ class ApplyJobResource extends Resource
                 'apply_jobs_status',
                 'apply_jobs_psikotest_status',
                 'apply_jobs_interview_by',
+                'apply_jobs_interview_user_email',
+                'apply_jobs_interview_location',
+                'apply_jobs_interview_date',
+                'apply_jobs_interview_time',
                 'apply_jobs_interview_result',
                 'apply_jobs_interview_ai_result',
                 'apply_jobs_interview_status',
@@ -80,6 +84,13 @@ class ApplyJobResource extends Resource
                 'requireid',
                 'require_id',
             ])
-            ->with(['jobVacancy', 'user', 'interviewStatus']);
+            ->with([
+                'jobVacancy', 
+                'user', 
+                'interviewStatus',
+                'applicant.educations',
+                'applicant.workExperiences',
+                'applicant.trainings'
+            ]);
     }
 }

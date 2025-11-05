@@ -18,13 +18,14 @@ class RequireWorkExperience extends Model
         'startdate',
         'enddate',
         'iscurrent',
-        'salary'
+        'salary',
+        'eexp_comments'
     ];
 
     protected $casts = [
-        'StartDate' => 'date',
-        'EndDate' => 'date',
-        'Salary' => 'decimal:2'
+        'startdate' => 'date',
+        'enddate' => 'date',
+        'salary' => 'decimal:2'
     ];
 
     // Relationships

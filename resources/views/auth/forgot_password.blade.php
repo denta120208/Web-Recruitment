@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login - Metland Recruitment</title>
+    <title>Lupa Password - Metland Recruitment</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo.png') }}">
@@ -793,7 +793,7 @@
                             <div style="font-weight:800;">Metland</div>
                             <div style="font-weight:700; margin-top:6px;">Recruitment</div>
                         </div>
-                        <div class="subtitle" style="color: rgba(255,255,255,0.95);">Masuk ke Akun Anda</div>
+                        <div class="subtitle" style="color: rgba(255,255,255,0.95);">Lupa Password</div>
                     </div>
                     
                     <div class="login-body">
@@ -813,7 +813,7 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('login') }}">
+                        <form method="POST" action="{{ route('password.email') }}">
                             @csrf
                             
                             <div class="form-floating mb-3">
@@ -826,47 +826,16 @@
                                 @enderror
                             </div>
 
-                            <div class="form-floating mb-3 position-relative">
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" name="password" placeholder="Password" required>
-                                <label for="password">Password</label>
-                                <button type="button" id="togglePassword" class="toggle-password-btn" aria-label="Toggle password visibility">
-                                    <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                                </button>
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                                    <label class="form-check-label" for="remember">
-                                        Ingat saya
-                                    </label>
-                                </div>
-                                <a href="{{ route('password.request') }}" class="text-decoration-none" style="font-size: 0.9rem;">
-                                    Lupa Password?
-                                </a>
-                            </div>
-
                             <div class="d-grid mb-3">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>Masuk
+                                    <i class="bi bi-send me-2"></i>Kirim Kode OTP
                                 </button>
                             </div>
                         </form>
 
-                        <div class="text-center">
-                            <p class="text-muted mb-0">Belum punya akun?</p>
-                            <a href="{{ route('register') }}" class="btn btn-outline-primary mt-2">
-                                <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
-                            </a>
-                        </div>
-
                         <div class="text-center mt-3">
-                            <a href="/" class="text-muted text-decoration-none">
-                                <i class="bi bi-arrow-left me-1"></i>Kembali ke Beranda
+                            <a href="{{ route('login') }}" class="text-muted text-decoration-none">
+                                <i class="bi bi-arrow-left me-1"></i>Kembali ke Login
                             </a>
                         </div>
                     </div>

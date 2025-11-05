@@ -47,6 +47,54 @@ class HrisApiService
     }
 
     /**
+     * Get all educations from HRIS
+     */
+    public function getAllEducations()
+    {
+        try {
+            $response = Http::withHeaders($this->getHeaders())
+                ->timeout($this->timeout)
+                ->get($this->baseUrl . '/getEducation');
+
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                // Handle response format: {"status":"success","dataEdu":[...]}
+                if (isset($data['dataEdu']) && is_array($data['dataEdu'])) {
+                    $educations = [];
+                    foreach ($data['dataEdu'] as $education) {
+                        if (isset($education['id']) && isset($education['name'])) {
+                            $educations[$education['id']] = $education['name'];
+                        }
+                    }
+                    return $educations;
+                }
+                
+                // Handle direct array format
+                if (is_array($data) && isset($data[0])) {
+                    $educations = [];
+                    foreach ($data as $education) {
+                        if (isset($education['id']) && isset($education['name'])) {
+                            $educations[$education['id']] = $education['name'];
+                        }
+                    }
+                    return $educations;
+                }
+            }
+
+            Log::warning('Failed to fetch educations from HRIS API', [
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Error fetching educations from HRIS: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Get all locations from HRIS
      */
     public function getAllLocations()
@@ -344,23 +392,58 @@ class HrisApiService
                 'bpjs_ks' => !empty($data['bpjs_ks']) ? $data['bpjs_ks'] : null,
                 'bpjs_tk' => !empty($data['bpjs_tk']) ? $data['bpjs_tk'] : null,
                 'npwp' => !empty($data['npwp']) ? $data['npwp'] : null,
-                // work_station removed - not supported by HRIS API
+                'image_profile_path' => !empty($data['image_profile_path']) ? $data['image_profile_path'] : null,
+                
+                // Data Education - kirim array kosong jika tidak ada data (sesuai dokumentasi API)
+                'data_education' => isset($data['data_education']) && is_array($data['data_education']) 
+                    ? (count($data['data_education']) > 0 ? $data['data_education'] : null)
+                    : null,
+                
+                // Data Work Experience - kirim array kosong jika tidak ada data
+                'data_work_experience' => isset($data['data_work_experience']) && is_array($data['data_work_experience']) 
+                    ? (count($data['data_work_experience']) > 0 ? $data['data_work_experience'] : null)
+                    : null,
+                
+                // Data Training - kirim array kosong jika tidak ada data
+                'data_training' => isset($data['data_training']) && is_array($data['data_training']) 
+                    ? (count($data['data_training']) > 0 ? $data['data_training'] : null)
+                    : null,
             ];
+
+            // Log payload sebelum dikirim untuk debugging
+            Log::info('HRIS API - Set Candidate Hired - Payload', [
+                'payload' => $payload,
+                'payload_size' => strlen(json_encode($payload))
+            ]);
 
             $response = Http::timeout($this->timeout)
                 ->withHeaders($this->getHeaders())
                 ->post($this->baseUrl . '/setCandidate', $payload);
 
-            Log::info('HRIS API - Set Candidate Hired', [
-                'payload' => $payload,
-                'response' => $response->json(),
-                'status' => $response->status()
+            // Log response detail termasuk body jika error
+            Log::info('HRIS API - Set Candidate Hired - Response', [
+                'status' => $response->status(),
+                'success' => $response->successful(),
+                'response_body' => $response->body(),
+                'response_json' => $response->json(),
+                'headers' => $response->headers()
             ]);
+
+            // Jika response tidak successful, log error detail
+            if (!$response->successful()) {
+                Log::error('HRIS API - Set Candidate Hired - Failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'json' => $response->json(),
+                    'payload' => $payload
+                ]);
+            }
 
             return [
                 'success' => $response->successful(),
                 'data' => $response->json(),
-                'status' => $response->status()
+                'status' => $response->status(),
+                'error' => !$response->successful() ? ($response->json()['message'] ?? $response->body()) : null
             ];
 
         } catch (\Exception $e) {

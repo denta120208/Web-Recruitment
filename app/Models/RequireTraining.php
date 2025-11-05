@@ -20,8 +20,8 @@ class RequireTraining extends Model
     ];
 
     protected $casts = [
-        'StartTrainingDate' => 'date',
-        'EndTrainingDate' => 'date'
+        'starttrainingdate' => 'date',
+        'endtrainingdate' => 'date'
     ];
 
     // Relationships

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login - Metland Recruitment</title>
+    <title>Reset Password - Metland Recruitment</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('storage/applicants/logo.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('storage/applicants/logo.png') }}">
@@ -793,7 +793,7 @@
                             <div style="font-weight:800;">Metland</div>
                             <div style="font-weight:700; margin-top:6px;">Recruitment</div>
                         </div>
-                        <div class="subtitle" style="color: rgba(255,255,255,0.95);">Masuk ke Akun Anda</div>
+                        <div class="subtitle" style="color: rgba(255,255,255,0.95);">Reset Password</div>
                     </div>
                     
                     <div class="login-body">
@@ -813,60 +813,41 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('login') }}">
+                        <form method="POST" action="{{ route('password.update') }}">
                             @csrf
                             
-                            <div class="form-floating mb-3">
-                                <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                       id="email" name="email" placeholder="Email" 
-                                       value="{{ old('email') }}" required autofocus>
-                                <label for="email">Email</label>
-                                @error('email')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
                             <div class="form-floating mb-3 position-relative">
                                 <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" name="password" placeholder="Password" required>
-                                <label for="password">Password</label>
+                                       id="password" name="password" placeholder="Password Baru" required autofocus>
+                                <label for="password">Password Baru</label>
                                 <button type="button" id="togglePassword" class="toggle-password-btn" aria-label="Toggle password visibility">
                                     <i class="bi bi-eye" id="togglePasswordIcon"></i>
                                 </button>
                                 @error('password')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <small class="text-muted">Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan karakter spesial</small>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                                    <label class="form-check-label" for="remember">
-                                        Ingat saya
-                                    </label>
-                                </div>
-                                <a href="{{ route('password.request') }}" class="text-decoration-none" style="font-size: 0.9rem;">
-                                    Lupa Password?
-                                </a>
+                            <div class="form-floating mb-3 position-relative">
+                                <input type="password" class="form-control" 
+                                       id="password_confirmation" name="password_confirmation" placeholder="Konfirmasi Password" required>
+                                <label for="password_confirmation">Konfirmasi Password</label>
+                                <button type="button" id="togglePasswordConfirm" class="toggle-password-btn" aria-label="Toggle password visibility">
+                                    <i class="bi bi-eye" id="togglePasswordConfirmIcon"></i>
+                                </button>
                             </div>
 
                             <div class="d-grid mb-3">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>Masuk
+                                    <i class="bi bi-check-circle me-2"></i>Reset Password
                                 </button>
                             </div>
                         </form>
 
-                        <div class="text-center">
-                            <p class="text-muted mb-0">Belum punya akun?</p>
-                            <a href="{{ route('register') }}" class="btn btn-outline-primary mt-2">
-                                <i class="bi bi-person-plus-fill me-2"></i>Daftar Sekarang
-                            </a>
-                        </div>
-
                         <div class="text-center mt-3">
-                            <a href="/" class="text-muted text-decoration-none">
-                                <i class="bi bi-arrow-left me-1"></i>Kembali ke Beranda
+                            <a href="{{ route('login') }}" class="text-muted text-decoration-none">
+                                <i class="bi bi-arrow-left me-1"></i>Kembali ke Login
                             </a>
                         </div>
                     </div>
@@ -892,6 +873,24 @@
                         passwordInput.type = 'password';
                         icon.classList.remove('bi-eye-slash');
                         icon.classList.add('bi-eye');
+                    }
+                });
+            }
+            
+            // Toggle for password confirmation
+            const toggleBtnConfirm = document.getElementById('togglePasswordConfirm');
+            const passwordConfirmInput = document.getElementById('password_confirmation');
+            const iconConfirm = document.getElementById('togglePasswordConfirmIcon');
+            if (toggleBtnConfirm && passwordConfirmInput) {
+                toggleBtnConfirm.addEventListener('click', function(){
+                    if (passwordConfirmInput.type === 'password') {
+                        passwordConfirmInput.type = 'text';
+                        iconConfirm.classList.remove('bi-eye');
+                        iconConfirm.classList.add('bi-eye-slash');
+                    } else {
+                        passwordConfirmInput.type = 'password';
+                        iconConfirm.classList.remove('bi-eye-slash');
+                        iconConfirm.classList.add('bi-eye');
                     }
                 });
             }

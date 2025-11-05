@@ -7,6 +7,7 @@ use App\Models\Applicant;
 use App\Models\RequireWorkExperience;
 use App\Models\RequireEducation;
 use App\Models\RequireTraining;
+use App\Services\HrisApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,11 @@ class ApplicantController extends Controller
         // Pass user email for auto-fill
         $userEmail = $user->email ?? '';
         
-        return view('applicant.create', compact('userEmail'));
+        // Get educations from HRIS API
+        $hrisService = new HrisApiService();
+        $hrisEducations = $hrisService->getAllEducations() ?? [];
+        
+        return view('applicant.create', compact('userEmail', 'hrisEducations'));
     }
 
     public function store(Request $request)
@@ -162,6 +167,7 @@ class ApplicantController extends Controller
                         'enddate' => $isCurrent ? null : ($workExp['EndDate'] ?? null),
                         'iscurrent' => $isCurrent ? 1 : 0,
                         'salary' => $workExp['Salary'] ?? null,
+                        'eexp_comments' => $workExp['Comments'] ?? null,
                     ]);
                 }
             }
@@ -173,10 +179,13 @@ class ApplicantController extends Controller
                 if (!empty($education['InstitutionName'])) {
                     RequireEducation::create([
                         'requireid' => $applicant->getKey(),
+                        'education_id' => isset($education['EducationId']) && $education['EducationId'] !== '' ? (int) $education['EducationId'] : null,
                         'institutionname' => $education['InstitutionName'],
-                        'major' => $education['Major'],
+                        'major' => $education['Major'] ?? null,
+                        'year' => $education['Year'] ?? null,
+                        'score' => $education['Score'] ?? null,
                         'startdate' => $education['StartDate'],
-                        'enddate' => $education['EndDate'],
+                        'enddate' => $education['EndDate'] ?? null,
                     ]);
                 }
             }
@@ -211,8 +220,17 @@ class ApplicantController extends Controller
         $applicant = Applicant::where('requireid', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
+        
+        // Get educations from HRIS API
+        $hrisService = new HrisApiService();
+        $hrisEducations = $hrisService->getAllEducations() ?? [];
+        
+        // Get existing data from database
+        $educations = $applicant->educations;
+        $workExperiences = $applicant->workExperiences;
+        $trainings = $applicant->trainings;
             
-        return view('applicant.edit', compact('applicant'));
+        return view('applicant.edit', compact('applicant', 'educations', 'workExperiences', 'trainings', 'hrisEducations'));
     }
 
     public function update(Request $request, $id)
@@ -314,6 +332,7 @@ class ApplicantController extends Controller
                         'enddate' => $isCurrent ? null : ($workExp['EndDate'] ?? null),
                         'iscurrent' => $isCurrent ? 1 : 0,
                         'salary' => $workExp['Salary'] ?? null,
+                        'eexp_comments' => $workExp['Comments'] ?? null,
                     ]);
                 }
             }
@@ -326,10 +345,13 @@ class ApplicantController extends Controller
                 if (!empty($education['InstitutionName'])) {
                     RequireEducation::create([
                         'requireid' => $applicant->getKey(),
+                        'education_id' => isset($education['EducationId']) && $education['EducationId'] !== '' ? (int) $education['EducationId'] : null,
                         'institutionname' => $education['InstitutionName'],
-                        'major' => $education['Major'],
+                        'major' => $education['Major'] ?? null,
+                        'year' => $education['Year'] ?? null,
+                        'score' => $education['Score'] ?? null,
                         'startdate' => $education['StartDate'],
-                        'enddate' => $education['EndDate'],
+                        'enddate' => $education['EndDate'] ?? null,
                     ]);
                 }
             }

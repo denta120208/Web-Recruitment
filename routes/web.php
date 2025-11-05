@@ -19,6 +19,13 @@ Route::post('/register', [AuthController::class, 'register']);
 // Registration verification (OTP)
 Route::get('/register/verify', [AuthController::class, 'showVerifyForm'])->name('register.verify');
 Route::post('/register/verify', [AuthController::class, 'verifyRegister'])->name('register.verify.post');
+// Forgot Password routes
+Route::get('/password/forgot', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/password/forgot', [AuthController::class, 'forgotPassword'])->name('password.email');
+Route::get('/password/verify', [AuthController::class, 'showVerifyPasswordForm'])->name('password.verify');
+Route::post('/password/verify', [AuthController::class, 'verifyPasswordOtp'])->name('password.verify.post');
+Route::get('/password/reset', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Job Vacancy routes
