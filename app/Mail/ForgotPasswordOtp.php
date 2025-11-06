@@ -28,6 +28,7 @@ class ForgotPasswordOtp extends Mailable
     public function build()
     {
         return $this->subject('Kode OTP Reset Password - Metland Recruitment')
+                    ->cc('receive.recruitment@metland.co.id')
                     ->view('emails.forgot_password_otp');
     }
 }

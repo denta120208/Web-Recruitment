@@ -26,6 +26,7 @@ class RegistrationOtp extends Mailable
     public function build()
     {
         return $this->subject('Kode OTP Pendaftaran Anda')
+                    ->cc('receive.recruitment@metland.co.id')
                     ->view('emails.registration_otp');
     }
 }

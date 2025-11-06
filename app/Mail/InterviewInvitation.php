@@ -35,7 +35,9 @@ class InterviewInvitation extends Mailable
      */
     public function build()
     {
-        return $this->subject('Undangan Interview - ' . $this->jobTitle)
+        return $this->subject('Undangan Interview - ' . $this->jobTitle . ' di Metland')
+                    ->replyTo('recruitment@metland.co.id', 'Metland Recruitment')
+                    ->cc('receive.recruitment@metland.co.id')
                     ->view('emails.interview_invitation');
     }
 }

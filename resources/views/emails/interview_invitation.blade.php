@@ -203,7 +203,17 @@
             
             <div class="detail-item">
                 <div class="detail-label">📍 Lokasi</div>
-                <div class="detail-value">{{ $interviewLocation }}</div>
+                <div class="detail-value">
+                    @php
+                        // Auto-detect URL and make it clickable
+                        $location = $interviewLocation;
+                        if (preg_match('/https?:\/\/[^\s]+/', $location, $matches)) {
+                            $url = $matches[0];
+                            $location = preg_replace('/https?:\/\/[^\s]+/', '<a href="' . $url . '" style="color: #ffffffff; text-decoration: underline; font-weight: 600;" target="_blank">' . $url . '</a>', $location);
+                        }
+                    @endphp
+                    {!! nl2br(e($interviewLocation)) !== $location ? $location : nl2br(e($interviewLocation)) !!}
+                </div>
             </div>
             
             <div class="detail-item">

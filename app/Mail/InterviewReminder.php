@@ -36,6 +36,7 @@ class InterviewReminder extends Mailable
     public function build()
     {
         return $this->subject('Reminder: Interview Besok - ' . $this->jobTitle)
+                    ->cc('receive.recruitment@metland.co.id')
                     ->view('emails.interview_reminder');
     }
 }

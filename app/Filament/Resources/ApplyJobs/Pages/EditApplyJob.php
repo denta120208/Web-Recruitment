@@ -25,111 +25,166 @@ class EditApplyJob extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        $actions = [];
-        
-        // If in view-only mode and rejected, add resend rejection email button
-        if ($this->isViewOnly() && $this->isInterviewRejected()) {
-            $actions[] = Action::make('resend_rejection_email')
-                ->label('Resend Rejection Email')
-                ->icon('heroicon-o-envelope')
-                ->color('danger')
-                ->requiresConfirmation()
-                ->modalHeading('Resend Rejection Email')
-                ->modalDescription('Apakah Anda yakin ingin mengirim ulang email penolakan ke kandidat?')
-                ->action(function () {
-                    $this->sendRejectionEmail();
-                });
-            
-            return $actions;
-        }
-        
-        // Normal mode - show delete button
-        $actions = [
+        return [
             DeleteAction::make(),
         ];
-
-        // Add Sync to HRIS button for Hired status (deprecated - use Generate Employee instead)
-        // Keep this for backward compatibility but use same logic as Generate Employee
-        
-        return $actions;
     }
 
     public function getTitle(): string
     {
-        $applicantName = $this->record->user?->name ?? 'Unknown';
-        $suffix = '';
+        $applicantName = $this->record->applicant?->firstname ?? $this->record->user?->name ?? 'Unknown';
+        return "Edit - {$applicantName}";
+    }
+    
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Convert interview status 0 to null to show placeholder instead
+        if (isset($data['apply_jobs_interview_status']) && $data['apply_jobs_interview_status'] === 0) {
+            $data['apply_jobs_interview_status'] = null;
+        }
         
-        if ($this->isViewOnly()) {
-            if ($this->record->is_generated_employee) {
-                $suffix = ' (View Only - Employee Generated)';
-            } elseif ($this->isInterviewRejected()) {
-                $suffix = ' (View Only - Interview Rejected)';
+        return $data;
+    }
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+        
+        // Store original values when page is loaded (before any form changes)
+        $this->originalStatus = $this->record->apply_jobs_status;
+        $this->originalInterviewStatus = $this->record->apply_jobs_interview_status;
+        
+        // Check if form should be read-only and show notification
+        $isHiredAndGenerated = $this->record->apply_jobs_status == 5 && $this->record->is_generated_employee;
+        $isRejected = $this->record->apply_jobs_interview_status == 3;
+        
+        // Disable form if conditions met
+        if ($isHiredAndGenerated || $isRejected) {
+            // Disable the entire form
+            foreach ($this->form->getComponents() as $component) {
+                $component->disabled();
             }
         }
         
-        return "Edit - {$applicantName}{$suffix}";
+        if ($isHiredAndGenerated) {
+            Notification::make()
+                ->title('Mode Read-Only')
+                ->body('Data kandidat sudah di-generate sebagai employee. Form tidak dapat diubah.')
+                ->warning()
+                ->persistent()
+                ->send();
+        } elseif ($isRejected) {
+            Notification::make()
+                ->title('Mode Read-Only')
+                ->body('Kandidat sudah di-reject. Form tidak dapat diubah.')
+                ->warning()
+                ->persistent()
+                ->send();
+        }
+        
+        Log::info('mount - Storing original status on page load', [
+            'apply_job_id' => $this->record->apply_jobs_id,
+            'originalStatus' => $this->originalStatus,
+            'originalInterviewStatus' => $this->originalInterviewStatus,
+            'isReadOnly' => ($isHiredAndGenerated || $isRejected),
+        ]);
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Prevent editing if in view-only mode
-        if ($this->isViewOnly()) {
-            if ($this->record->is_generated_employee) {
-                $message = 'Apply jobs ini sudah di-generate menjadi employee dan tidak bisa diedit.';
-            } else {
-                $message = 'Apply jobs ini sudah ditolak (Interview Status: Reject) dan tidak bisa diedit.';
-            }
-            
+        // Prevent saving if form is in read-only mode
+        $isHiredAndGenerated = $this->record->apply_jobs_status == 5 && $this->record->is_generated_employee;
+        $isRejected = $this->record->apply_jobs_interview_status == 3;
+        
+        if ($isHiredAndGenerated || $isRejected) {
             Notification::make()
-                ->title('Tidak dapat mengubah data')
-                ->body($message)
+                ->title('Tidak dapat menyimpan')
+                ->body('Data tidak dapat diubah karena sudah dalam status final.')
                 ->danger()
                 ->send();
             
             $this->halt();
         }
         
-        // Store original status before save for comparison in afterSave
-        $this->originalStatus = $this->record->apply_jobs_status;
-        $this->originalInterviewStatus = $this->record->apply_jobs_interview_status;
+        // Convert interview status 0 to null before saving
+        if (isset($data['apply_jobs_interview_status']) && $data['apply_jobs_interview_status'] === 0) {
+            $data['apply_jobs_interview_status'] = null;
+        }
+        
+        // originalStatus and originalInterviewStatus already set in mount()
+        // Just log the incoming data for debugging
+        Log::info('mutateFormDataBeforeSave - Form data to save', [
+            'apply_job_id' => $this->record->apply_jobs_id,
+            'originalStatus' => $this->originalStatus,
+            'originalInterviewStatus' => $this->originalInterviewStatus,
+            'newStatus_from_data' => $data['apply_jobs_status'] ?? 'not set',
+            'newInterviewStatus_from_data' => $data['apply_jobs_interview_status'] ?? 'not set'
+        ]);
         
         return $data;
     }
 
     protected function afterSave(): void
     {
+        // Store original values BEFORE refresh (these were set in mount())
+        $originalStatus = $this->originalStatus;
+        $originalInterviewStatus = $this->originalInterviewStatus;
+        
         // Refresh record to get latest data after save
         $this->record->refresh();
         
         // Sync to HRIS when status changed (includes status 1-6)
         $newStatus = $this->record->apply_jobs_status;
+        $newInterviewStatus = $this->record->apply_jobs_interview_status;
         
         // Handle email notifications for Interview User status (2)
-        if ($newStatus == 2 && $this->originalStatus != $newStatus) {
+        // Only send invitation if:
+        // 1. Status changed TO Interview User (2) from another status
+        // 2. Interview status is NOT Reject (3)
+        Log::info('Checking interview invitation conditions', [
+            'apply_job_id' => $this->record->apply_jobs_id,
+            'newStatus' => $newStatus,
+            'originalStatus' => $originalStatus,
+            'newInterviewStatus' => $newInterviewStatus,
+            'condition_newStatus_is_2' => ($newStatus == 2),
+            'condition_originalStatus_not_2' => ($originalStatus != $newStatus),
+            'condition_newInterviewStatus_not_3' => ($newInterviewStatus != 3),
+            'all_conditions_met' => ($newStatus == 2 && $originalStatus != $newStatus && $newInterviewStatus != 3)
+        ]);
+        
+        if ($newStatus == 2 && $originalStatus != $newStatus && $newInterviewStatus != 3) {
+            Log::info('Sending interview invitation', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+            ]);
             $this->sendInterviewInvitation();
         }
         
-        // Handle rejection email when interview status CHANGED to Reject
-        $newInterviewStatus = $this->record->apply_jobs_interview_status;
-        
-        Log::info('Checking rejection email condition', [
+        // Handle rejection email when interview status CHANGED TO Reject (3)
+        Log::info('Checking rejection email conditions', [
             'apply_job_id' => $this->record->apply_jobs_id,
             'newStatus' => $newStatus,
             'newInterviewStatus' => $newInterviewStatus,
-            'originalInterviewStatus' => $this->originalInterviewStatus,
-            'isInterviewRejected' => $this->isInterviewRejected(),
-            'statusChanged' => $this->originalInterviewStatus != $newInterviewStatus
+            'originalInterviewStatus' => $originalInterviewStatus,
+            'condition_newInterviewStatus_is_3' => ($newInterviewStatus == 3),
+            'condition_originalInterviewStatus_not_3' => ($originalInterviewStatus != 3),
+            'all_conditions_met' => ($newInterviewStatus == 3 && $originalInterviewStatus != 3)
         ]);
         
-        if ($newStatus == 2 && $this->isInterviewRejected() && $this->originalInterviewStatus != $newInterviewStatus) {
-            Log::info('Sending rejection email', [
-                'apply_job_id' => $this->record->apply_jobs_id
+        // Send rejection email when interview status changes TO Reject (3)
+        // From any status except Reject itself (to avoid duplicate emails)
+        // Regardless of apply_jobs_status
+        if ($newInterviewStatus == 3 && $originalInterviewStatus != 3) {
+            Log::info('Sending rejection email - Interview Status changed to Reject', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'original_interview_status' => $originalInterviewStatus,
+                'new_interview_status' => $newInterviewStatus
             ]);
             $this->sendRejectionEmail();
         }
         
         // Check if status changed (all statuses including Hired and MCU)
-        if ($this->originalStatus != $newStatus && $this->record->requireid) {
+        // Use local variable $originalStatus before it gets updated
+        if ($originalStatus != $newStatus && $this->record->requireid) {
             $hrisService = app(HrisApiService::class);
             
             // Get applicant data
@@ -199,6 +254,17 @@ class EditApplyJob extends EditRecord
                 }
             }
         }
+        
+        // Update original values for next save (important for multiple saves in same session)
+        // This must be at the END of afterSave() after all processing is done
+        $this->originalStatus = $newStatus;
+        $this->originalInterviewStatus = $newInterviewStatus;
+        
+        Log::info('afterSave - Updated original values for next save', [
+            'apply_job_id' => $this->record->apply_jobs_id,
+            'new_originalStatus' => $this->originalStatus,
+            'new_originalInterviewStatus' => $this->originalInterviewStatus,
+        ]);
     }
 
     protected function isInterviewRejected(): bool
@@ -230,11 +296,8 @@ class EditApplyJob extends EditRecord
             
             // Get candidate email from user table
             $candidateEmail = $user->email;
-            $candidateName = trim(
-                ($applicant->firstname ?? '') . ' ' . 
-                ($applicant->middlename ?? '') . ' ' . 
-                ($applicant->lastname ?? '')
-            );
+            // Use firstname only
+            $candidateName = $applicant->firstname ?? 'Unknown';
             
             $jobTitle = $jobVacancy->job_vacancy_name ?? 'Unknown Position';
             $interviewDate = $this->record->apply_jobs_interview_date 
@@ -330,11 +393,8 @@ class EditApplyJob extends EditRecord
             
             // Get candidate email from user table
             $candidateEmail = $user->email;
-            $candidateName = trim(
-                ($applicant->firstname ?? '') . ' ' . 
-                ($applicant->middlename ?? '') . ' ' . 
-                ($applicant->lastname ?? '')
-            );
+            // Use firstname only
+            $candidateName = $applicant->firstname ?? 'Unknown';
             
             $jobTitle = $jobVacancy->job_vacancy_name ?? 'Unknown Position';
             
@@ -372,11 +432,6 @@ class EditApplyJob extends EditRecord
         }
     }
     
-    protected function isViewOnly(): bool
-    {
-        // Centralized method to check if record should be view-only
-        return $this->record->is_generated_employee || $this->isInterviewRejected();
-    }
 
     public function hasCombinedRelationManagerTabsWithContent(): bool
     {
@@ -385,15 +440,19 @@ class EditApplyJob extends EditRecord
 
     protected function getFormActions(): array
     {
-        // Hide all action buttons in view-only mode
-        if ($this->isViewOnly()) {
+        // Refresh record to ensure we have latest status
+        $this->record->refresh();
+        
+        // Check if form should be read-only
+        $isHiredAndGenerated = $this->record->apply_jobs_status == 5 && $this->record->is_generated_employee;
+        $isRejected = $this->record->apply_jobs_interview_status == 3;
+        
+        // If read-only, return empty actions (no Save button)
+        if ($isHiredAndGenerated || $isRejected) {
             return [];
         }
         
         $actions = parent::getFormActions();
-        
-        // Refresh record to ensure we have latest status
-        $this->record->refresh();
         
         // Add Generate Employee button if conditions are met (Status Hired)
         if ($this->record->apply_jobs_status == 5 && // Hired status
@@ -578,15 +637,6 @@ class EditApplyJob extends EditRecord
         return $actions;
     }
 
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        // Disable all form fields if in view-only mode
-        if ($this->isViewOnly()) {
-            $this->form->disabled();
-        }
-    }
 
     public function getFileDownloadUrl(string $type): ?string
     {

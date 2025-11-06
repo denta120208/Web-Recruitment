@@ -53,15 +53,19 @@ class ApplyJobForm
                     ->relationship('interviewStatus', 'interview_status_name')
                     ->searchable()
                     ->preload()
-                    ->default(0)
+                    ->placeholder('Choose Interview Status')
+                    ->native(false)
                     ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
                 Textarea::make('apply_jobs_interview_ai_result')
                     ->label('Apply Jobs Interview AI Result')
                     ->columnSpanFull()
                     ->disabled()
                     ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
-                TextInput::make('apply_jobs_interview_location')
+                Textarea::make('apply_jobs_interview_location')
                     ->label('Interview Location')
+                    ->placeholder('Masukkan lokasi atau URL meeting (contoh: https://zoom.us/j/123456)')
+                    ->rows(2)
+                    ->helperText('Anda bisa memasukkan alamat fisik atau URL meeting online (Zoom, Google Meet, dll)')
                     ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
                 DatePicker::make('apply_jobs_interview_date')
                     ->label('Interview Date')

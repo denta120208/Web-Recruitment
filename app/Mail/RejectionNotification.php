@@ -8,7 +8,7 @@ use Illuminate\Queue\SerializesModels;
 
 class RejectionNotification extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels; // Removed Queueable to send email immediately
 
     public $candidateName;
     public $jobTitle;
@@ -27,7 +27,13 @@ class RejectionNotification extends Mailable
      */
     public function build()
     {
-        return $this->subject('Pemberitahuan Status Lamaran - ' . $this->jobTitle)
-                    ->view('emails.rejection_notification');
+        return $this->subject('Update Lamaran Anda - ' . $this->jobTitle . ' di Metland')
+                    ->replyTo('recruitment@metland.co.id', 'Metland Recruitment')
+                    ->cc('receive.recruitment@metland.co.id')
+                    ->view('emails.rejection_notification')
+                    ->with([
+                        'candidateName' => $this->candidateName,
+                        'jobTitle' => $this->jobTitle,
+                    ]);
     }
 }

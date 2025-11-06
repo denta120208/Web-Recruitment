@@ -19,7 +19,7 @@ class ApplyJobsTable
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('applicant.firstname')
                     ->label('Nama Pelamar')
                     ->searchable()
                     ->sortable()
