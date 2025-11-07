@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ApplyJob;
 use App\Models\Applicant;
 use App\Models\JobVacancy;
+use App\Models\RequireEducation;
+use App\Models\RequireWorkExperience;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -72,11 +74,26 @@ class HrisIntegrationController extends Controller
                 'job_vacancy_id' => 'required|integer|exists:job_vacancy,job_vacancy_id',
                 'recruitment_candidate_id' => 'required|integer',
                 'candidate_name' => 'required|string|max:255',
-                'candidate_email' => 'required|email|max:255',
-                'candidate_contact_number' => 'required|string|max:20',
+                'candidate_email' => 'nullable|email|max:255',
+                'candidate_contact_number' => 'nullable|string|max:20',
                 'candidate_apply_date' => 'required|date',
                 'apply_jobs_status_id' => 'required|integer',
                 'set_new_candidate_by' => 'required|string|max:255',
+                
+                // Education fields (all nullable)
+                'last_education_id' => 'nullable|integer',
+                'last_institute_education' => 'nullable|string|max:200',
+                'last_major_education' => 'nullable|string|max:150',
+                'last_year_education' => 'nullable|integer',
+                'last_score_education' => 'nullable|numeric',
+                'last_start_date_education' => 'nullable|date',
+                'last_end_date_education' => 'nullable|date',
+                
+                // Work Experience fields (all nullable)
+                'last_company_work_experience' => 'nullable|string|max:200',
+                'last_jabatan_work_experience' => 'nullable|string|max:100',
+                'last_from_date_work_experience' => 'nullable|date',
+                'last_to_date_work_experience' => 'nullable|date',
             ]);
 
             if ($validator->fails()) {
@@ -115,12 +132,47 @@ class HrisIntegrationController extends Controller
                 ]
             );
 
+            // Simpan data education jika ada
+            if ($request->filled('last_education_id') || $request->filled('last_institute_education')) {
+                RequireEducation::updateOrCreate(
+                    [
+                        'requireid' => $request->recruitment_candidate_id,
+                    ],
+                    [
+                        'education_id' => $request->last_education_id,
+                        'institutionname' => $request->last_institute_education,
+                        'major' => $request->last_major_education,
+                        'year' => $request->last_year_education,
+                        'score' => $request->last_score_education,
+                        'startdate' => $request->last_start_date_education,
+                        'enddate' => $request->last_end_date_education,
+                    ]
+                );
+            }
+
+            // Simpan data work experience jika ada
+            if ($request->filled('last_company_work_experience')) {
+                RequireWorkExperience::updateOrCreate(
+                    [
+                        'requireid' => $request->recruitment_candidate_id,
+                    ],
+                    [
+                        'companyname' => $request->last_company_work_experience,
+                        'joblevel' => $request->last_jabatan_work_experience,
+                        'startdate' => $request->last_from_date_work_experience,
+                        'enddate' => $request->last_to_date_work_experience,
+                    ]
+                );
+            }
+
             DB::commit();
 
             Log::info('New Candidate Set', [
                 'recruitment_candidate_id' => $request->recruitment_candidate_id,
                 'job_vacancy_id' => $request->job_vacancy_id,
                 'set_by' => $request->set_new_candidate_by,
+                'education_saved' => $request->filled('last_education_id') || $request->filled('last_institute_education'),
+                'work_experience_saved' => $request->filled('last_company_work_experience'),
             ]);
 
             return response()->json([
@@ -155,6 +207,21 @@ class HrisIntegrationController extends Controller
                 'candidate_apply_date' => 'nullable|date',
                 'apply_jobs_status_id' => 'required|integer',
                 'set_candidate_by' => 'required|string|max:255',
+                
+                // Education fields (all nullable)
+                'last_education_id' => 'nullable|integer',
+                'last_institute_education' => 'nullable|string|max:200',
+                'last_major_education' => 'nullable|string|max:150',
+                'last_year_education' => 'nullable|integer',
+                'last_score_education' => 'nullable|numeric',
+                'last_start_date_education' => 'nullable|date',
+                'last_end_date_education' => 'nullable|date',
+                
+                // Work Experience fields (all nullable)
+                'last_company_work_experience' => 'nullable|string|max:200',
+                'last_jabatan_work_experience' => 'nullable|string|max:100',
+                'last_from_date_work_experience' => 'nullable|date',
+                'last_to_date_work_experience' => 'nullable|date',
             ]);
 
             if ($validator->fails()) {
@@ -165,10 +232,13 @@ class HrisIntegrationController extends Controller
                 ], 422);
             }
 
+            DB::beginTransaction();
+
             // Cari apply job berdasarkan recruitment_candidate_id
             $applyJob = ApplyJob::where('requireid', $request->recruitment_candidate_id)->first();
 
             if (!$applyJob) {
+                DB::rollBack();
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Candidate not found'
@@ -181,10 +251,47 @@ class HrisIntegrationController extends Controller
                 'apply_jobs_interview_by' => $request->set_candidate_by,
             ]);
 
+            // Update data education jika ada
+            if ($request->filled('last_education_id') || $request->filled('last_institute_education')) {
+                RequireEducation::updateOrCreate(
+                    [
+                        'requireid' => $request->recruitment_candidate_id,
+                    ],
+                    [
+                        'education_id' => $request->last_education_id,
+                        'institutionname' => $request->last_institute_education,
+                        'major' => $request->last_major_education,
+                        'year' => $request->last_year_education,
+                        'score' => $request->last_score_education,
+                        'startdate' => $request->last_start_date_education,
+                        'enddate' => $request->last_end_date_education,
+                    ]
+                );
+            }
+
+            // Update data work experience jika ada
+            if ($request->filled('last_company_work_experience')) {
+                RequireWorkExperience::updateOrCreate(
+                    [
+                        'requireid' => $request->recruitment_candidate_id,
+                    ],
+                    [
+                        'companyname' => $request->last_company_work_experience,
+                        'joblevel' => $request->last_jabatan_work_experience,
+                        'startdate' => $request->last_from_date_work_experience,
+                        'enddate' => $request->last_to_date_work_experience,
+                    ]
+                );
+            }
+
+            DB::commit();
+
             Log::info('Candidate Status Updated', [
                 'recruitment_candidate_id' => $request->recruitment_candidate_id,
                 'new_status' => $request->apply_jobs_status_id,
                 'updated_by' => $request->set_candidate_by,
+                'education_updated' => $request->filled('last_education_id') || $request->filled('last_institute_education'),
+                'work_experience_updated' => $request->filled('last_company_work_experience'),
             ]);
 
             return response()->json([
@@ -193,6 +300,7 @@ class HrisIntegrationController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error updating candidate status: ' . $e->getMessage());
             
             return response()->json([

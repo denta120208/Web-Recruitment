@@ -53,6 +53,12 @@ class ApplyJobObserver
             // Get phone (already auto-decrypted by model accessor)
             $candidate_contact_number = $applicant->phone ?? '';
 
+            // Get last education data
+            $lastEducation = $applicant->educations()->orderBy('eduid', 'desc')->first();
+            
+            // Get last work experience
+            $lastWorkExp = $applicant->workExperiences()->orderBy('workid', 'desc')->first();
+
             $data = [
                 'job_vacancy_id' => $vacancy?->job_request_hris_id ?? 0,
                 'recruitment_candidate_id' => $applyJob->requireid,
@@ -62,6 +68,21 @@ class ApplyJobObserver
                 'candidate_apply_date' => $applyJob->apply_date ?? $applyJob->created_at->format('Y-m-d'),
                 'apply_jobs_status_id' => $applyJob->apply_jobs_status ?? 1,
                 'set_new_candidate_by' => optional(Auth::user())->name ?? 'System',
+                
+                // Education data
+                'last_education_id' => $lastEducation?->education_id,
+                'last_institute_education' => $lastEducation?->institutionname,
+                'last_major_education' => $lastEducation?->major,
+                'last_year_education' => $lastEducation?->year,
+                'last_score_education' => $lastEducation?->score,
+                'last_start_date_education' => $lastEducation?->startdate?->format('Y-m-d'),
+                'last_end_date_education' => $lastEducation?->enddate?->format('Y-m-d'),
+                
+                // Work experience data
+                'last_company_work_experience' => $lastWorkExp?->companyname,
+                'last_jabatan_work_experience' => $lastWorkExp?->joblevel,
+                'last_from_date_work_experience' => $lastWorkExp?->startdate?->format('Y-m-d'),
+                'last_to_date_work_experience' => $lastWorkExp?->enddate?->format('Y-m-d'),
             ];
 
             Log::info('ApplyJobObserver - Creating new candidate', [
@@ -142,6 +163,12 @@ class ApplyJobObserver
             // Get phone (already auto-decrypted by model accessor)
             $candidate_contact_number = $applicant->phone ?? '';
 
+            // Get last education data
+            $lastEducation = $applicant->educations()->orderBy('eduid', 'desc')->first();
+            
+            // Get last work experience
+            $lastWorkExp = $applicant->workExperiences()->orderBy('workid', 'desc')->first();
+
             // Untuk status selain Hired, gunakan setCandidate biasa
             $data = [
                 'recruitment_candidate_id' => $applyJob->requireid,
@@ -151,6 +178,21 @@ class ApplyJobObserver
                 'candidate_apply_date' => $applyJob->apply_date ?? $applyJob->created_at->format('Y-m-d'),
                 'apply_jobs_status_id' => $newStatus,
                 'set_candidate_by' => optional(Auth::user())->name ?? 'System',
+                
+                // Education data
+                'last_education_id' => $lastEducation?->education_id,
+                'last_institute_education' => $lastEducation?->institutionname,
+                'last_major_education' => $lastEducation?->major,
+                'last_year_education' => $lastEducation?->year,
+                'last_score_education' => $lastEducation?->score,
+                'last_start_date_education' => $lastEducation?->startdate?->format('Y-m-d'),
+                'last_end_date_education' => $lastEducation?->enddate?->format('Y-m-d'),
+                
+                // Work experience data
+                'last_company_work_experience' => $lastWorkExp?->companyname,
+                'last_jabatan_work_experience' => $lastWorkExp?->joblevel,
+                'last_from_date_work_experience' => $lastWorkExp?->startdate?->format('Y-m-d'),
+                'last_to_date_work_experience' => $lastWorkExp?->enddate?->format('Y-m-d'),
             ];
 
             Log::info('ApplyJobObserver - Updating candidate status', [

@@ -56,27 +56,17 @@ class EditApplyJob extends EditRecord
         
         // Check if form should be read-only and show notification
         $isHiredAndGenerated = $this->record->apply_jobs_status == 5 && $this->record->is_generated_employee;
-        $isRejected = $this->record->apply_jobs_interview_status == 3;
         
-        // Disable form if conditions met
-        if ($isHiredAndGenerated || $isRejected) {
+        // Disable form only if hired and generated
+        if ($isHiredAndGenerated) {
             // Disable the entire form
             foreach ($this->form->getComponents() as $component) {
                 $component->disabled();
             }
-        }
-        
-        if ($isHiredAndGenerated) {
+            
             Notification::make()
                 ->title('Mode Read-Only')
                 ->body('Data kandidat sudah di-generate sebagai employee. Form tidak dapat diubah.')
-                ->warning()
-                ->persistent()
-                ->send();
-        } elseif ($isRejected) {
-            Notification::make()
-                ->title('Mode Read-Only')
-                ->body('Kandidat sudah di-reject. Form tidak dapat diubah.')
                 ->warning()
                 ->persistent()
                 ->send();
@@ -86,20 +76,19 @@ class EditApplyJob extends EditRecord
             'apply_job_id' => $this->record->apply_jobs_id,
             'originalStatus' => $this->originalStatus,
             'originalInterviewStatus' => $this->originalInterviewStatus,
-            'isReadOnly' => ($isHiredAndGenerated || $isRejected),
+            'isReadOnly' => $isHiredAndGenerated,
         ]);
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Prevent saving if form is in read-only mode
+        // Prevent saving only if hired and generated employee
         $isHiredAndGenerated = $this->record->apply_jobs_status == 5 && $this->record->is_generated_employee;
-        $isRejected = $this->record->apply_jobs_interview_status == 3;
         
-        if ($isHiredAndGenerated || $isRejected) {
+        if ($isHiredAndGenerated) {
             Notification::make()
                 ->title('Tidak dapat menyimpan')
-                ->body('Data tidak dapat diubah karena sudah dalam status final.')
+                ->body('Data tidak dapat diubah karena sudah di-generate sebagai employee.')
                 ->danger()
                 ->send();
             
@@ -198,6 +187,12 @@ class EditApplyJob extends EditRecord
                     ($applicant->lastname ?? '')
                 );
                 
+                // Get last education data
+                $lastEducation = $applicant->educations()->orderBy('eduid', 'desc')->first();
+                
+                // Get last work experience
+                $lastWorkExp = $applicant->workExperiences()->orderBy('workid', 'desc')->first();
+                
                 // For status 1-4, use setCandidate (normal status update)
                 // For status 5 (Hired), also use setCandidate to sync status first
                 // (Generate Employee button will send full employee data later)
@@ -209,6 +204,21 @@ class EditApplyJob extends EditRecord
                     'candidate_apply_date' => $this->record->apply_date ?? $this->record->created_at->format('Y-m-d'),
                     'apply_jobs_status_id' => $newStatus,
                     'set_candidate_by' => optional(Auth::user())->name ?? 'Admin',
+                    
+                    // Education data
+                    'last_education_id' => $lastEducation?->education_id,
+                    'last_institute_education' => $lastEducation?->institutionname,
+                    'last_major_education' => $lastEducation?->major,
+                    'last_year_education' => $lastEducation?->year,
+                    'last_score_education' => $lastEducation?->score,
+                    'last_start_date_education' => $lastEducation?->startdate?->format('Y-m-d'),
+                    'last_end_date_education' => $lastEducation?->enddate?->format('Y-m-d'),
+                    
+                    // Work experience data
+                    'last_company_work_experience' => $lastWorkExp?->companyname,
+                    'last_jabatan_work_experience' => $lastWorkExp?->joblevel,
+                    'last_from_date_work_experience' => $lastWorkExp?->startdate?->format('Y-m-d'),
+                    'last_to_date_work_experience' => $lastWorkExp?->enddate?->format('Y-m-d'),
                 ];
                 
                 Log::info('EditApplyJob - Syncing status change to HRIS', [
@@ -443,12 +453,11 @@ class EditApplyJob extends EditRecord
         // Refresh record to ensure we have latest status
         $this->record->refresh();
         
-        // Check if form should be read-only
+        // Check if form should be read-only (only for hired and generated)
         $isHiredAndGenerated = $this->record->apply_jobs_status == 5 && $this->record->is_generated_employee;
-        $isRejected = $this->record->apply_jobs_interview_status == 3;
         
-        // If read-only, return empty actions (no Save button)
-        if ($isHiredAndGenerated || $isRejected) {
+        // If hired and generated, return empty actions (no Save button)
+        if ($isHiredAndGenerated) {
             return [];
         }
         

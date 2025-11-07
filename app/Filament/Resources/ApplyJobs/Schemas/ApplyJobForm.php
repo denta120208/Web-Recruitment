@@ -23,10 +23,19 @@ class ApplyJobForm
                     ->searchable()
                     ->preload(),
                 Select::make('user_id')
-                    ->relationship('user', 'name')
+                    ->label('User')
+                    ->options(function () {
+                        // Load ALL users with their applicant firstname
+                        return \App\Models\Applicant::with('user')
+                            ->get()
+                            ->filter(fn($applicant) => $applicant->user_id !== null)
+                            ->mapWithKeys(function ($applicant) {
+                                return [$applicant->user_id => $applicant->firstname];
+                            })
+                            ->sort();
+                    })
                     ->required()
                     ->searchable()
-                    ->preload()
                     ->disabledOn('edit'),
                 Select::make('apply_jobs_status')
                     ->label('Status Lamaran')

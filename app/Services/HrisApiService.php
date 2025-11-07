@@ -289,6 +289,21 @@ class HrisApiService
                 'candidate_apply_date' => $data['candidate_apply_date'],
                 'apply_jobs_status_id' => $data['apply_jobs_status_id'],
                 'set_new_candidate_by' => $data['set_new_candidate_by'],
+                
+                // Education data (nullable)
+                'last_education_id' => $data['last_education_id'] ?? null,
+                'last_institute_education' => $data['last_institute_education'] ?? null,
+                'last_major_education' => $data['last_major_education'] ?? null,
+                'last_year_education' => $data['last_year_education'] ?? null,
+                'last_score_education' => $data['last_score_education'] ?? null,
+                'last_start_date_education' => $data['last_start_date_education'] ?? null,
+                'last_end_date_education' => $data['last_end_date_education'] ?? null,
+                
+                // Work experience data (nullable)
+                'last_company_work_experience' => $data['last_company_work_experience'] ?? null,
+                'last_jabatan_work_experience' => $data['last_jabatan_work_experience'] ?? null,
+                'last_from_date_work_experience' => $data['last_from_date_work_experience'] ?? null,
+                'last_to_date_work_experience' => $data['last_to_date_work_experience'] ?? null,
             ];
 
             $response = Http::timeout($this->timeout)
@@ -331,6 +346,21 @@ class HrisApiService
                 'candidate_apply_date' => $data['candidate_apply_date'],
                 'apply_jobs_status_id' => $data['apply_jobs_status_id'],
                 'set_candidate_by' => $data['set_candidate_by'],
+                
+                // Education data (nullable)
+                'last_education_id' => $data['last_education_id'] ?? null,
+                'last_institute_education' => $data['last_institute_education'] ?? null,
+                'last_major_education' => $data['last_major_education'] ?? null,
+                'last_year_education' => $data['last_year_education'] ?? null,
+                'last_score_education' => $data['last_score_education'] ?? null,
+                'last_start_date_education' => $data['last_start_date_education'] ?? null,
+                'last_end_date_education' => $data['last_end_date_education'] ?? null,
+                
+                // Work experience data (nullable)
+                'last_company_work_experience' => $data['last_company_work_experience'] ?? null,
+                'last_jabatan_work_experience' => $data['last_jabatan_work_experience'] ?? null,
+                'last_from_date_work_experience' => $data['last_from_date_work_experience'] ?? null,
+                'last_to_date_work_experience' => $data['last_to_date_work_experience'] ?? null,
             ];
 
             $response = Http::timeout($this->timeout)
