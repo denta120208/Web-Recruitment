@@ -152,7 +152,7 @@ class ApplicantController extends Controller
             'user_id' => auth()->id(),
         ];
 
-        $applicant = Applicant::create($modelData);nh
+        $applicant = Applicant::create($modelData);
 
        
         if ($request->has('work_experiences')) {
