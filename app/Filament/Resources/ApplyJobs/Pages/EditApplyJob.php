@@ -26,7 +26,10 @@ class EditApplyJob extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->requiresConfirmation()
+                ->modalHeading(fn ($record) => 'Delete ' . ($record->applicant?->firstname ?? $record->user?->name ?? $record->apply_jobs_id))
+                ->modalDescription('Are you sure you would like to delete this application? This action cannot be undone.'),
         ];
     }
 

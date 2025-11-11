@@ -219,7 +219,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control @error('FirstName') is-invalid @enderror" 
                                            id="FirstName" name="FirstName" placeholder="Nama Depan" 
-                                           value="{{ old('FirstName') }}" required>
+                                           value="{{ old('FirstName', $firstName) }}" required>
                                     <label for="FirstName">Nama Depan *</label>
                                     @error('FirstName')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -231,7 +231,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control @error('MiddleName') is-invalid @enderror" 
                                            id="MiddleName" name="MiddleName" placeholder="Nama Tengah" 
-                                           value="{{ old('MiddleName') }}">
+                                           value="{{ old('MiddleName', $middleName) }}">
                                     <label for="MiddleName">Nama Tengah</label>
                                     @error('MiddleName')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -240,9 +240,9 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                        <input type="text" class="form-control @error('LastName') is-invalid @enderror" 
+                                    <input type="text" class="form-control @error('LastName') is-invalid @enderror" 
                                  id="LastName" name="LastName" placeholder="Nama Belakang" 
-                                 value="{{ old('LastName') }}">
+                                 value="{{ old('LastName', $lastName) }}">
                              <label for="LastName">Nama Belakang</label>
                                     @error('LastName')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -329,8 +329,8 @@
                                 <div class="form-floating">
                                     <input type="email" class="form-control @error('Gmail') is-invalid @enderror" 
                                            id="Gmail" name="Gmail" placeholder="Email" 
-                                           value="{{ old('Gmail', $userEmail ?? '') }}" required>
-                                    <label for="Gmail">Email *</label>
+                                           value="{{ old('Gmail', $userEmail ?? '') }}" required readonly>
+                                    <label for="Gmail">Email * (tidak dapat diubah)</label>
                                     @error('Gmail')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -341,7 +341,7 @@
                                     <input type="url" class="form-control @error('LinkedIn') is-invalid @enderror" 
                                            id="LinkedIn" name="LinkedIn" placeholder="LinkedIn URL" 
                                            value="{{ old('LinkedIn') }}">
-                                    <label for="LinkedIn">LinkedIn URL</label>
+                                    <label for="LinkedIn">LinkedIn</label>
                                     @error('LinkedIn')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -352,7 +352,7 @@
                                     <input type="text" class="form-control @error('Instagram') is-invalid @enderror" 
                                            id="Instagram" name="Instagram" placeholder="Instagram Username" 
                                            value="{{ old('Instagram') }}">
-                                    <label for="Instagram">Instagram Username</label>
+                                    <label for="Instagram">Instagram</label>
                                     @error('Instagram')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

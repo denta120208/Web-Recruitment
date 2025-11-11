@@ -16,6 +16,7 @@ class ApplyJobForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(3)
             ->components([
                 Select::make('job_vacancy_id')
                     ->relationship('jobVacancy', 'job_vacancy_name')
@@ -50,25 +51,9 @@ class ApplyJobForm
                     ->required()
                     ->default(1)
                     ->live(),
+                // Interview fields in requested order
                 TextInput::make('apply_jobs_interview_by')
                     ->label('Apply Jobs Interview by')
-                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
-                Textarea::make('apply_jobs_interview_result')
-                    ->label('Apply Jobs Interview Result')
-                    ->columnSpanFull()
-                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
-                Select::make('apply_jobs_interview_status')
-                    ->label('Interview Status')
-                    ->relationship('interviewStatus', 'interview_status_name')
-                    ->searchable()
-                    ->preload()
-                    ->placeholder('Choose Interview Status')
-                    ->native(false)
-                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
-                Textarea::make('apply_jobs_interview_ai_result')
-                    ->label('Apply Jobs Interview AI Result')
-                    ->columnSpanFull()
-                    ->disabled()
                     ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
                 Textarea::make('apply_jobs_interview_location')
                     ->label('Interview Location')
@@ -86,15 +71,23 @@ class ApplyJobForm
                     ->native(false)
                     ->seconds(false)
                     ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
-                Select::make('apply_jobs_psikotest_status')
-                    ->label('Status Psikotes')
-                    ->options([
-                        1 => 'Approve',
-                        2 => 'Considered',
-                        3 => 'Reject'
-                    ])
-                    ->default(0)
-                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [3, 5])),
+                Textarea::make('apply_jobs_interview_result')
+                    ->label('Apply Jobs Interview Result')
+                    ->columnSpanFull()
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
+                Textarea::make('apply_jobs_interview_ai_result')
+                    ->label('Apply Jobs Interview AI Result')
+                    ->columnSpanFull()
+                    ->disabled()
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
+                Select::make('apply_jobs_interview_status')
+                    ->label('Interview Status')
+                    ->relationship('interviewStatus', 'interview_status_name')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('Choose Interview Status')
+                    ->native(false)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2, 5])),
                 TextInput::make('apply_jobs_psikotest_iq_num')
                     ->label('Apply Jobs Psikotest IQ Num')
                     ->numeric()
@@ -112,6 +105,15 @@ class ApplyJobForm
                         ? new \Illuminate\Support\HtmlString('Upload file hasil psikotes (PDF atau gambar, max 10MB) | <a href="' . route('admin.file.apply-job', ['path' => $record->apply_jobs_psikotest_file]) . '" class="text-primary-600 hover:underline font-semibold">📥 Download File Saat Ini</a>')
                         : 'Upload file hasil psikotes (PDF atau gambar, max 10MB)'
                     ),
+                Select::make('apply_jobs_psikotest_status')
+                    ->label('Status Psikotes')
+                    ->options([
+                        1 => 'Approve',
+                        2 => 'Considered',
+                        3 => 'Reject'
+                    ])
+                    ->default(0)
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [3, 5])),
                 FileUpload::make('apply_jobs_mcu_file')
                     ->label('Upload MCU')
                     ->disk('mlnas')

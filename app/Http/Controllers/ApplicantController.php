@@ -29,14 +29,27 @@ class ApplicantController extends Controller
             return redirect()->route('applicant.edit', $existingApplication->getKey());
         }
         
-        // Pass user email for auto-fill
+        // Get user name parts from registration
+        $nameParts = explode(' ', $user->name);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = '';
+        $middleName = '';
+        
+        if (count($nameParts) > 2) {
+            $middleName = implode(' ', array_slice($nameParts, 1, -1));
+            $lastName = end($nameParts);
+        } elseif (count($nameParts) == 2) {
+            $lastName = $nameParts[1];
+        }
+        
+        // Pass user email and name parts for auto-fill
         $userEmail = $user->email ?? '';
         
         // Get educations from HRIS API
         $hrisService = new HrisApiService();
         $hrisEducations = $hrisService->getAllEducations() ?? [];
         
-        return view('applicant.create', compact('userEmail', 'hrisEducations'));
+        return view('applicant.create', compact('userEmail', 'hrisEducations', 'firstName', 'middleName', 'lastName'));
     }
 
     public function store(Request $request)
