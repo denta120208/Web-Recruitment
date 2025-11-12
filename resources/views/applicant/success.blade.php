@@ -70,6 +70,7 @@
                             <i class="bi bi-plus-circle-fill me-2"></i>Edit Profil
                         </a>
                     </div>
+                    
                 </div>
             </div>
         </div>

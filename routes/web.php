@@ -40,6 +40,9 @@ Route::prefix('applicant')->name('applicant.')->middleware(['auth', 'check.exist
     Route::get('/edit/{id}', [ApplicantController::class, 'edit'])->name('edit');
     Route::put('/update/{id}', [ApplicantController::class, 'update'])->name('update');
     Route::get('/success', [ApplicantController::class, 'success'])->name('success');
+    Route::get('/show/{id}', [ApplicantController::class, 'show'])->name('show');
+    Route::get('/print/{id}', [ApplicantController::class, 'printView'])->name('print');
+    Route::get('/pdf/{id}', [ApplicantController::class, 'generatePDF'])->name('pdf');
 });
 
 // Route for serving files from mlnas disk (accept full path)
@@ -56,6 +59,13 @@ Route::get('/admin/file/applicant/{requireId}/{type}', [ApplicantController::cla
 // Download apply job files (psikotest, mcu, offering letter)
 Route::get('/admin/file/apply-job', [ApplicantController::class, 'serveApplyJobFile'])
     ->name('admin.file.apply-job');
+
+// Admin routes for viewing applicant data
+Route::prefix('admin/applicant')->name('admin.applicant.')->group(function () {
+    Route::get('/show/{id}', [ApplicantController::class, 'showAdmin'])->name('show');
+    Route::get('/print/{id}', [ApplicantController::class, 'printViewAdmin'])->name('print');
+    Route::get('/pdf/{id}', [ApplicantController::class, 'generatePDFAdmin'])->name('pdf');
+});
 
 // Terms routes (show and accept)
 Route::middleware('auth')->group(function(){

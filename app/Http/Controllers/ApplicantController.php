@@ -585,4 +585,111 @@ class ApplicantController extends Controller
             abort(500, 'Error serving file: ' . $e->getMessage());
         }
     }
+
+    public function show($id)
+    {
+        $user = auth()->user();
+        $applicant = Applicant::where('requireid', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+        
+        // Get existing data from database
+        $educations = $applicant->educations;
+        $workExperiences = $applicant->workExperiences;
+        $trainings = $applicant->trainings;
+            
+        return view('applicant.show', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+    }
+
+    public function printView($id)
+    {
+        $user = auth()->user();
+        $applicant = Applicant::where('requireid', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+        
+        // Get existing data from database
+        $educations = $applicant->educations;
+        $workExperiences = $applicant->workExperiences;
+        $trainings = $applicant->trainings;
+            
+        return view('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+    }
+
+    public function generatePDF($id)
+    {
+        $user = auth()->user();
+        $applicant = Applicant::where('requireid', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+        
+        // Get existing data from database
+        $educations = $applicant->educations;
+        $workExperiences = $applicant->workExperiences;
+        $trainings = $applicant->trainings;
+        
+        $pdf = app('dompdf.wrapper')->loadView('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+        $pdf->setPaper('A4', 'portrait');
+        
+        $filename = 'Formulir_Lamaran_' . $applicant->firstname . '_' . $applicant->lastname . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    // Admin methods for viewing applicant data
+    public function showAdmin($id)
+    {
+        // Only allow authenticated Filament admin users
+        if (! Filament::auth()->check()) {
+            abort(401);
+        }
+
+        $applicant = Applicant::where('requireid', $id)->firstOrFail();
+        
+        // Get existing data from database
+        $educations = $applicant->educations;
+        $workExperiences = $applicant->workExperiences;
+        $trainings = $applicant->trainings;
+            
+        return view('applicant.show', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+    }
+
+    public function printViewAdmin($id)
+    {
+        // Only allow authenticated Filament admin users
+        if (! Filament::auth()->check()) {
+            abort(401);
+        }
+
+        $applicant = Applicant::where('requireid', $id)->firstOrFail();
+        
+        // Get existing data from database
+        $educations = $applicant->educations;
+        $workExperiences = $applicant->workExperiences;
+        $trainings = $applicant->trainings;
+            
+        return view('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+    }
+
+    public function generatePDFAdmin($id)
+    {
+        // Only allow authenticated Filament admin users
+        if (! Filament::auth()->check()) {
+            abort(401);
+        }
+
+        $applicant = Applicant::where('requireid', $id)->firstOrFail();
+        
+        // Get existing data from database
+        $educations = $applicant->educations;
+        $workExperiences = $applicant->workExperiences;
+        $trainings = $applicant->trainings;
+        
+        $pdf = app('dompdf.wrapper')->loadView('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+        $pdf->setPaper('A4', 'portrait');
+        
+        $filename = 'Formulir_Lamaran_' . $applicant->firstname . '_' . $applicant->lastname . '.pdf';
+        
+        return $pdf->download($filename);
+    }
 }
