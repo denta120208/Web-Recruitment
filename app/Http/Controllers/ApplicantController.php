@@ -331,7 +331,7 @@ class ApplicantController extends Controller
 
         $applicant->update($modelData);
 
-        // Update work experiences
+        // Update work experiences 
         if ($request->has('work_experiences')) {
             $applicant->workExperiences()->delete();
             foreach ($request->work_experiences as $workExp) {

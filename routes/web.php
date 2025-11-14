@@ -48,8 +48,13 @@ Route::prefix('applicant')->name('applicant.')->middleware(['auth', 'check.exist
 // Route for serving files from mlnas disk (accept full path)
 Route::get('/file/{path}', [ApplicantController::class, 'servePath'])
     ->where('path', '.*')
-    ->middleware('auth')
     ->name('file.serve');
+
+// Protected admin routes for PDF generation
+Route::get('/admin/applicant/pdf/{id}', [ApplicantController::class, 'generatePDFAdmin'])
+    ->name('admin.applicant.pdf');
+Route::get('/admin/applicant/print/{id}', [ApplicantController::class, 'printViewAdmin'])
+    ->name('admin.applicant.print');
 
 // Admin-only streaming for applicant files by RequireID
 Route::get('/admin/file/applicant/{requireId}/{type}', [ApplicantController::class, 'serveApplicantFileAdmin'])
@@ -65,6 +70,18 @@ Route::prefix('admin/applicant')->name('admin.applicant.')->group(function () {
     Route::get('/show/{id}', [ApplicantController::class, 'showAdmin'])->name('show');
     Route::get('/print/{id}', [ApplicantController::class, 'printViewAdmin'])->name('print');
     Route::get('/pdf/{id}', [ApplicantController::class, 'generatePDFAdmin'])->name('pdf');
+});
+
+// Report routes akan dihandle oleh Filament secara otomatis
+
+// Test HRIS routes
+Route::prefix('test-hris')->group(function () {
+    Route::get('/applicants', [TestHrisController::class, 'getApplicants']);
+    Route::get('/applicant/{id}', [TestHrisController::class, 'getApplicant']);
+    Route::get('/job-vacancies', [TestHrisController::class, 'getJobVacancies']);
+    Route::get('/job-vacancy/{id}', [TestHrisController::class, 'getJobVacancy']);
+    Route::get('/apply-jobs', [TestHrisController::class, 'getApplyJobs']);
+    Route::get('/apply-job/{id}', [TestHrisController::class, 'getApplyJob']);
 });
 
 // Terms routes (show and accept)
