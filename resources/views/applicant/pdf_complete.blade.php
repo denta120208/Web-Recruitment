@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title>Formulir Lamaran Pekerjaan - {{ $applicant->firstname }} {{ $applicant->lastname }}</title>
     <style>
         
@@ -55,12 +56,13 @@
         }
         
         .photo-box {
-            width: 80px;
-            height: 100px;
+            width: 100px;
+            height: 130px;
             border: 1px solid #000;
             text-align: center;
-            vertical-align: middle;
+            vertical-align: top;
             font-size: 7px;
+            margin-top: -40px;
         }
         
         .checkbox {
@@ -95,18 +97,57 @@
         .bold {
             font-weight: bold;
         }
+        
+        /* Hide URL when printing */
+        @media print {
+            @page {
+                margin: 0.5in 0.5in 0.2in 0.5in;
+                size: A4;
+            }
+            
+            /* Hide browser URL and other print elements */
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            /* Hide any potential URL display */
+            a[href]:after {
+                content: none !important;
+            }
+            
+            /* Hide browser generated content */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* Remove any browser default headers/footers */
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
     </style>
     <script>
         // Auto-trigger print dialog when page loads
         window.onload = function() {
-            window.print();
+            // Add a small delay to ensure page is fully loaded
+            setTimeout(function() {
+                window.print();
+            }, 500);
         };
+        
+        // Hide URL in print by modifying print behavior
+        window.addEventListener('beforeprint', function() {
+            document.title = '';
+        });
     </script>
 </head>
 <body>
     <!-- Header -->
     <div class="header">
-        Formulir : F-HO&PROJECT/GHL/HRD-02 Rev.01
+     
     </div>
 
     <!-- Title -->
@@ -141,16 +182,69 @@
                         <strong>ALAMAT EMAIL (Email Address) :</strong> {{ $applicant->gmail ?? '' }}
                     </div>
                     <br>
-                    <div class="form-row"><strong>Facebook :</strong> </div>
                     <div class="form-row"><strong>Linkedin :</strong> {{ $applicant->linkedin ?? '' }}</div>
-                    <div class="form-row"><strong>Twitter :</strong> </div>
                     <div class="form-row"><strong>Instagram :</strong> {{ $applicant->instagram ?? '' }}</div>
                     <div class="form-row"><strong>Telepon (Telephone) :</strong> {{ $applicant->phone ?? '' }}</div>
                 </td>
                 <td style="width: 30%; text-align: center; border: none;">
                     <div class="photo-box">
-                        Pas photo<br>
-                        (Photograph)
+                        @if($applicant->photopath)
+                            @php
+                                $fileFound = false;
+                                $debugInfo = '';
+                                $imageSrc = '';
+                                
+                                // Try to get file from mlnas disk using Laravel Storage
+                                try {
+                                    $disk = \Storage::disk('mlnas');
+                                    $photoPath = $applicant->photopath;
+                                    
+                                    // Try different path variations
+                                    $pathVariations = [
+                                        $photoPath,
+                                        'applicants/photos/' . basename($photoPath),
+                                        basename($photoPath)
+                                    ];
+                                    
+                                    foreach ($pathVariations as $path) {
+                                        try {
+                                            if ($disk->exists($path)) {
+                                                $imageData = base64_encode($disk->get($path));
+                                                $imageType = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                                                // Handle different image types
+                                                if ($imageType === 'jpg') $imageType = 'jpeg';
+                                                $imageSrc = 'data:image/' . $imageType . ';base64,' . $imageData;
+                                                $fileFound = true;
+                                                $debugInfo = 'Found: ' . $path;
+                                                break;
+                                            }
+                                        } catch (\Exception $e) {
+                                            continue;
+                                        }
+                                    }
+                                    
+                                    if (!$fileFound) {
+                                        $debugInfo = 'Not found in paths: ' . implode(', ', $pathVariations);
+                                    }
+                                    
+                                } catch (\Exception $e) {
+                                    $debugInfo = 'FTP Error: ' . $e->getMessage();
+                                }
+                            @endphp
+                            
+                            @if(isset($fileFound) && $fileFound)
+                                <img src="{{ $imageSrc }}" 
+                                     style="width: 98px; height: 128px; object-fit: cover; border: none;" 
+                                     alt="Pas Photo">
+                            @else
+                                Pas photo<br>
+                                (Photograph)<br>
+                                <small style="color: red; font-size: 6px;">{{ $debugInfo ?? 'File not found' }}</small>
+                            @endif
+                        @else
+                            Pas photo<br>   
+                            (Photograph)
+                        @endif
                     </div>
                 </td>
             </tr>
