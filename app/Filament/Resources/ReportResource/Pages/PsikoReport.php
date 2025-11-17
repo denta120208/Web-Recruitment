@@ -13,6 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -35,6 +36,17 @@ class PsikoReport extends Page implements HasTable
     {
         $jobVacancy = JobVacancy::find($this->job_vacancy_id);
         return 'Psiko Test Report - ' . ($jobVacancy->jobTitle ?? 'Job Vacancy');
+    }
+    
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('back')
+                ->label('Back to Reports')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(route('filament.admin.resources.reports.index'))
+        ];
     }
 
     public function table(Table $table): Table

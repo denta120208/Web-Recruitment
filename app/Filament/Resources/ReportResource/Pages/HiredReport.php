@@ -15,16 +15,14 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
-
-class InterviewUserReport extends Page implements HasTable
+class HiredReport extends Page implements HasTable
 {
     use InteractsWithTable;
     
     protected static string $resource = ReportResource::class;
 
-    protected string $view = 'filament.resources.report-resource.pages.interview-user-report';
+    protected string $view = 'filament.resources.report-resource.pages.hired-report';
     
     public $job_vacancy_id;
     
@@ -36,7 +34,7 @@ class InterviewUserReport extends Page implements HasTable
     public function getTitle(): string
     {
         $jobVacancy = JobVacancy::find($this->job_vacancy_id);
-        return 'Interview User Report - ' . ($jobVacancy->jobTitle ?? 'Job Vacancy');
+        return 'Hired Candidates Report - ' . ($jobVacancy->job_vacancy_name ?? 'Job Vacancy');
     }
     
     protected function getHeaderActions(): array
@@ -57,7 +55,7 @@ class InterviewUserReport extends Page implements HasTable
                 ApplyJob::query()
                     ->join('require', 'apply_jobs.requireid', '=', 'require.requireid')
                     ->where('apply_jobs.job_vacancy_id', $this->job_vacancy_id)
-                    ->where('apply_jobs.apply_jobs_status', 2) // Interview User status dari tabel apply_jobs_status
+                    ->where('apply_jobs.apply_jobs_status', 5) // Hired status
                     ->select('apply_jobs.*', 'require.*')
             )
             ->columns([
@@ -68,6 +66,11 @@ class InterviewUserReport extends Page implements HasTable
                         ($record->middlename ?? '') . ' ' . 
                         ($record->lastname ?? '')
                     )
+                    ->url(function ($record) {
+                        // Link to applicant view page
+                        return route('filament.admin.resources.applicants.view', $record->requireid);
+                    })
+                    ->color('primary')
                     ->searchable()
                     ->sortable(),
                     
@@ -97,39 +100,17 @@ class InterviewUserReport extends Page implements HasTable
                     ->searchable()
                     ->sortable(),
                     
-                TextColumn::make('interview_by')
-                    ->label('Interview By')
+                TextColumn::make('hired_date')
+                    ->label('Hired Date')
                     ->getStateUsing(function ($record) {
-                        return $record->apply_jobs_interview_by ?? 'HR Team';
+                        return \Carbon\Carbon::parse($record->updated_at)->format('d M Y H:i');
                     })
                     ->sortable(),
-                    
-                TextColumn::make('interview_date')
-    ->label('Interview Date')
-    ->getStateUsing(function ($record) {
-        $date = $record->apply_jobs_interview_date;
-        $time = $record->apply_jobs_interview_time;
-
-        // Jika tidak ada data
-        if (!$date && !$time) {
-            return '-';
-        }
-
-        // Format tanggal (ambil hanya Y-m-d meskipun aslinya lengkap)
-        $formattedDate = $date ? Carbon::parse($date)->format('Y-m-d') : '';
-
-        // Format waktu (ambil hanya H:i meskipun aslinya lengkap)
-        $formattedTime = $time ? Carbon::parse($time)->format('H:i') : '';
-
-        // Gabung jika keduanya ada
-        return trim($formattedDate . ' ' . $formattedTime);
-    })
-    ->sortable(),
                     
                 TextColumn::make('status')
                     ->label('Status')
                     ->getStateUsing(function ($record) {
-                        return 'Interview User'; // Status dari apply_jobs_status_id = 2
+                        return 'Hired';
                     })
                     ->badge()
                     ->color('success'),

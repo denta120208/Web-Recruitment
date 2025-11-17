@@ -3,7 +3,7 @@
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Psiko Test Report</h2>
             <p class="text-sm text-gray-600 mb-6">
-                Daftar kandidat yang sudah masuk tahap Psiko Test untuk job vacancy ini. Klik "View Psiko File" untuk melihat hasil test.
+               
             </p>
             
             {{ $this->table }}

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ReportResource\Pages;
 use App\Models\JobVacancy;
 use App\Models\ApplyJobs;
+use App\Models\ApplyJob;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -32,7 +33,7 @@ class ReportResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-chart-bar';
     
     // Sementara disembunyikan dari navigasi
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function table(Table $table): Table
     {
@@ -78,12 +79,63 @@ class ReportResource extends Resource
                 TextColumn::make('total_applicants')
                     ->label('Total Applicants')
                     ->getStateUsing(function ($record) {
+                        // Count all applicants for this job vacancy
+                        $total = DB::table('apply_jobs')
+                            ->where('job_vacancy_id', $record->job_vacancy_id)
+                            ->count();
+                        
+                        // Get breakdown by status
+                        $breakdown = DB::table('apply_jobs')
+                            ->where('job_vacancy_id', $record->job_vacancy_id)
+                            ->selectRaw('apply_jobs_status, COUNT(*) as count')
+                            ->groupBy('apply_jobs_status')
+                            ->pluck('count', 'apply_jobs_status')
+                            ->toArray();
+                        
+                        return $total;
+                    })
+                    ->badge()
+                    ->color('primary')
+                    ->tooltip(function ($record) {
+                        // Show breakdown in tooltip
+                        $breakdown = DB::table('apply_jobs')
+                            ->where('job_vacancy_id', $record->job_vacancy_id)
+                            ->selectRaw('apply_jobs_status, COUNT(*) as count')
+                            ->groupBy('apply_jobs_status')
+                            ->pluck('count', 'apply_jobs_status')
+                            ->toArray();
+                        
+                        $statusNames = [
+                            0 => 'Applied',
+                            1 => 'Review',
+                            2 => 'Interview',
+                            3 => 'Psiko Test',
+                            4 => 'Offering',
+                            5 => 'Hired',
+                            6 => 'MCU'
+                        ];
+                        
+                        $tooltipText = 'Breakdown by Status:';
+                        foreach ($breakdown as $status => $count) {
+                            $statusName = $statusNames[$status] ?? "Status $status";
+                            $tooltipText .= "\n$statusName: $count";
+                        }
+                        
+                        return $tooltipText;
+                    })
+                    ->url(fn ($record) => static::getUrl('all-applicants', ['job_vacancy_id' => $record->job_vacancy_id])),
+                    
+                TextColumn::make('review_applicant_count')
+                    ->label('Review Applicant')
+                    ->getStateUsing(function ($record) {
                         return DB::table('apply_jobs')
                             ->where('job_vacancy_id', $record->job_vacancy_id)
+                            ->where('apply_jobs_status', 1) // Review Applicant dari tabel apply_jobs_status
                             ->count();
                     })
                     ->badge()
-                    ->color('primary'),
+                    ->color('info')
+                    ->url(fn ($record) => static::getUrl('review-applicant', ['job_vacancy_id' => $record->job_vacancy_id])),
                     
                 TextColumn::make('interview_user_count')
                     ->label('Interview User')
@@ -95,8 +147,7 @@ class ReportResource extends Resource
                     })
                     ->badge()
                     ->color('success')
-                    ->url(fn ($record) => static::getUrl('interview-user', ['job_vacancy_id' => $record->job_vacancy_id]))
-                    ->openUrlInNewTab(),
+                    ->url(fn ($record) => static::getUrl('interview-user', ['job_vacancy_id' => $record->job_vacancy_id])),
                     
                 TextColumn::make('psiko_count')
                     ->label('Psiko Test')
@@ -108,8 +159,7 @@ class ReportResource extends Resource
                     })
                     ->badge()
                     ->color('info')
-                    ->url(fn ($record) => static::getUrl('psiko', ['job_vacancy_id' => $record->job_vacancy_id]))
-                    ->openUrlInNewTab(),
+                    ->url(fn ($record) => static::getUrl('psiko', ['job_vacancy_id' => $record->job_vacancy_id])),
                     
                 TextColumn::make('offering_letter_count')
                     ->label('Offering Letter')
@@ -121,8 +171,7 @@ class ReportResource extends Resource
                     })
                     ->badge()
                     ->color('warning')
-                    ->url(fn ($record) => static::getUrl('offering', ['job_vacancy_id' => $record->job_vacancy_id]))
-                    ->openUrlInNewTab(),
+                    ->url(fn ($record) => static::getUrl('offering', ['job_vacancy_id' => $record->job_vacancy_id])),
                     
                 TextColumn::make('mcu_count')
                     ->label('MCU')
@@ -134,12 +183,37 @@ class ReportResource extends Resource
                     })
                     ->badge()
                     ->color('danger')
-                    ->url(fn ($record) => static::getUrl('mcu', ['job_vacancy_id' => $record->job_vacancy_id]))
-                    ->openUrlInNewTab(),
+                    ->url(fn ($record) => static::getUrl('mcu', ['job_vacancy_id' => $record->job_vacancy_id])),
+                    
+                TextColumn::make('hired_count')
+                    ->label('Hired')
+                    ->getStateUsing(function ($record) {
+                        return DB::table('apply_jobs')
+                            ->where('job_vacancy_id', $record->job_vacancy_id)
+                            ->where('apply_jobs_status', 5) // Hired dari tabel apply_jobs_status
+                            ->count();
+                    })
+                    ->badge()
+                    ->color('success')
+                    ->url(fn ($record) => static::getUrl('hired', ['job_vacancy_id' => $record->job_vacancy_id])),
                     
                 BadgeColumn::make('status')
                     ->label('Job Status')
                     ->getStateUsing(function ($record) {
+                        // Check if hired count has reached man power requirement
+                        $hiredCount = DB::table('apply_jobs')
+                            ->where('job_vacancy_id', $record->job_vacancy_id)
+                            ->where('apply_jobs_status', 5) // Hired status
+                            ->count();
+                        
+                        $manPowerNeeded = $record->job_vacancy_man_power ?? 0;
+                        
+                        // If hired count reaches man power needed, job is closed
+                        if ($hiredCount >= $manPowerNeeded && $manPowerNeeded > 0) {
+                            return 'Closed';
+                        }
+                        
+                        // Check end date
                         $endDate = \Carbon\Carbon::parse($record->job_vacancy_end_date);
                         $now = \Carbon\Carbon::now();
                         
@@ -164,10 +238,32 @@ class ReportResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] === 'active',
-                            fn (Builder $query): Builder => $query->where('job_vacancy_end_date', '>=', now()),
+                            function (Builder $query): Builder {
+                                return $query->where(function ($q) {
+                                    // Active if end date hasn't passed AND hired count < man power needed
+                                    $q->where('job_vacancy_end_date', '>=', now())
+                                      ->whereRaw('(
+                                          SELECT COUNT(*) 
+                                          FROM apply_jobs 
+                                          WHERE apply_jobs.job_vacancy_id = job_vacancies.job_vacancy_id 
+                                          AND apply_jobs.apply_jobs_status = 5
+                                      ) < job_vacancies.job_vacancy_man_power');
+                                });
+                            }
                         )->when(
                             $data['value'] === 'closed',
-                            fn (Builder $query): Builder => $query->where('job_vacancy_end_date', '<', now()),
+                            function (Builder $query): Builder {
+                                return $query->where(function ($q) {
+                                    // Closed if end date has passed OR hired count >= man power needed
+                                    $q->where('job_vacancy_end_date', '<', now())
+                                      ->orWhereRaw('(
+                                          SELECT COUNT(*) 
+                                          FROM apply_jobs 
+                                          WHERE apply_jobs.job_vacancy_id = job_vacancies.job_vacancy_id 
+                                          AND apply_jobs.apply_jobs_status = 5
+                                      ) >= job_vacancies.job_vacancy_man_power AND job_vacancies.job_vacancy_man_power > 0');
+                                });
+                            }
                         );
                     }),
             ])
@@ -190,10 +286,13 @@ class ReportResource extends Resource
     {
         return [
             'index' => Pages\ListReports::route('/'),
+            'all-applicants' => Pages\AllApplicantsReport::route('/{job_vacancy_id}/all-applicants'),
+            'review-applicant' => Pages\ReviewApplicantReport::route('/{job_vacancy_id}/review-applicant'),
             'interview-user' => Pages\InterviewUserReport::route('/{job_vacancy_id}/interview-user'),
             'psiko' => Pages\PsikoReport::route('/{job_vacancy_id}/psiko'),
             'offering' => Pages\OfferingReport::route('/{job_vacancy_id}/offering'),
             'mcu' => Pages\McuReport::route('/{job_vacancy_id}/mcu'),
+            'hired' => Pages\HiredReport::route('/{job_vacancy_id}/hired'),
         ];
     }
 }
