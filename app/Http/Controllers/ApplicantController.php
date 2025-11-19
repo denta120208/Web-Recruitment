@@ -11,6 +11,10 @@ use App\Services\HrisApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Filament\Facades\Filament;
 
 class ApplicantController extends Controller
@@ -42,18 +46,38 @@ class ApplicantController extends Controller
             $lastName = $nameParts[1];
         }
         
-        // Pass user email and name parts for auto-fill
+        // Pass user email, name parts and DOB for auto-fill
         $userEmail = $user->email ?? '';
+        $userDateOfBirth = null;
+        if (!empty($user->date_of_birth)) {
+            try {
+                $userDateOfBirth = \Carbon\Carbon::parse($user->date_of_birth)->format('Y-m-d');
+            } catch (\Exception $e) {
+                $userDateOfBirth = null;
+            }
+        }
         
         // Get educations from HRIS API
         $hrisService = new HrisApiService();
         $hrisEducations = $hrisService->getAllEducations() ?? [];
         
-        return view('applicant.create', compact('userEmail', 'hrisEducations', 'firstName', 'middleName', 'lastName'));
+        return view('applicant.create', compact('userEmail', 'hrisEducations', 'firstName', 'middleName', 'lastName', 'userDateOfBirth'));
     }
 
     public function store(Request $request)
     {
+        // If the form did not supply DateOfBirth but the authenticated user
+        // has a saved date_of_birth (from registration), use it as a fallback.
+        $user = auth()->user();
+        if ($user && empty($request->input('DateOfBirth')) && !empty($user->date_of_birth)) {
+            try {
+                $dob = \Carbon\Carbon::parse($user->date_of_birth)->format('Y-m-d');
+                $request->merge(['DateOfBirth' => $dob]);
+            } catch (\Exception $e) {
+                // ignore parse error and let validation handle missing/invalid date
+            }
+        }
+
         $validated = $request->validate([
             'FirstName' => 'required|string|max:255',
             'MiddleName' => 'nullable|string|max:255',
@@ -691,5 +715,146 @@ class ApplicantController extends Controller
         $filename = 'Formulir_Lamaran_' . $applicant->firstname . '_' . $applicant->lastname . '.pdf';
         
         return $pdf->download($filename);
+    }
+
+    /**
+     * Show delete account confirmation form
+     */
+    public function showDeleteAccount()
+    {
+        $user = auth()->user();
+        $applicant = Applicant::where('user_id', $user->id)->first();
+        
+        // For now, allow all users to delete their accounts
+        $isHired = false;
+        $isEmployee = false;
+        $hiredNotGenerated = false;
+        
+        return view('applicant.delete_account', compact('user', 'applicant', 'isHired', 'isEmployee', 'hiredNotGenerated'));
+    }
+
+    /**
+     * Delete user account and all related data
+     */
+    public function deleteAccount(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login')->withErrors(['error' => 'User tidak ditemukan.']);
+        }
+
+        // Validate password
+        $request->validate([
+            'password' => 'required|string',
+            'confirm_delete' => 'required|accepted'
+        ], [
+            'password.required' => 'Password wajib diisi.',
+            'confirm_delete.accepted' => 'Anda harus mencentang konfirmasi penghapusan.'
+        ]);
+
+        if (!Hash::check($request->password, $user->password)) {
+            return redirect()->back()->withErrors(['password' => 'Password tidak cocok.']);
+        }
+
+        $userId = $user->id;
+        $userEmail = $user->email;
+
+        try {
+            DB::beginTransaction();
+
+            Log::info('Starting account deletion process', ['user_id' => $userId, 'email' => $userEmail]);
+
+            // 1. Delete all ApplyJob records first (regardless of status)
+            $deletedApplyJobs = \App\Models\ApplyJob::where('user_id', $userId)->count();
+            \App\Models\ApplyJob::where('user_id', $userId)->delete();
+            Log::info('Deleted ApplyJob records', ['user_id' => $userId, 'count' => $deletedApplyJobs]);
+
+            // 2. Delete applicant and all related data
+            $applicant = Applicant::where('user_id', $userId)->first();
+            if ($applicant) {
+                $applicantId = $applicant->requireid;
+                Log::info('Found applicant record', ['user_id' => $userId, 'applicant_id' => $applicantId]);
+
+                // Delete related records
+                $deletedEducations = RequireEducation::where('requireid', $applicantId)->count();
+                RequireEducation::where('requireid', $applicantId)->delete();
+                Log::info('Deleted education records', ['applicant_id' => $applicantId, 'count' => $deletedEducations]);
+                
+                $deletedWorkExp = RequireWorkExperience::where('requireid', $applicantId)->count();
+                RequireWorkExperience::where('requireid', $applicantId)->delete();
+                Log::info('Deleted work experience records', ['applicant_id' => $applicantId, 'count' => $deletedWorkExp]);
+                
+                $deletedTrainings = RequireTraining::where('requireid', $applicantId)->count();
+                RequireTraining::where('requireid', $applicantId)->delete();
+                Log::info('Deleted training records', ['applicant_id' => $applicantId, 'count' => $deletedTrainings]);
+
+                // Delete uploaded files (outside transaction to avoid blocking)
+                $disk = Storage::disk('mlnas');
+                $deletedFiles = [];
+                
+                foreach (['cvpath', 'photopath', 'idcardpath'] as $pathField) {
+                    if (!empty($applicant->{$pathField})) {
+                        if ($disk->exists($applicant->{$pathField})) {
+                            $disk->delete($applicant->{$pathField});
+                            $deletedFiles[] = $applicant->{$pathField};
+                        }
+                    }
+                }
+                
+                Log::info('Deleted applicant files', ['user_id' => $userId, 'files' => $deletedFiles]);
+
+                // Delete applicant record
+                $applicant->delete();
+                Log::info('Deleted applicant record', ['user_id' => $userId, 'applicant_id' => $applicantId]);
+            } else {
+                Log::info('No applicant record found', ['user_id' => $userId]);
+            }
+
+            // 3. Delete password reset tokens
+            if (Schema::hasTable('password_resets')) {
+                DB::table('password_resets')->where('email', $userEmail)->delete();
+                Log::info('Deleted password_resets records', ['user_id' => $userId]);
+            }
+            if (Schema::hasTable('password_reset_tokens')) {
+                DB::table('password_reset_tokens')->where('email', $userEmail)->delete();
+                Log::info('Deleted password_reset_tokens records', ['user_id' => $userId]);
+            }
+            Log::info('Password reset tokens cleanup completed', ['user_id' => $userId]);
+
+            // 4. Delete user sessions
+            if (Schema::hasTable('sessions')) {
+                DB::table('sessions')->where('user_id', $userId)->delete();
+            }
+            Log::info('Deleted user sessions', ['user_id' => $userId]);
+
+            // 5. Finally delete the user
+            $user->delete();
+            Log::info('Deleted user record', ['user_id' => $userId, 'email' => $userEmail]);
+
+            DB::commit();
+            Log::info('Account deletion completed successfully', ['user_id' => $userId, 'email' => $userEmail]);
+
+            // Logout and clear session
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/')->with('success', 'Akun Anda berhasil dihapus sepenuhnya.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to delete user account', [
+                'user_id' => $userId,
+                'email' => $userEmail,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+
+            return redirect()->back()->withErrors([
+                'error' => 'Terjadi kesalahan saat menghapus akun: ' . $e->getMessage() . ' (Line: ' . $e->getLine() . ')'
+            ]);
+        }
     }
 }

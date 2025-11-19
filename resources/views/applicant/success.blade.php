@@ -23,27 +23,7 @@
                         dan akan segera diproses oleh tim HR kami.
                     </p>
                     
-                    <!-- Next Steps -->
-                    <div class="alert alert-info border-0 mb-4">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            Langkah Selanjutnya
-                        </h6>
-                        <ul class="list-unstyled mb-0 text-start">
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle text-success me-2"></i>
-                                Tim HR akan meninjau aplikasi Anda dalam 1-3 hari kerja
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle text-success me-2"></i>
-                                Anda akan menerima notifikasi via email jika lolos ke tahap selanjutnya
-                            </li>
-                            <li class="mb-0">
-                                <i class="bi bi-check-circle text-success me-2"></i>
-                                Proses interview akan dijadwalkan sesuai dengan posisi yang tersedia
-                            </li>
-                        </ul>
-                    </div>
+                    
                     
                     <!-- Contact Info -->
                     <div class="bg-light rounded p-4 mb-4">

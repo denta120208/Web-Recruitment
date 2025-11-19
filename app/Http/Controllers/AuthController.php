@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RegistrationOtp;
 use App\Mail\ForgotPasswordOtp;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Applicant;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -54,6 +60,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'date_of_birth' => 'required|date',
             'password' => [
                 'required',
                 'string',
@@ -77,11 +84,23 @@ class AuthController extends Controller
                 ->withInput();
         }
 
+        // enforce age >= 18 on server-side
+        try {
+            $dob = Carbon::parse($request->input('date_of_birth'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['date_of_birth' => 'Format tanggal lahir tidak valid.'])->withInput();
+        }
+
+        if ($dob->age < 18) {
+            return redirect()->back()->withErrors(['date_of_birth' => 'Umur minimal 18 tahun untuk mendaftar.'])->withInput();
+        }
+
         // Generate OTP and store pending registration in session
         $otp = rand(100000, 999999);
         $pending = [
             'name' => $request->name,
             'email' => $request->email,
+            'date_of_birth' => $request->date_of_birth,
             'password' => Hash::make($request->password),
             'accepted_terms_at' => now(),
             'otp' => $otp,
@@ -133,12 +152,19 @@ class AuthController extends Controller
         }
 
         // create user
-        $user = User::create([
+        $userData = [
             'name' => $pending['name'],
             'email' => $pending['email'],
             'password' => $pending['password'],
             'accepted_terms_at' => $pending['accepted_terms_at'],
-        ]);
+        ];
+
+        // Only include date_of_birth if the column exists in the DB (migration may not have been run)
+        if (isset($pending['date_of_birth']) && Schema::hasColumn('users', 'date_of_birth')) {
+            $userData['date_of_birth'] = $pending['date_of_birth'];
+        }
+
+        $user = User::create($userData);
 
         // clear pending
         session()->forget('pending_registration');
@@ -284,5 +310,116 @@ class AuthController extends Controller
         session()->forget('pending_password_reset');
 
         return redirect()->route('login')->with('success', 'Password berhasil direset! Silakan login dengan password baru Anda.');
+    }
+
+    /**
+     * Show account deletion confirmation form to the authenticated user.
+     */
+    public function showDeleteAccountForm()
+    {
+        return view('auth.delete_account');
+    }
+
+    /**
+     * Delete the authenticated user's account after password confirmation.
+     */
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return redirect('/')->withErrors(['account' => 'User tidak ditemukan.']);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator);
+        }
+
+        if (! Hash::check($request->input('password'), $user->password)) {
+            return redirect()->back()->withErrors(['password' => 'Password tidak cocok.']);
+        }
+
+        // Perform deletion inside a transaction
+        $userId = $user->id;
+        $userEmail = $user->email;
+        DB::transaction(function() use ($user, $userId, $userEmail) {
+            // Delete all ApplyJob records for this user first
+            try {
+                \App\Models\ApplyJob::where('user_id', $user->id)->delete();
+            } catch (\Exception $e) {
+                \Log::warning('Failed to delete ApplyJob records during account deletion', [
+                    'user_id' => $userId,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Delete applicant and related records if any
+            $applicant = Applicant::where('user_id', $user->id)->first();
+            if ($applicant) {
+                // delete related education/work/training records if relationships exist
+                try {
+                    if (method_exists($applicant, 'workExperiences')) {
+                        $applicant->workExperiences()->delete();
+                    }
+                    if (method_exists($applicant, 'educations')) {
+                        $applicant->educations()->delete();
+                    }
+                    if (method_exists($applicant, 'trainings')) {
+                        $applicant->trainings()->delete();
+                    }
+                } catch (\Exception $e) {
+                    // ignore individual relationship deletion errors and continue
+                }
+
+                // Delete stored files (cv, photo, idcard) if present and disk exists
+                try {
+                    $disk = Storage::disk('mlnas');
+                    foreach (['cvpath','photopath','idcardpath'] as $p) {
+                        if (!empty($applicant->{$p}) && $disk->exists($applicant->{$p})) {
+                            $disk->delete($applicant->{$p});
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // ignore storage cleanup errors
+                }
+
+                // delete applicant record
+                try { $applicant->delete(); } catch (\Exception $e) {}
+            }
+
+                // remove any password reset tokens for this email
+                try { 
+                    \Illuminate\Support\Facades\DB::table('password_resets')->where('email', $userEmail)->delete();
+                } catch (\Exception $e) {}
+
+                // finally delete the user
+                try { \App\Models\User::destroy($userId); } catch (\Exception $e) {}
+        });
+
+        // Logout and clear session completely
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        // Clear any remember me tokens
+        try {
+            DB::table('sessions')->where('user_id', $userId)->delete();
+        } catch (\Exception $e) {
+            Log::warning('Failed to clear session records during account deletion', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Verify deletion - if user still exists, notify admin and return error
+        if (\App\Models\User::find($userId)) {
+            \Log::warning('Account deletion attempted but user record still exists', ['user_id' => $userId, 'email' => $userEmail]);
+            return redirect('/')->with('warning', 'Permintaan hapus akun diproses, tetapi beberapa data tidak dapat dihapus sepenuhnya. Silakan hubungi admin.');
+        }
+
+        return redirect('/')->with('success', 'Akun Anda berhasil dihapus.');
     }
 }

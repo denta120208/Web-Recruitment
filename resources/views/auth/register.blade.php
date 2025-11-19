@@ -1003,6 +1003,16 @@
                                 @enderror
                             </div>
 
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror"
+                                       id="date_of_birth" name="date_of_birth" placeholder="Tanggal Lahir"
+                                       value="{{ old('date_of_birth') }}" required>
+                                <label for="date_of_birth">Tanggal Lahir *</label>
+                                @error('date_of_birth')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="form-floating mb-3 position-relative">
                                 <input type="password" class="form-control @error('password') is-invalid @enderror" 
                                        id="password" name="password" placeholder="Password" required
@@ -1234,6 +1244,47 @@
 
             alignToggleButtons();
             window.addEventListener('resize', alignToggleButtons);
+            // Registration DOB client-side age check (must be >= 18)
+            const regForm = document.querySelector('form[action="{{ route('register') }}"]') || document.querySelector('form');
+            if (regForm) {
+                regForm.addEventListener('submit', function(e) {
+                    const dobEl = document.getElementById('date_of_birth');
+                    if (!dobEl) return;
+                    const dobVal = dobEl.value;
+                    if (!dobVal) {
+                        dobEl.classList.add('is-invalid');
+                        e.preventDefault();
+                        alert('Mohon isi tanggal lahir.');
+                        return false;
+                    }
+                    const dob = new Date(dobVal + 'T00:00:00');
+                    if (isNaN(dob.getTime())) {
+                        dobEl.classList.add('is-invalid');
+                        e.preventDefault();
+                        alert('Format tanggal lahir tidak valid.');
+                        return false;
+                    }
+                    const today = new Date();
+                    let age = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                        age--;
+                    }
+                    if (age < 18) {
+                        dobEl.classList.add('is-invalid');
+                        e.preventDefault();
+                        alert('Umur minimal 18 tahun untuk mendaftar.');
+                        return false;
+                    }
+                });
+
+                const dobEl = document.getElementById('date_of_birth');
+                if (dobEl) {
+                    dobEl.addEventListener('change', function() {
+                        this.classList.remove('is-invalid');
+                    });
+                }
+            }
         });
     </script>
     

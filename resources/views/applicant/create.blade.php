@@ -265,9 +265,9 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="date" class="form-control @error('DateOfBirth') is-invalid @enderror" 
-                                           id="DateOfBirth" name="DateOfBirth" 
-                                           value="{{ old('DateOfBirth') }}" required>
+                                     <input type="date" class="form-control @error('DateOfBirth') is-invalid @enderror" 
+                                         id="DateOfBirth" name="DateOfBirth" 
+                                         value="{{ old('DateOfBirth', $userDateOfBirth ?? '') }}" required>
                                     <label for="DateOfBirth">Tanggal Lahir *</label>
                                     @error('DateOfBirth')
                                         <div class="invalid-feedback">{{ $message }}</div>

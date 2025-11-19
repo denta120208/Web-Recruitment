@@ -98,6 +98,14 @@ Route::middleware('auth')->group(function(){
         }
         return redirect()->route('applicant.create');
     })->name('terms.accept');
+
+    // Account management (self-service)
+    Route::get('/account/delete', [\App\Http\Controllers\AuthController::class, 'showDeleteAccountForm'])->name('account.delete');
+    Route::post('/account/delete', [\App\Http\Controllers\AuthController::class, 'deleteAccount'])->name('account.delete.post');
+    
+    // New improved delete account feature
+    Route::get('/applicant/delete-account', [\App\Http\Controllers\ApplicantController::class, 'showDeleteAccount'])->name('applicant.delete.account');
+    Route::post('/applicant/delete-account', [\App\Http\Controllers\ApplicantController::class, 'deleteAccount'])->name('applicant.delete.account.post');
 });
 
 // Test HRIS Connection
