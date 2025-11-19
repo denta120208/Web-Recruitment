@@ -245,9 +245,9 @@ class ReportResource extends Resource
                                       ->whereRaw('(
                                           SELECT COUNT(*) 
                                           FROM apply_jobs 
-                                          WHERE apply_jobs.job_vacancy_id = job_vacancies.job_vacancy_id 
+                                          WHERE apply_jobs.job_vacancy_id = job_vacancy.job_vacancy_id 
                                           AND apply_jobs.apply_jobs_status = 5
-                                      ) < job_vacancies.job_vacancy_man_power');
+                                      ) < job_vacancy.job_vacancy_man_power');
                                 });
                             }
                         )->when(
@@ -259,9 +259,9 @@ class ReportResource extends Resource
                                       ->orWhereRaw('(
                                           SELECT COUNT(*) 
                                           FROM apply_jobs 
-                                          WHERE apply_jobs.job_vacancy_id = job_vacancies.job_vacancy_id 
+                                          WHERE apply_jobs.job_vacancy_id = job_vacancy.job_vacancy_id 
                                           AND apply_jobs.apply_jobs_status = 5
-                                      ) >= job_vacancies.job_vacancy_man_power AND job_vacancies.job_vacancy_man_power > 0');
+                                      ) >= job_vacancy.job_vacancy_man_power AND job_vacancy.job_vacancy_man_power > 0');
                                 });
                             }
                         );
