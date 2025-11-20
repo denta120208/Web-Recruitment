@@ -33,12 +33,9 @@
                         </h6>
                         <p class="mb-2">
                             <i class="bi bi-envelope-fill me-2"></i>
-                            Email: hr@metland.com
+                            Email: hrd.metland@metropolitanland.com
                         </p>
-                        <p class="mb-0">
-                            <i class="bi bi-phone-fill me-2"></i>
-                            Telepon: (021) 1234-5678
-                        </p>
+                     
                     </div>
                     
                     <!-- Action Buttons -->

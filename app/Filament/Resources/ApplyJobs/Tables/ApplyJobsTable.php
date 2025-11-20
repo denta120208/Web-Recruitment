@@ -12,6 +12,8 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 use Filament\Notifications\Notification;
+use App\Models\Location;
+use Illuminate\Support\Facades\Auth;
 
 class ApplyJobsTable
 {
@@ -29,6 +31,18 @@ class ApplyJobsTable
                     ->searchable()
                     ->sortable()
                     ->limit(30),
+                
+                TextColumn::make('job_location')
+                    ->label('Lokasi')
+                    ->getStateUsing(function ($record) {
+                        if ($record->jobVacancy && $record->jobVacancy->job_vacancy_hris_location_id) {
+                            return Location::getNameByHrisId($record->jobVacancy->job_vacancy_hris_location_id);
+                        }
+                        return 'Tidak ada lokasi';
+                    })
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('apply_date')
                     ->label('Tanggal Apply (User)')
                     ->date('d M Y')
@@ -140,6 +154,30 @@ class ApplyJobsTable
                     ->relationship('jobVacancy', 'job_vacancy_name')
                     ->searchable()
                     ->preload(),
+                
+                \Filament\Tables\Filters\SelectFilter::make('location_filter')
+                    ->label('Lokasi')
+                    ->options(function () {
+                        $user = Auth::user();
+                        // Hanya tampilkan filter lokasi untuk admin pusat
+                        if ($user && $user->role === 'admin_pusat') {
+                            return Location::orderBy('name')
+                                ->pluck('name', 'hris_location_id')
+                                ->toArray();
+                        }
+                        return [];
+                    })
+                    ->query(function ($query, array $data) {
+                        if (!empty($data['value'])) {
+                            $query->whereHas('jobVacancy', function ($q) use ($data) {
+                                $q->where('job_vacancy_hris_location_id', $data['value']);
+                            });
+                        }
+                    })
+                    ->visible(function () {
+                        $user = Auth::user();
+                        return $user && $user->role === 'admin_pusat';
+                    }),
             ])
             ->recordActions([
                 ViewAction::make()

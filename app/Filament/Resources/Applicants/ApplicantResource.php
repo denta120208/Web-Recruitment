@@ -88,7 +88,7 @@ class ApplicantResource extends Resource
                 'reviewed_by',
                 'user_id',
             ])
-            ->with(['user', 'educations', 'workExperiences', 'trainings']);
+            ->with(['user.applyJobs.jobVacancy', 'educations', 'workExperiences', 'trainings']);
 
         // Apply location filter - filter applicants berdasarkan apply jobs mereka
         $user = Auth::user();

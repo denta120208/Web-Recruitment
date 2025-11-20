@@ -6,6 +6,7 @@ use App\Filament\Resources\ReportResource\Pages;
 use App\Models\JobVacancy;
 use App\Models\ApplyJobs;
 use App\Models\ApplyJob;
+use App\Models\Location;
 use App\Traits\LocationFilterTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -64,6 +65,18 @@ class ReportResource extends Resource
                     ->label('Level')
                     ->searchable()
                     ->sortable(),
+                
+                TextColumn::make('location_name')
+                    ->label('Lokasi')
+                    ->getStateUsing(function ($record) {
+                        if ($record->job_vacancy_hris_location_id) {
+                            return Location::getNameByHrisId($record->job_vacancy_hris_location_id);
+                        }
+                        return 'Tidak ada lokasi';
+                    })
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                     
                 TextColumn::make('job_vacancy_man_power')
                     ->label('Man Power Needed')
@@ -269,6 +282,23 @@ class ReportResource extends Resource
                                 });
                             }
                         );
+                    }),
+                
+                Tables\Filters\SelectFilter::make('job_vacancy_hris_location_id')
+                    ->label('Lokasi')
+                    ->options(function () {
+                        $user = Auth::user();
+                        // Hanya tampilkan filter lokasi untuk admin pusat
+                        if ($user && $user->role === 'admin_pusat') {
+                            return Location::orderBy('name')
+                                ->pluck('name', 'hris_location_id')
+                                ->toArray();
+                        }
+                        return [];
+                    })
+                    ->visible(function () {
+                        $user = Auth::user();
+                        return $user && $user->role === 'admin_pusat';
                     }),
             ])
             ->actions([

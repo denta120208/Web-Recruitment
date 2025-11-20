@@ -6,6 +6,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
+use App\Models\Location;
+use Illuminate\Support\Facades\Auth;
 
 class JobVacanciesTable
 {
@@ -26,6 +28,18 @@ class JobVacanciesTable
                 
                 TextColumn::make('job_vacancy_level_name')
                     ->label('Level')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                
+                TextColumn::make('location_name')
+                    ->label('Lokasi')
+                    ->getStateUsing(function ($record) {
+                        if ($record->job_vacancy_hris_location_id) {
+                            return Location::getNameByHrisId($record->job_vacancy_hris_location_id);
+                        }
+                        return 'Tidak ada lokasi';
+                    })
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
@@ -92,6 +106,23 @@ class JobVacanciesTable
                         3 => 'Closed',
                         4 => 'Draft',
                     ]),
+                
+                SelectFilter::make('job_vacancy_hris_location_id')
+                    ->label('Lokasi')
+                    ->options(function () {
+                        $user = Auth::user();
+                        // Hanya tampilkan filter lokasi untuk admin pusat
+                        if ($user && $user->role === 'admin_pusat') {
+                            return Location::orderBy('name')
+                                ->pluck('name', 'hris_location_id')
+                                ->toArray();
+                        }
+                        return [];
+                    })
+                    ->visible(function () {
+                        $user = Auth::user();
+                        return $user && $user->role === 'admin_pusat';
+                    }),
             ])
             ->recordActions([
                 \Filament\Actions\EditAction::make(),
