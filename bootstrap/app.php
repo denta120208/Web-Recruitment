@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.existing.application' => \App\Http\Middleware\CheckExistingApplication::class,
             'force.profile.completion' => \App\Http\Middleware\ForceProfileCompletion::class,
             'profile.freshness' => \App\Http\Middleware\ProfileFreshnessCheck::class,
+            'location.access' => \App\Http\Middleware\LocationAccessMiddleware::class,
+            'admin.auth' => \App\Http\Middleware\AdminAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

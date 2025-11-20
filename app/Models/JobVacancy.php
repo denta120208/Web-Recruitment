@@ -40,6 +40,11 @@ class JobVacancy extends Model
         return $this->hasMany(ApplyJob::class, 'job_vacancy_id', 'job_vacancy_id');
     }
 
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'job_vacancy_hris_location_id', 'hris_location_id');
+    }
+
     // Scope for active jobs (status 1,2,3,4 and within date range)
     public function scopeActive($query)
     {
@@ -71,6 +76,16 @@ class JobVacancy extends Model
         $manPower = $this->job_vacancy_man_power ?? 0;
         $available = max(0, $manPower - $hiredCount); // Ensure non-negative
         return $available;
+    }
+
+    // Get location name for display
+    public function getLocationAttribute()
+    {
+        if ($this->job_vacancy_hris_location_id) {
+            $location = Location::where('hris_location_id', $this->job_vacancy_hris_location_id)->first();
+            return $location ? $location->name : null;
+        }
+        return null;
     }
 
 }

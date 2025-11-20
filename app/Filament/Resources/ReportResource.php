@@ -6,7 +6,9 @@ use App\Filament\Resources\ReportResource\Pages;
 use App\Models\JobVacancy;
 use App\Models\ApplyJobs;
 use App\Models\ApplyJob;
+use App\Traits\LocationFilterTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -20,6 +22,8 @@ use BackedEnum;
 
 class ReportResource extends Resource
 {
+    use LocationFilterTrait;
+    
     protected static ?string $model = JobVacancy::class;
     
     protected static ?string $navigationLabel = 'Reports';
@@ -294,5 +298,31 @@ class ReportResource extends Resource
             'mcu' => Pages\McuReport::route('/{job_vacancy_id}/mcu'),
             'hired' => Pages\HiredReport::route('/{job_vacancy_id}/hired'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        // Apply location filter
+        $user = Auth::user();
+        
+        if ($user && in_array($user->role, ['admin_location', 'admin_pusat'])) {
+            if ($user->role === 'admin_location' && $user->location_id) {
+                $location = $user->location;
+                if ($location && $location->hris_location_id) {
+                    $query->where('job_vacancy_hris_location_id', $location->hris_location_id);
+                } else {
+                    // Admin location has no valid location, show empty
+                    $query->whereRaw('1 = 0');
+                }
+            }
+            // Admin pusat can see all data (no filter needed)
+        } else {
+            // Non-admin cannot access
+            $query->whereRaw('1 = 0');
+        }
+        
+        return $query;
     }
 }

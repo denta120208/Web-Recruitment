@@ -8,14 +8,18 @@ use App\Filament\Resources\ApplyJobs\Pages\ListApplyJobs;
 use App\Filament\Resources\ApplyJobs\Schemas\ApplyJobForm;
 use App\Filament\Resources\ApplyJobs\Tables\ApplyJobsTable;
 use App\Models\ApplyJob;
+use App\Traits\LocationFilterTrait;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class ApplyJobResource extends Resource
 {
+    use LocationFilterTrait;
+    
     protected static ?string $model = ApplyJob::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -59,7 +63,7 @@ class ApplyJobResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         // Optimized: eager load relations and select only needed columns
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->select([
                 'apply_jobs_id',
                 'job_vacancy_id',
@@ -92,5 +96,28 @@ class ApplyJobResource extends Resource
                 'applicant.workExperiences',
                 'applicant.trainings'
             ]);
+
+        // Apply location filter through job vacancy
+        $user = Auth::user();
+        
+        if ($user && in_array($user->role, ['admin_location', 'admin_pusat'])) {
+            if ($user->role === 'admin_location' && $user->location_id) {
+                $location = $user->location;
+                if ($location && $location->hris_location_id) {
+                    $query->whereHas('jobVacancy', function ($q) use ($location) {
+                        $q->where('job_vacancy_hris_location_id', $location->hris_location_id);
+                    });
+                } else {
+                    // Admin location has no valid location, show empty
+                    $query->whereRaw('1 = 0');
+                }
+            }
+            // Admin pusat can see all data (no filter needed)
+        } else {
+            // Non-admin cannot access
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query;
     }
 }

@@ -8,14 +8,18 @@ use App\Filament\Resources\JobVacancies\Pages\ListJobVacancies;
 use App\Filament\Resources\JobVacancies\Schemas\JobVacancyForm;
 use App\Filament\Resources\JobVacancies\Tables\JobVacanciesTable;
 use App\Models\JobVacancy;
+use App\Traits\LocationFilterTrait;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class JobVacancyResource extends Resource
 {
+    use LocationFilterTrait;
+    
     protected static ?string $model = JobVacancy::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-briefcase';
@@ -58,6 +62,26 @@ class JobVacancyResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery();
+        $query = parent::getEloquentQuery();
+        
+        // Apply location filter
+        $user = Auth::user();
+        if ($user && in_array($user->role, ['admin_location', 'admin_pusat'])) {
+            if ($user->role === 'admin_location' && $user->location_id) {
+                $location = $user->location;
+                if ($location && $location->hris_location_id) {
+                    $query->where('job_vacancy_hris_location_id', $location->hris_location_id);
+                } else {
+                    // Jika admin lokasi tidak punya location yang valid, tampilkan data kosong
+                    $query->whereRaw('1 = 0');
+                }
+            }
+            // Admin pusat bisa lihat semua data (tidak perlu filter)
+        } else {
+            // Non-admin tidak bisa akses
+            $query->whereRaw('1 = 0');
+        }
+        
+        return $query;
     }
 }

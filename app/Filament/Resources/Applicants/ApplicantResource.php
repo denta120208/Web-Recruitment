@@ -10,14 +10,18 @@ use App\Filament\Resources\Applicants\Schemas\ApplicantForm;
 use App\Filament\Resources\Applicants\Schemas\ApplicantInfolist;
 use App\Filament\Resources\Applicants\Tables\ApplicantsTable;
 use App\Models\Applicant;
+use App\Traits\LocationFilterTrait;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class ApplicantResource extends Resource
 {
+    use LocationFilterTrait;
+    
     protected static ?string $model = Applicant::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -60,7 +64,7 @@ class ApplicantResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->select([
                 'requireid',
                 'firstname',
@@ -85,5 +89,29 @@ class ApplicantResource extends Resource
                 'user_id',
             ])
             ->with(['user', 'educations', 'workExperiences', 'trainings']);
+
+        // Apply location filter - filter applicants berdasarkan apply jobs mereka
+        $user = Auth::user();
+        
+        if ($user && in_array($user->role, ['admin_location', 'admin_pusat'])) {
+            if ($user->role === 'admin_location' && $user->location_id) {
+                $location = $user->location;
+                if ($location && $location->hris_location_id) {
+                    // Filter applicants yang punya apply jobs di lokasi ini
+                    $query->whereHas('user.applyJobs.jobVacancy', function ($q) use ($location) {
+                        $q->where('job_vacancy_hris_location_id', $location->hris_location_id);
+                    });
+                } else {
+                    // Admin location has no valid location, show empty
+                    $query->whereRaw('1 = 0');
+                }
+            }
+            // Admin pusat can see all applicants (no filter needed)
+        } else {
+            // Non-admin cannot access
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query;
     }
 }

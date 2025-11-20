@@ -27,6 +27,8 @@ class User extends Authenticatable
         'password',
         'accepted_terms_at',
         'date_of_birth',
+        'role',
+        'location_id',
     ];
 
     /**
@@ -61,5 +63,46 @@ class User extends Authenticatable
     public function applicant()
     {
         return $this->hasOne(Applicant::class, 'user_id', 'id');
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    // Role helper methods
+    public function isApplicant()
+    {
+        return $this->role === 'applicant';
+    }
+
+    public function isAdminLocation()
+    {
+        return $this->role === 'admin_location';
+    }
+
+    public function isAdminPusat()
+    {
+        return $this->role === 'admin_pusat';
+    }
+
+    public function isAdmin()
+    {
+        return in_array($this->role, ['admin_location', 'admin_pusat']);
+    }
+
+    public function canAccessLocation($locationId)
+    {
+        // Admin pusat bisa akses semua lokasi
+        if ($this->isAdminPusat()) {
+            return true;
+        }
+
+        // Admin lokasi hanya bisa akses lokasi mereka sendiri
+        if ($this->isAdminLocation()) {
+            return $this->location_id == $locationId;
+        }
+
+        return false;
     }
 }
