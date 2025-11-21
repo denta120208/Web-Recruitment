@@ -290,7 +290,9 @@ class ReportResource extends Resource
                         $user = Auth::user();
                         // Hanya tampilkan filter lokasi untuk admin pusat
                         if ($user && $user->role === 'admin_pusat') {
-                            return Location::orderBy('name')
+                            return Location::select('hris_location_id', 'name')
+                                ->groupBy('hris_location_id', 'name')
+                                ->orderBy('name')
                                 ->pluck('name', 'hris_location_id')
                                 ->toArray();
                         }
