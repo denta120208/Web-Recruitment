@@ -25,6 +25,7 @@ class ApplyJob extends Model
         'apply_jobs_interview_ai_result',
         'apply_jobs_interview_status',
         'apply_jobs_interview_email_sent',
+        'apply_jobs_interview_file',
         'apply_jobs_psikotest_iq_num',
         'apply_jobs_psikotest_date',
         'apply_jobs_psikotest_time',

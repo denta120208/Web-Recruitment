@@ -282,12 +282,12 @@
         <table>
             <tr>
                 <td rowspan="2" style="width: 120px;"><strong>Status Perkawinan<br>(Marital Status)</strong></td>
-                <td><span class="checkbox"></span> Belum kawin (Single)</td>
-                <td><span class="checkbox"></span> Janda / Duda (Widow / Widower)</td>
+                <td><span class="checkbox">{{ $applicant->marital_status === 'Belum Kawin' ? '✓' : '' }}</span> Belum kawin (Single)</td>
+                <td><span class="checkbox">{{ $applicant->marital_status === 'Janda/Duda' ? '✓' : '' }}</span> Janda / Duda (Widow / Widower)</td>
             </tr>
             <tr>
-                <td><span class="checkbox"></span> Kawin (Married)</td>
-                <td><span class="checkbox"></span> Cerai (Divorced)</td>
+                <td><span class="checkbox">{{ $applicant->marital_status === 'Kawin' ? '✓' : '' }}</span> Kawin (Married)</td>
+                <td><span class="checkbox">{{ $applicant->marital_status === 'Cerai' ? '✓' : '' }}</span> Cerai (Divorced)</td>
             </tr>
         </table>
 
@@ -570,9 +570,24 @@
                 <th style="width: 25%;"><strong>PEKERJAAN</strong><br>(Occupation)</th>
                 <th style="width: 25%;"><strong>HUBUNGAN</strong><br>(Relationship)</th>
             </tr>
-            <tr style="height: 35px;"><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 35px;"><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 35px;"><td></td><td></td><td></td><td></td></tr>
+            <tr style="height: 35px;">
+                <td>{{ $applicant->ref1_name ?? '' }}</td>
+                <td>{{ $applicant->ref1_address_phone ?? '' }}</td>
+                <td>{{ $applicant->ref1_occupation ?? '' }}</td>
+                <td>{{ $applicant->ref1_relationship ?? '' }}</td>
+            </tr>
+            <tr style="height: 35px;">
+                <td>{{ $applicant->ref2_name ?? '' }}</td>
+                <td>{{ $applicant->ref2_address_phone ?? '' }}</td>
+                <td>{{ $applicant->ref2_occupation ?? '' }}</td>
+                <td>{{ $applicant->ref2_relationship ?? '' }}</td>
+            </tr>
+            <tr style="height: 35px;">
+                <td>{{ $applicant->ref3_name ?? '' }}</td>
+                <td>{{ $applicant->ref3_address_phone ?? '' }}</td>
+                <td>{{ $applicant->ref3_occupation ?? '' }}</td>
+                <td>{{ $applicant->ref3_relationship ?? '' }}</td>
+            </tr>
         </table>
     </div>
 
@@ -677,7 +692,9 @@
             <tr>
                 <td>11</td>
                 <td>Apakah anda bersedia ditempatkan diluar kota Jakarta?<br><small>(Are you willing to be placed outside Jakarta?)</small></td>
-                <td></td><td></td><td></td>
+                <td>{{ $applicant->q11_willing_outside_jakarta === true ? '✓' : '' }}</td>
+                <td>{{ $applicant->q11_willing_outside_jakarta === false ? '✓' : '' }}</td>
+                <td></td>
             </tr>
             <tr>
                 <td>12</td>
@@ -692,17 +709,17 @@
             <tr>
                 <td>14</td>
                 <td>Berapa penghasilan & fasilitas apa yang anda terima saat ini?<br><small>(How much your current income and facilities that you accepted?)</small></td>
-                <td></td><td></td><td></td>
+                <td></td><td></td><td>{{ $applicant->q14_current_income ?? '' }}</td>
             </tr>
             <tr>
                 <td>15</td>
                 <td>Berapa penghasilan & fasilitas apa yang anda harapkan?<br><small>(How much your expected income and facilities?)</small></td>
-                <td></td><td></td><td></td>
+                <td></td><td></td><td>{{ $applicant->q15_expected_income ?? '' }}</td>
             </tr>
             <tr>
                 <td>16</td>
                 <td>Kapankah anda siap untuk bekerja di perusahaan ini?<br><small>(When will you be available for work in this company?)</small></td>
-                <td></td><td></td><td></td>
+                <td></td><td></td><td>{{ $applicant->q16_available_from ?? '' }}</td>
             </tr>
         </table>
     </div>

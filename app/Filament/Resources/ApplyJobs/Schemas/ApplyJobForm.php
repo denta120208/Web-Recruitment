@@ -89,6 +89,18 @@ class ApplyJobForm
                     ->placeholder('Choose Interview Status')
                     ->native(false)
                     ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2])),
+                FileUpload::make('apply_jobs_interview_file')
+                    ->label('File Interview')
+                    ->disk('mlnas')
+                    ->directory('interview')
+                    ->acceptedFileTypes(['application/pdf', 'image/*'])
+                    ->maxSize(10240)
+                    ->preserveFilenames()
+                    ->visible(fn ($get) => in_array($get('apply_jobs_status'), [2]))
+                    ->helperText(fn ($record) => $record && $record->apply_jobs_interview_file 
+                        ? new \Illuminate\Support\HtmlString('Upload file form hasil wawancara (PDF atau gambar, max 10MB) | <a href="' . route('admin.file.apply-job', ['path' => $record->apply_jobs_interview_file]) . '" class="text-primary-600 hover:underline font-semibold">📥 Download File Saat Ini</a>')
+                        : 'Upload file form hasil wawancara (PDF atau gambar, max 10MB)'
+                    ),
                 TextInput::make('apply_jobs_psikotest_iq_num')
                     ->label('Apply Jobs Psikotest IQ Num')
                     ->numeric()

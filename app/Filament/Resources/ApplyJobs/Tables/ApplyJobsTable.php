@@ -57,11 +57,28 @@ class ApplyJobsTable
                     ->sortable()
                     ->searchable()
                     ->placeholder('-'),
+                TextColumn::make('apply_jobs_interview_date')
+                    ->label('Interview Date')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->placeholder('-'),
                 TextColumn::make('apply_jobs_interview_by')
                     ->label('Interviewer')
                     ->searchable()
                     ->placeholder('-')
                     ->toggleable(),
+                TextColumn::make('apply_jobs_interview_file')
+                    ->label('File Interview')
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($state) {
+                            $url = route('admin.file.apply-job', ['path' => $state]);
+                            return new HtmlString('<a href="' . e($url) . '" class="fi-btn fi-btn-size-sm fi-color-primary">Download</a>');
+                        }
+                        return new HtmlString('<span class="text-gray-400">-</span>');
+                    })
+                    ->html()
+                    ->searchable(false)
+                    ->sortable(false),
                 TextColumn::make('apply_jobs_psikotest_file')
                     ->label('File Psikotes')
                     ->formatStateUsing(function ($state, $record) {
@@ -74,6 +91,11 @@ class ApplyJobsTable
                     ->html()
                     ->searchable(false)
                     ->sortable(false),
+                TextColumn::make('apply_jobs_psikotest_date')
+                    ->label('Psikotest Date')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->placeholder('-'),
                 TextColumn::make('apply_jobs_psikotest_status')
                     ->label('Psikotes')
                     ->formatStateUsing(function ($state) {
@@ -94,29 +116,37 @@ class ApplyJobsTable
                 TextColumn::make('apply_jobs_mcu_file')
                     ->label('File MCU')
                     ->formatStateUsing(function ($state, $record) {
-                        if ($state && $record && $record->apply_jobs_status == 4) {
+                        if ($state) {
                             $url = route('admin.file.apply-job', ['path' => $state]);
                             return new HtmlString('<a href="' . e($url) . '" class="fi-btn fi-btn-size-sm fi-color-primary">Download</a>');
                         }
                         return new HtmlString('<span class="text-gray-400">-</span>');
                     })
                     ->html()
-                    ->visible(fn ($record) => $record && $record->apply_jobs_status == 4)
                     ->searchable(false)
                     ->sortable(false),
+                TextColumn::make('apply_jobs_mcu_date')
+                    ->label('MCU Date')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->placeholder('-'),
                 TextColumn::make('apply_jobs_offering_letter_file')
                     ->label('File Offering Letter')
                     ->formatStateUsing(function ($state, $record) {
-                        if ($state && $record && $record->apply_jobs_status == 4) {
+                        if ($state) {
                             $url = route('admin.file.apply-job', ['path' => $state]);
                             return new HtmlString('<a href="' . e($url) . '" class="fi-btn fi-btn-size-sm fi-color-primary">Download</a>');
                         }
                         return new HtmlString('<span class="text-gray-400">-</span>');
                     })
                     ->html()
-                    ->visible(fn ($record) => $record && $record->apply_jobs_status == 4)
                     ->searchable(false)
                     ->sortable(false),
+                TextColumn::make('apply_jobs_offering_letter_date')
+                    ->label('Offering Date')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->placeholder('-'),
                 TextColumn::make('apply_jobs_status')
                     ->label('Status')
                     ->formatStateUsing(function ($state) {

@@ -19,7 +19,8 @@ class RequireWorkExperience extends Model
         'enddate',
         'iscurrent',
         'salary',
-        'eexp_comments'
+        'eexp_comments',
+        'jobdesk',
     ];
 
     protected $casts = [

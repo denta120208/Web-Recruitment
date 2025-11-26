@@ -315,6 +315,25 @@
                                     @enderror
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select @error('MaritalStatus') is-invalid @enderror" 
+                                            id="MaritalStatus" name="MaritalStatus">
+                                        <option value="">Pilih Status Perkawinan</option>
+                                        @php
+                                            $currentMarital = old('MaritalStatus', $applicant->marital_status);
+                                        @endphp
+                                        <option value="Belum Kawin" {{ $currentMarital === 'Belum Kawin' ? 'selected' : '' }}>Belum kawin (Single)</option>
+                                        <option value="Kawin" {{ $currentMarital === 'Kawin' ? 'selected' : '' }}>Kawin (Married)</option>
+                                        <option value="Janda/Duda" {{ $currentMarital === 'Janda/Duda' ? 'selected' : '' }}>Janda / Duda (Widow / Widower)</option>
+                                        <option value="Cerai" {{ $currentMarital === 'Cerai' ? 'selected' : '' }}>Cerai (Divorced)</option>
+                                    </select>
+                                    <label for="MaritalStatus">Status Perkawinan</label>
+                                    @error('MaritalStatus')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -523,9 +542,15 @@
                             <i class="bi bi-briefcase-fill me-2"></i>
                             Pengalaman Kerja
                         </h3>
-                        <button type="button" class="btn btn-light btn-sm" id="addWorkExperience">
-                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
-                        </button>
+                        <div class="d-flex align-items-center">
+                            <div class="form-check me-3 mb-0">
+                                <input class="form-check-input" type="checkbox" id="is_fresh_graduate" name="is_fresh_graduate" value="1" {{ old('is_fresh_graduate', $applicant->is_fresh_graduate) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_fresh_graduate">Fresh Graduate (belum punya pengalaman kerja)</label>
+                            </div>
+                            <button type="button" class="btn btn-light btn-sm" id="addWorkExperience">
+                                <i class="bi bi-plus-circle-fill me-1"></i>Tambah
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body p-4">
                         <div id="workExperienceContainer">
@@ -567,8 +592,14 @@
                                     </div>
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea class="form-control" name="work_experiences[{{ $index }}][Comments]" placeholder="Keterangan" style="height: 100px">{{ $workExp->eexp_comments }}</textarea>
-                                            <label>Keterangan</label>
+                                            <textarea class="form-control" name="work_experiences[{{ $index }}][Comments]" placeholder="Alasan keluar" style="height: 100px">{{ $workExp->eexp_comments }}</textarea>
+                                            <label>Alasan Keluar</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control" name="work_experiences[{{ $index }}][Jobdesk]" placeholder="Jobdesk / tugas dan tanggung jawab" style="height: 100px">{{ $workExp->jobdesk }}</textarea>
+                                            <label>Jobdesk / Tugas & Tanggung Jawab</label>
                                         </div>
                                     </div>
                                     <div class="col-12">
@@ -673,6 +704,7 @@ $(document).ready(function() {
     function updateProgress() {
         const totalSections = 6;
         let completedSections = 0;
+        const isFreshGraduate = $('#is_fresh_graduate').is(':checked');
         
         
         // Check personal info
@@ -691,7 +723,7 @@ $(document).ready(function() {
         }
         
         // Check work experience
-        if ($('#workExperienceContainer .dynamic-section').length > 0) {
+        if ($('#workExperienceContainer .dynamic-section').length > 0 || isFreshGraduate) {
             completedSections++;
         }
         
@@ -709,6 +741,23 @@ $(document).ready(function() {
         $('#progressBar').css('width', progress + '%');
     }
     
+    function toggleFreshGraduateUi() {
+        const isFresh = $('#is_fresh_graduate').is(':checked');
+        $('#addWorkExperience').prop('disabled', isFresh);
+        if (isFresh) {
+            $('#workExperienceContainer').addClass('d-none');
+        } else {
+            $('#workExperienceContainer').removeClass('d-none');
+        }
+    }
+
+    $('#is_fresh_graduate').on('change', function() {
+        toggleFreshGraduateUi();
+        updateProgress();
+    });
+
+    toggleFreshGraduateUi();
+
     // Add work experience
     $('#addWorkExperience').click(function() {
         workExpCount++;
@@ -750,8 +799,14 @@ $(document).ready(function() {
                     </div>
                     <div class="col-12">
                         <div class="form-floating">
-                            <textarea class="form-control" name="work_experiences[${workExpCount}][Comments]" placeholder="Keterangan" style="height: 100px"></textarea>
-                            <label>Keterangan</label>
+                            <textarea class="form-control" name="work_experiences[${workExpCount}][Comments]" placeholder="Alasan keluar" style="height: 100px"></textarea>
+                            <label>Alasan Keluar</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <textarea class="form-control" name="work_experiences[${workExpCount}][Jobdesk]" placeholder="Jobdesk / tugas dan tanggung jawab" style="height: 100px"></textarea>
+                            <label>Jobdesk / Tugas & Tanggung Jawab</label>
                         </div>
                     </div>
                     <div class="col-12">

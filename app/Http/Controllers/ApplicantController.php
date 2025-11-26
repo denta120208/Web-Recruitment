@@ -90,6 +90,35 @@ class ApplicantController extends Controller
             'LinkedIn' => 'nullable|url|max:255',
             'Instagram' => 'nullable|string|max:255',
             'Phone' => 'required|string|max:20',
+            'MaritalStatus' => 'nullable|string|max:50',
+            'is_fresh_graduate' => 'nullable|boolean',
+            // References
+            'Ref1Name' => 'nullable|string|max:255',
+            'Ref1AddressPhone' => 'nullable|string|max:255',
+            'Ref1Occupation' => 'nullable|string|max:255',
+            'Ref1Relationship' => 'nullable|string|max:255',
+            'Ref2Name' => 'nullable|string|max:255',
+            'Ref2AddressPhone' => 'nullable|string|max:255',
+            'Ref2Occupation' => 'nullable|string|max:255',
+            'Ref2Relationship' => 'nullable|string|max:255',
+            'Ref3Name' => 'nullable|string|max:255',
+            'Ref3AddressPhone' => 'nullable|string|max:255',
+            'Ref3Occupation' => 'nullable|string|max:255',
+            'Ref3Relationship' => 'nullable|string|max:255',
+            // Emergency contacts
+            'Emergency1Name' => 'nullable|string|max:255',
+            'Emergency1Address' => 'nullable|string|max:255',
+            'Emergency1Phone' => 'nullable|string|max:50',
+            'Emergency1Relationship' => 'nullable|string|max:255',
+            'Emergency2Name' => 'nullable|string|max:255',
+            'Emergency2Address' => 'nullable|string|max:255',
+            'Emergency2Phone' => 'nullable|string|max:50',
+            'Emergency2Relationship' => 'nullable|string|max:255',
+            // Extra questions
+            'Q11WillingOutsideJakarta' => 'nullable|boolean',
+            'Q14CurrentIncome' => 'nullable|string|max:1000',
+            'Q15ExpectedIncome' => 'nullable|string|max:1000',
+            'Q16AvailableFrom' => 'nullable|string|max:255',
            
             'CVPath' => 'required|file|mimes:pdf|max:5120',
             'PhotoPath' => 'required|image|mimes:jpeg,png,jpg|max:5120',
@@ -163,7 +192,27 @@ class ApplicantController extends Controller
         }
 
         if (! $hasEducation) {
-            return redirect()->back()->withInput()->withErrors(['educations' => 'Mohon tambahkan minimal 1 data pendidikan.']);
+            return redirect()->back()->withInput()->withErrors([
+                'educations' => 'Mohon tambahkan minimal 1 data pendidikan.',
+            ]);
+        }
+
+        // Ensure work experience or fresh graduate flag
+        $isFreshGraduate = $request->boolean('is_fresh_graduate');
+        $hasWorkExperience = false;
+        if ($request->has('work_experiences')) {
+            foreach ($request->work_experiences as $workExp) {
+                if (!empty($workExp['CompanyName'])) {
+                    $hasWorkExperience = true;
+                    break;
+                }
+            }
+        }
+
+        if (! $isFreshGraduate && ! $hasWorkExperience) {
+            return redirect()->back()->withInput()->withErrors([
+                'work_experiences' => 'Mohon tambahkan minimal 1 pengalaman kerja atau centang Fresh Graduate.',
+            ]);
         }
 
         // Ensure database NOT NULL columns get a non-null value when fields are optional in the form
@@ -187,6 +236,37 @@ class ApplicantController extends Controller
             'cvpath' => $validated['CVPath'] ?? null,
             'photopath' => $validated['PhotoPath'] ?? null,
             'user_id' => auth()->id(),
+            'marital_status' => $validated['MaritalStatus'] ?? null,
+            'is_fresh_graduate' => $isFreshGraduate,
+            // References
+            'ref1_name' => $validated['Ref1Name'] ?? null,
+            'ref1_address_phone' => $validated['Ref1AddressPhone'] ?? null,
+            'ref1_occupation' => $validated['Ref1Occupation'] ?? null,
+            'ref1_relationship' => $validated['Ref1Relationship'] ?? null,
+            'ref2_name' => $validated['Ref2Name'] ?? null,
+            'ref2_address_phone' => $validated['Ref2AddressPhone'] ?? null,
+            'ref2_occupation' => $validated['Ref2Occupation'] ?? null,
+            'ref2_relationship' => $validated['Ref2Relationship'] ?? null,
+            'ref3_name' => $validated['Ref3Name'] ?? null,
+            'ref3_address_phone' => $validated['Ref3AddressPhone'] ?? null,
+            'ref3_occupation' => $validated['Ref3Occupation'] ?? null,
+            'ref3_relationship' => $validated['Ref3Relationship'] ?? null,
+            // Emergency contacts
+            'emergency1_name' => $validated['Emergency1Name'] ?? null,
+            'emergency1_address' => $validated['Emergency1Address'] ?? null,
+            'emergency1_phone' => $validated['Emergency1Phone'] ?? null,
+            'emergency1_relationship' => $validated['Emergency1Relationship'] ?? null,
+            'emergency2_name' => $validated['Emergency2Name'] ?? null,
+            'emergency2_address' => $validated['Emergency2Address'] ?? null,
+            'emergency2_phone' => $validated['Emergency2Phone'] ?? null,
+            'emergency2_relationship' => $validated['Emergency2Relationship'] ?? null,
+            // Extra questions
+            'q11_willing_outside_jakarta' => array_key_exists('Q11WillingOutsideJakarta', $validated)
+                ? (bool) $validated['Q11WillingOutsideJakarta']
+                : null,
+            'q14_current_income' => $validated['Q14CurrentIncome'] ?? null,
+            'q15_expected_income' => $validated['Q15ExpectedIncome'] ?? null,
+            'q16_available_from' => $validated['Q16AvailableFrom'] ?? null,
         ];
 
         $applicant = Applicant::create($modelData);
@@ -205,6 +285,7 @@ class ApplicantController extends Controller
                         'iscurrent' => $isCurrent ? 1 : 0,
                         'salary' => $workExp['Salary'] ?? null,
                         'eexp_comments' => $workExp['Comments'] ?? null,
+                        'jobdesk' => $workExp['Jobdesk'] ?? null,
                     ]);
                 }
             }
@@ -289,6 +370,35 @@ class ApplicantController extends Controller
             'LinkedIn' => 'nullable|url|max:255',
             'Instagram' => 'nullable|string|max:255',
             'Phone' => 'required|string|max:20',
+            'MaritalStatus' => 'nullable|string|max:50',
+            'is_fresh_graduate' => 'nullable|boolean',
+            // References
+            'Ref1Name' => 'nullable|string|max:255',
+            'Ref1AddressPhone' => 'nullable|string|max:255',
+            'Ref1Occupation' => 'nullable|string|max:255',
+            'Ref1Relationship' => 'nullable|string|max:255',
+            'Ref2Name' => 'nullable|string|max:255',
+            'Ref2AddressPhone' => 'nullable|string|max:255',
+            'Ref2Occupation' => 'nullable|string|max:255',
+            'Ref2Relationship' => 'nullable|string|max:255',
+            'Ref3Name' => 'nullable|string|max:255',
+            'Ref3AddressPhone' => 'nullable|string|max:255',
+            'Ref3Occupation' => 'nullable|string|max:255',
+            'Ref3Relationship' => 'nullable|string|max:255',
+            // Emergency contacts
+            'Emergency1Name' => 'nullable|string|max:255',
+            'Emergency1Address' => 'nullable|string|max:255',
+            'Emergency1Phone' => 'nullable|string|max:50',
+            'Emergency1Relationship' => 'nullable|string|max:255',
+            'Emergency2Name' => 'nullable|string|max:255',
+            'Emergency2Address' => 'nullable|string|max:255',
+            'Emergency2Phone' => 'nullable|string|max:50',
+            'Emergency2Relationship' => 'nullable|string|max:255',
+            // Extra questions
+            'Q11WillingOutsideJakarta' => 'nullable|boolean',
+            'Q14CurrentIncome' => 'nullable|string|max:1000',
+            'Q15ExpectedIncome' => 'nullable|string|max:1000',
+            'Q16AvailableFrom' => 'nullable|string|max:255',
             'CVPath' => 'nullable|file|mimes:pdf|max:5120',
             'PhotoPath' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
@@ -322,7 +432,27 @@ class ApplicantController extends Controller
         }
 
         if (! $hasEducation) {
-            return redirect()->back()->withInput()->withErrors(['educations' => 'Mohon tambahkan minimal 1 data pendidikan.']);
+            return redirect()->back()->withInput()->withErrors([
+                'educations' => 'Mohon tambahkan minimal 1 data pendidikan.',
+            ]);
+        }
+
+        // Ensure work experience or fresh graduate flag
+        $isFreshGraduate = $request->boolean('is_fresh_graduate');
+        $hasWorkExperience = false;
+        if ($request->has('work_experiences')) {
+            foreach ($request->work_experiences as $workExp) {
+                if (!empty($workExp['CompanyName'])) {
+                    $hasWorkExperience = true;
+                    break;
+                }
+            }
+        }
+
+        if (! $isFreshGraduate && ! $hasWorkExperience) {
+            return redirect()->back()->withInput()->withErrors([
+                'work_experiences' => 'Mohon tambahkan minimal 1 pengalaman kerja atau centang Fresh Graduate.',
+            ]);
         }
 
         // Ensure database NOT NULL columns get a non-null value when fields are optional in the form
@@ -343,6 +473,37 @@ class ApplicantController extends Controller
             'linkedin' => $validated['LinkedIn'] ?? null,
             'instagram' => $validated['Instagram'] ?? null,
             'phone' => $validated['Phone'],
+            'marital_status' => $validated['MaritalStatus'] ?? $applicant->marital_status,
+            'is_fresh_graduate' => $isFreshGraduate,
+            // References
+            'ref1_name' => $validated['Ref1Name'] ?? $applicant->ref1_name,
+            'ref1_address_phone' => $validated['Ref1AddressPhone'] ?? $applicant->ref1_address_phone,
+            'ref1_occupation' => $validated['Ref1Occupation'] ?? $applicant->ref1_occupation,
+            'ref1_relationship' => $validated['Ref1Relationship'] ?? $applicant->ref1_relationship,
+            'ref2_name' => $validated['Ref2Name'] ?? $applicant->ref2_name,
+            'ref2_address_phone' => $validated['Ref2AddressPhone'] ?? $applicant->ref2_address_phone,
+            'ref2_occupation' => $validated['Ref2Occupation'] ?? $applicant->ref2_occupation,
+            'ref2_relationship' => $validated['Ref2Relationship'] ?? $applicant->ref2_relationship,
+            'ref3_name' => $validated['Ref3Name'] ?? $applicant->ref3_name,
+            'ref3_address_phone' => $validated['Ref3AddressPhone'] ?? $applicant->ref3_address_phone,
+            'ref3_occupation' => $validated['Ref3Occupation'] ?? $applicant->ref3_occupation,
+            'ref3_relationship' => $validated['Ref3Relationship'] ?? $applicant->ref3_relationship,
+            // Emergency contacts
+            'emergency1_name' => $validated['Emergency1Name'] ?? $applicant->emergency1_name,
+            'emergency1_address' => $validated['Emergency1Address'] ?? $applicant->emergency1_address,
+            'emergency1_phone' => $validated['Emergency1Phone'] ?? $applicant->emergency1_phone,
+            'emergency1_relationship' => $validated['Emergency1Relationship'] ?? $applicant->emergency1_relationship,
+            'emergency2_name' => $validated['Emergency2Name'] ?? $applicant->emergency2_name,
+            'emergency2_address' => $validated['Emergency2Address'] ?? $applicant->emergency2_address,
+            'emergency2_phone' => $validated['Emergency2Phone'] ?? $applicant->emergency2_phone,
+            'emergency2_relationship' => $validated['Emergency2Relationship'] ?? $applicant->emergency2_relationship,
+            // Extra questions
+            'q11_willing_outside_jakarta' => array_key_exists('Q11WillingOutsideJakarta', $validated)
+                ? (bool) $validated['Q11WillingOutsideJakarta']
+                : $applicant->q11_willing_outside_jakarta,
+            'q14_current_income' => $validated['Q14CurrentIncome'] ?? $applicant->q14_current_income,
+            'q15_expected_income' => $validated['Q15ExpectedIncome'] ?? $applicant->q15_expected_income,
+            'q16_available_from' => $validated['Q16AvailableFrom'] ?? $applicant->q16_available_from,
         ];
 
         // Only update file paths if new files were uploaded
@@ -370,6 +531,7 @@ class ApplicantController extends Controller
                         'iscurrent' => $isCurrent ? 1 : 0,
                         'salary' => $workExp['Salary'] ?? null,
                         'eexp_comments' => $workExp['Comments'] ?? null,
+                        'jobdesk' => $workExp['Jobdesk'] ?? null,
                     ]);
                 }
             }
