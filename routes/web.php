@@ -111,3 +111,14 @@ Route::middleware('auth')->group(function(){
 // Test HRIS Connection
 Route::get('/test-hris', [TestHrisController::class, 'testConnection']);
 Route::get('/test-hris', [\App\Http\Controllers\TestHrisController::class, 'testSendCandidate']);
+
+// Report Export Routes (Admin only)
+Route::middleware(['auth:admin'])->group(function () {
+    Route::get('/admin/reports/export/excel', [\App\Http\Controllers\ReportExportController::class, 'exportExcel'])
+        ->name('reports.export.excel');
+    Route::get('/admin/reports/export/pdf', [\App\Http\Controllers\ReportExportController::class, 'exportPdf'])
+        ->name('reports.export.pdf');
+
+    Route::get('/admin/reports/{job_vacancy_id}/{status_key}/export/excel', [\App\Http\Controllers\ReportExportController::class, 'exportApplicantsExcel'])
+        ->name('reports.status.export.excel');
+});

@@ -179,33 +179,49 @@
 <body>
     <div class="container">
         <div class="logo-section">
-            <h1>🎉 Selamat!</h1>
-            <p class="subtitle">Anda telah lolos ke tahap interview</p>
+            <h1>Undangan Interview</h1>
+            <p class="subtitle">PT Metropolitan Land, Tbk</p>
         </div>
         
         <div class="greeting">
-            Yth. <strong>{{ $candidateName }}</strong>,<br><br>
-            Selamat! Kami dengan senang hati mengundang Anda untuk mengikuti sesi interview untuk posisi <strong>{{ $jobTitle }}</strong>.
+            Dear <strong>{{ $candidateName }}</strong>,<br><br>
+            Pengajuan lamaran dan CV Anda melalui Metland Recruitment sudah kami terima.<br><br>
+            Dengan ini kami mengundang Anda untuk mengikuti tes seleksi Calon Karyawan <strong>PT. Metropolitan Land, Tbk</strong> dengan detail sebagai berikut:
         </div>
         
         <div class="interview-box">
             <div class="interview-title">Detail Interview</div>
             
             <div class="detail-item">
-                <div class="detail-label">📅 Tanggal</div>
+                <div class="detail-label">Tanggal Interview</div>
                 <div class="detail-value">{{ $interviewDate }}</div>
             </div>
             
             <div class="detail-item">
-                <div class="detail-label">🕐 Waktu</div>
-                <div class="detail-value">{{ $interviewTime }} WIB</div>
+                <div class="detail-label">Jam Interview</div>
+                <div class="detail-value">{{ $interviewTime }} WIB (mohon agar dapat hadir 10 menit sebelum interview dimulai)</div>
             </div>
-            
+
             <div class="detail-item">
-                <div class="detail-label">📍 Lokasi</div>
+                <div class="detail-label">Posisi yang Dilamar</div>
+                <div class="detail-value">{{ $jobTitle }}</div>
+            </div>
+
+
+            <div class="detail-item">
+                <div class="detail-label">Nama Perusahaan</div>
+                <div class="detail-value">PT METROPOLITAN LAND, TBK</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Penempatan Lokasi</div>
+                <div class="detail-value">{{ $placementLocation ?? 'Kantor Pusat' }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Alamat Lokasi Interview</div>
                 <div class="detail-value">
                     @php
-                        // Auto-detect URL and make it clickable
                         $location = $interviewLocation;
                         if (preg_match('/https?:\/\/[^\s]+/', $location, $matches)) {
                             $url = $matches[0];
@@ -215,26 +231,37 @@
                     {!! nl2br(e($interviewLocation)) !== $location ? $location : nl2br(e($interviewLocation)) !!}
                 </div>
             </div>
+
+            <div class="detail-item">
+                <div class="detail-label">PIC</div>
+                <div class="detail-value">{{ $picName ?? 'Ibu Natasha' }}</div>
+            </div>
             
             <div class="detail-item">
-                <div class="detail-label">👤 Interviewer</div>
+                <div class="detail-label">Interviewer</div>
                 <div class="detail-value">{{ $interviewBy }}</div>
             </div>
         </div>
         
         <div class="info-section">
-            <div class="info-title">Hal yang Perlu Dipersiapkan</div>
+            <div class="info-title">PENTING!</div>
+            <p style="margin-bottom: 10px; color: #4a5568;">
+                Seluruh proses recruitment di PT Metropolitan Land Tbk beserta seluruh unitnya
+                <strong>bebas dari biaya apapun</strong>. Mohon berhati-hati atas penipuan dan pihak-pihak
+                yang mengatasnamakan PT Metropolitan Land, Tbk.
+            </p>
+
+            <div class="info-title" style="margin-top: 20px;">Notes:</div>
             <ul class="info-list">
-                <li>Datang 15 menit sebelum waktu interview</li>
-                <li>Membawa CV dan dokumen pendukung lainnya</li>
-                <li>Berpakaian rapi dan profesional</li>
-              
+                <li>Mohon untuk tidak terlambat dan hadir pada agenda interview 10 menit sebelum interview dimulai.</li>
+                <li>Berpakaian rapi dan sopan, serta membawa berkas: kartu identitas, CV terupdate, sertifikat training atau keahlian (jika ada), fotokopi paklaring, dan portfolio.</li>
+                <li>Harap diingat bahwa agenda interview ini telah dikonfirmasi oleh User. Perubahan jadwal tidak dapat dilakukan secara mendadak, mohon untuk memberitahukan kepada PIC yang bersangkutan.</li>
+                <li>Periksa website perusahaan PT Metropolitan Land, Tbk: <a href="https://metropolitanland.com/id/home" target="_blank" style="color: #009290; font-weight: 600;">https://metropolitanland.com/id/home</a></li>
             </ul>
         </div>
         
         <div class="greeting">
-            Jika ada pertanyaan atau kendala, silakan hubungi kami.<br><br>
-            Kami menantikan kehadiran Anda!<br><br>
+            Kami menantikan kehadiran Anda.<br><br>
             Salam,<br>
             <strong>Tim HRD Metland Recruitment</strong>
         </div>
@@ -243,7 +270,7 @@
             <p class="footer-text">
                 Email ini dikirim secara otomatis oleh sistem<br>
                 <span class="company-name">Metland Recruitment</span><br>
-                © 2025 Metland. All rights reserved.
+                {{ date('Y') }} Metland. All rights reserved.
             </p>
         </div>
     </div>

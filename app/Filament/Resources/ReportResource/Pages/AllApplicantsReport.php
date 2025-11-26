@@ -45,7 +45,16 @@ class AllApplicantsReport extends Page implements HasTable
                 ->label('Back to Reports')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
-                ->url(route('filament.admin.resources.reports.index'))
+                ->url(route('filament.admin.resources.reports.index')),
+
+            Action::make('export_excel')
+                ->label('Export Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->url(fn () => route('reports.status.export.excel', [
+                    'job_vacancy_id' => $this->job_vacancy_id,
+                    'status_key' => 'all',
+                ])),
         ];
     }
 

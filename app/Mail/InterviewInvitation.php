@@ -16,11 +16,13 @@ class InterviewInvitation extends Mailable
     public $interviewTime;
     public $interviewLocation;
     public $interviewBy;
+    public $placementLocation;
+    public $picName;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($candidateName, $jobTitle, $interviewDate, $interviewTime, $interviewLocation, $interviewBy)
+    public function __construct($candidateName, $jobTitle, $interviewDate, $interviewTime, $interviewLocation, $interviewBy, $placementLocation, $picName)
     {
         $this->candidateName = $candidateName;
         $this->jobTitle = $jobTitle;
@@ -28,6 +30,8 @@ class InterviewInvitation extends Mailable
         $this->interviewTime = $interviewTime;
         $this->interviewLocation = $interviewLocation;
         $this->interviewBy = $interviewBy;
+        $this->placementLocation = $placementLocation;
+        $this->picName = $picName;
     }
 
     /**
@@ -35,7 +39,7 @@ class InterviewInvitation extends Mailable
      */
     public function build()
     {
-        return $this->subject('Undangan Interview - ' . $this->jobTitle . ' di Metland')
+        return $this->subject('Undangan Interview ' . $this->jobTitle . ' — PT Metropolitan Land, Tbk')
                     ->replyTo('recruitment@metland.co.id', 'Metland Recruitment')
                     ->cc('receive.recruitment@metland.co.id')
                     ->view('emails.interview_invitation');

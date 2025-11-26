@@ -16,6 +16,7 @@ class ApplyJob extends Model
         'user_id',
         'apply_jobs_status',
         'apply_jobs_interview_by',
+        'apply_jobs_interview_pic',
         'apply_jobs_interview_user_email',
         'apply_jobs_interview_location',
         'apply_jobs_interview_date',
@@ -23,6 +24,7 @@ class ApplyJob extends Model
         'apply_jobs_interview_result',
         'apply_jobs_interview_ai_result',
         'apply_jobs_interview_status',
+        'apply_jobs_interview_email_sent',
         'apply_jobs_psikotest_iq_num',
         'apply_jobs_psikotest_status',
         'apply_jobs_psikotest_file',
@@ -37,6 +39,7 @@ class ApplyJob extends Model
     protected $casts = [
         'apply_jobs_psikotest_iq_num' => 'integer',
         'is_generated_employee' => 'boolean',
+        'apply_jobs_interview_email_sent' => 'boolean',
         'apply_date' => 'date',
         'apply_jobs_interview_date' => 'date',
         'apply_jobs_interview_time' => 'datetime:H:i:s',

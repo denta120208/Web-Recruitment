@@ -102,6 +102,11 @@ class EditApplyJob extends EditRecord
         if (isset($data['apply_jobs_interview_status']) && $data['apply_jobs_interview_status'] === 0) {
             $data['apply_jobs_interview_status'] = null;
         }
+
+        // Ensure DB NOT NULL constraint: if still null / not set, store as 0 ("no decision")
+        if (!isset($data['apply_jobs_interview_status']) || $data['apply_jobs_interview_status'] === null) {
+            $data['apply_jobs_interview_status'] = 0;
+        }
         
         // originalStatus and originalInterviewStatus already set in mount()
         // Just log the incoming data for debugging
@@ -128,28 +133,6 @@ class EditApplyJob extends EditRecord
         // Sync to HRIS when status changed (includes status 1-6)
         $newStatus = $this->record->apply_jobs_status;
         $newInterviewStatus = $this->record->apply_jobs_interview_status;
-        
-        // Handle email notifications for Interview User status (2)
-        // Only send invitation if:
-        // 1. Status changed TO Interview User (2) from another status
-        // 2. Interview status is NOT Reject (3)
-        Log::info('Checking interview invitation conditions', [
-            'apply_job_id' => $this->record->apply_jobs_id,
-            'newStatus' => $newStatus,
-            'originalStatus' => $originalStatus,
-            'newInterviewStatus' => $newInterviewStatus,
-            'condition_newStatus_is_2' => ($newStatus == 2),
-            'condition_originalStatus_not_2' => ($originalStatus != $newStatus),
-            'condition_newInterviewStatus_not_3' => ($newInterviewStatus != 3),
-            'all_conditions_met' => ($newStatus == 2 && $originalStatus != $newStatus && $newInterviewStatus != 3)
-        ]);
-        
-        if ($newStatus == 2 && $originalStatus != $newStatus && $newInterviewStatus != 3) {
-            Log::info('Sending interview invitation', [
-                'apply_job_id' => $this->record->apply_jobs_id,
-            ]);
-            $this->sendInterviewInvitation();
-        }
         
         // Handle rejection email when interview status CHANGED TO Reject (3)
         Log::info('Checking rejection email conditions', [
@@ -278,6 +261,9 @@ class EditApplyJob extends EditRecord
             'new_originalStatus' => $this->originalStatus,
             'new_originalInterviewStatus' => $this->originalInterviewStatus,
         ]);
+        
+        // Refresh the page after saving changes
+        $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record->getKey()]));
     }
 
     protected function isInterviewRejected(): bool
@@ -321,6 +307,10 @@ class EditApplyJob extends EditRecord
                 : 'TBA';
             $interviewLocation = $this->record->apply_jobs_interview_location ?? 'TBA';
             $interviewBy = $this->record->apply_jobs_interview_by ?? 'HRD Team';
+            // Lokasi penempatan sesuai project yang dilamar
+            $placementLocation = $jobVacancy->location ?? 'Kantor Pusat';
+            // PIC interview (optional, from admin form)
+            $picName = $this->record->apply_jobs_interview_pic ?? 'Ibu Natasha';
             
             // Send interview invitation email
             Mail::to($candidateEmail)->send(
@@ -330,7 +320,9 @@ class EditApplyJob extends EditRecord
                     $interviewDate,
                     $interviewTime,
                     $interviewLocation,
-                    $interviewBy
+                    $interviewBy,
+                    $placementLocation,
+                    $picName
                 )
             );
             
@@ -369,6 +361,11 @@ class EditApplyJob extends EditRecord
                     ]);
                 }
             }
+
+            // Mark that interview email has been sent so button can be hidden
+            $this->record->update([
+                'apply_jobs_interview_email_sent' => true,
+            ]);
             
             Notification::make()
                 ->title('Email undangan interview berhasil dikirim')
@@ -465,6 +462,28 @@ class EditApplyJob extends EditRecord
         }
         
         $actions = parent::getFormActions();
+
+        $isInterviewUser = $this->record->apply_jobs_status == 2;
+
+        $hasInterviewDetails =
+            !empty($this->record->apply_jobs_interview_by) &&
+            !empty($this->record->apply_jobs_interview_location) &&
+            !empty($this->record->apply_jobs_interview_date) &&
+            !empty($this->record->apply_jobs_interview_time);
+
+        $canSendInterviewEmail = !($this->record->apply_jobs_interview_email_sent);
+
+        if ($isInterviewUser && $hasInterviewDetails && $canSendInterviewEmail) {
+            $actions[] = Action::make('send_interview_email')
+                ->label('Send Mail')
+                ->icon('heroicon-o-envelope')
+                ->color('primary')
+                ->action(function () {
+                    $this->sendInterviewInvitation();
+                    // Refresh page so the Send Mail button disappears after first send
+                    $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record->getKey()]));
+                });
+        }
         
         // Add Generate Employee button if conditions are met (Status Hired)
         if ($this->record->apply_jobs_status == 5 && // Hired status

@@ -181,57 +181,62 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-section">
-            <h1>Pemberitahuan Status Lamaran</h1>
-            <p class="subtitle">Terima kasih atas partisipasi Anda</p>
+   <div class="container">
+    <div class="logo-section">
+        <h1>Pengumuman Proses Rekrutmen — PT Metropolitan Land, Tbk</h1>
+        <p class="subtitle">Terima kasih atas partisipasi Anda</p>
+    </div>
+    
+    <div class="greeting">
+        Dear <strong>{{ $candidateName }}</strong>,<br><br>
+        Terima kasih telah meluangkan waktu untuk mengikuti proses rekrutmen di PT Metropolitan Land Tbk
+        untuk posisi <strong>{{ $jobTitle }}</strong>. Kami sangat menghargai minat, waktu, dan usaha Anda dalam mengikuti proses seleksi bersama kami.
+    </div>
+    
+    <div class="message-box">
+        <div class="message-text">
+            Meskipun kami yakin bahwa Anda memiliki keterampilan yang dibutuhkan, dengan berat hati kami umumkan bahwa kami tidak dapat melanjutkan proses rekrutmen Anda.
         </div>
-        
-        <div class="greeting">
-            Yth. <strong>{{ $candidateName }}</strong>,<br><br>
-            Terima kasih atas minat dan waktu yang Anda berikan untuk melamar posisi <strong>{{ $jobTitle }}</strong> di Metland.
-        </div>
-        
-        <div class="message-box">
-            <div class="message-text">
-                Setelah melalui proses seleksi yang ketat dan mempertimbangkan berbagai aspek, dengan berat hati kami informasikan bahwa saat ini kami belum dapat melanjutkan proses rekrutmen Anda untuk posisi tersebut.
-            </div>
-            <div class="message-text">
-                Keputusan ini tidak mengurangi apresiasi kami terhadap kualifikasi dan pengalaman yang Anda miliki. Kami sangat menghargai usaha dan waktu yang telah Anda investasikan dalam proses rekrutmen ini.
-            </div>
-        </div>
-        
-        <div class="encouragement-box">
-            <div class="encouragement-icon">💪</div>
-            <div class="encouragement-title">Jangan Menyerah!</div>
-            <div class="encouragement-text">
-                Kami mendorong Anda untuk terus mengembangkan diri dan melamar kembali untuk posisi lain yang sesuai dengan keahlian Anda di masa mendatang.
-            </div>
-        </div>
-        
-        <div class="info-section">
-            <div class="info-title">Saran untuk Langkah Selanjutnya</div>
-            <ul class="info-list">
-                <li>Terus pantau lowongan pekerjaan di website kami</li>
-                <li>Tingkatkan skill dan pengalaman Anda</li>
-                <li>Jangan ragu untuk melamar posisi lain yang sesuai</li>
-                <li>Tetap semangat dalam pencarian karir Anda</li>
-            </ul>
-        </div>
-        
-        <div class="greeting">
-            Kami berharap Anda sukses dalam pencarian karir Anda dan semoga di kesempatan lain kita dapat bekerja sama.<br><br>
-            Salam hormat,<br>
-            <strong>Tim HRD Metland Recruitment</strong>
-        </div>
-        
-        <div class="footer">
-            <p class="footer-text">
-                Email ini dikirim secara otomatis oleh sistem<br>
-                <span class="company-name">Metland Recruitment</span><br>
-                © 2025 Metland. All rights reserved.
-            </p>
+        <div class="message-text">
+            Perlu diketahui bahwa persaingan untuk mendapatkan posisi di PT Metropolitan Land Tbk selalu ketat, dan kami sering kali harus membuat pilihan yang sulit di antara banyak kandidat berkualitas tinggi.
         </div>
     </div>
+    
+    <div class="encouragement-box">
+        <div class="encouragement-icon">💪</div>
+        <div class="encouragement-title">Jangan Patah Semangat!</div>
+        <div class="encouragement-text">
+            Kami mendorong Anda untuk mencoba peluang posisi lain yang mungkin cocok untuk Anda di Halaman Karir PT Metropolitan Land Tbk Indonesia.
+            Kami juga akan menyimpan data Anda sebagai database jika ada kecocokan posisi lain di masa depan.
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <div class="info-title">Saran untuk Langkah Selanjutnya</div>
+        <ul class="info-list">
+            <li>Pantau lowongan pekerjaan di halaman karir Metland</li>
+            <li>Tingkatkan keterampilan dan pengalaman Anda</li>
+            <li>Cobalah posisi lain yang relevan dengan kompetensi Anda</li>
+            <li>Tetap semangat dalam perjalanan karir Anda</li>
+        </ul>
+    </div>
+    
+    <div class="greeting">
+        Sekali lagi, terima kasih atas ketertarikan Anda pada PT Metropolitan Land Tbk. Kami sangat menghargai usaha Anda selama ini.<br><br>
+        Salam hangat,<br>
+        <strong>Semoga sukses selalu</strong>
+        <strong>Hormat kami,</strong>
+        <strong>HRD Metland</strong>
+    </div>
+    
+    <div class="footer">
+        <p class="footer-text">
+            <span class="company-name">Metland Recruitment</span><br>
+            © 2025 PT Metropolitan Land Tbk. All rights reserved.
+            hc.team@metropolitanland.com
+        </p>
+    </div>
+</div>
+
 </body>
 </html>
