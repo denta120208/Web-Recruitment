@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InterviewInvitation;
 use App\Mail\RejectionNotification;
+use App\Mail\PsikotestInvitation;
+use App\Mail\McuInvitation;
+use App\Mail\OfferingLetter;
+use App\Mail\JoinNotification;
 use App\Jobs\SendInterviewReminderJob;
 use Carbon\Carbon;
 
@@ -387,6 +391,290 @@ class EditApplyJob extends EditRecord
         }
     }
     
+    protected function sendJoinNotification(): void
+    {
+        try {
+            $applicant = $this->record->applicant;
+            $user = $this->record->user;
+            $jobVacancy = $this->record->jobVacancy;
+            
+            if (!$applicant || !$user || !$jobVacancy) {
+                Log::warning('Cannot send join notification - missing data', [
+                    'apply_job_id' => $this->record->apply_jobs_id
+                ]);
+                return;
+            }
+            
+            // Get candidate email from user table
+            $candidateEmail = $user->email;
+            // Use firstname only
+            $candidateName = $applicant->firstname ?? 'Unknown';
+            
+            $jobTitle = $jobVacancy->job_vacancy_name ?? 'Staff Recruitment';
+            // Lokasi kerja default kantor pusat (bisa disesuaikan nanti kalau mau dinamis)
+         $workLocation = $jobVacancy->location ?? 'Kantor Pusat — M Gold Tower, Jl. KH. Noer Ali, RT.008/RW.002, Pekayon Jaya, Kec. Bekasi Sel., Kota Bks, Jawa Barat';
+            $joinDate = $this->record->apply_jobs_join_date
+                ? Carbon::parse($this->record->apply_jobs_join_date)->format('d F Y')
+                : 'TBA';
+            
+            // Send Join Notification email
+            Mail::to($candidateEmail)->send(
+                new JoinNotification(
+                    $candidateName,
+                    $jobTitle,
+                    $joinDate,
+                    $workLocation
+                )
+            );
+            
+            Log::info('Join notification email sent', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'email' => $candidateEmail,
+                'candidate' => $candidateName
+            ]);
+
+            // Mark that join email has been sent so button can be hidden
+            $this->record->update([
+                'apply_jobs_join_email_sent' => true,
+            ]);
+            
+            Notification::make()
+                ->title('Email Selamat Bergabung berhasil dikirim')
+                ->body('Email telah dikirim ke ' . $candidateEmail)
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            Log::error('Failed to send Join notification email', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            Notification::make()
+                ->title('Gagal mengirim email')
+                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+    
+    protected function sendPsikotestInvitation(): void
+    {
+        try {
+            $applicant = $this->record->applicant;
+            $user = $this->record->user;
+            $jobVacancy = $this->record->jobVacancy;
+            
+            if (!$applicant || !$user || !$jobVacancy) {
+                Log::warning('Cannot send psikotest invitation - missing data', [
+                    'apply_job_id' => $this->record->apply_jobs_id
+                ]);
+                return;
+            }
+            
+            // Get candidate email from user table
+            $candidateEmail = $user->email;
+            // Use firstname only
+            $candidateName = $applicant->firstname ?? 'Unknown';
+            
+            $jobTitle = $jobVacancy->job_vacancy_name ?? 'Unknown Position';
+            $psikotestDate = $this->record->apply_jobs_psikotest_date 
+                ? Carbon::parse($this->record->apply_jobs_psikotest_date)->format('d F Y')
+                : 'TBA';
+            $psikotestTime = $this->record->apply_jobs_psikotest_time 
+                ? Carbon::parse($this->record->apply_jobs_psikotest_time)->format('H:i')
+                : 'TBA';
+            $psikotestLocation = $this->record->apply_jobs_psikotest_location 
+                ? $this->record->apply_jobs_psikotest_location 
+                : 'Logos Indonesia.' . "\n" . 
+                  'Jl. Amil No. 27C, Warung Buncit Raya,' . "\n" .
+                  'Kalibata, Pancoran. Jakarta Selatan 12670.';
+            // PIC interview (optional, from admin form)
+            $picName = $this->record->apply_jobs_interview_pic ?? 'Ibu Natasha';
+            
+            // Send psikotest invitation email
+            Mail::to($candidateEmail)->send(
+                new PsikotestInvitation(
+                    $candidateName,
+                    $jobTitle,
+                    $psikotestDate,
+                    $psikotestTime,
+                    $psikotestLocation,
+                    $picName
+                )
+            );
+            
+            Log::info('Psikotest invitation sent', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'email' => $candidateEmail,
+                'candidate' => $candidateName
+            ]);
+
+            // Mark that psikotest email has been sent so button can be hidden
+            $this->record->update([
+                'apply_jobs_psikotest_email_sent' => true,
+            ]);
+            
+            Notification::make()
+                ->title('Email undangan psikotest berhasil dikirim')
+                ->body('Email telah dikirim ke ' . $candidateEmail)
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            Log::error('Failed to send psikotest invitation', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            Notification::make()
+                ->title('Gagal mengirim email')
+                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+    
+    protected function sendMcuInvitation(): void
+    {
+        try {
+            $applicant = $this->record->applicant;
+            $user = $this->record->user;
+            $jobVacancy = $this->record->jobVacancy;
+            
+            if (!$applicant || !$user || !$jobVacancy) {
+                Log::warning('Cannot send MCU invitation - missing data', [
+                    'apply_job_id' => $this->record->apply_jobs_id
+                ]);
+                return;
+            }
+            
+            // Get candidate email from user table
+            $candidateEmail = $user->email;
+            // Use firstname only
+            $candidateName = $applicant->firstname ?? 'Unknown';
+            
+            $jobTitle = $jobVacancy->job_vacancy_name ?? 'Unknown Position';
+            $mcuDate = $this->record->apply_jobs_mcu_date 
+                ? Carbon::parse($this->record->apply_jobs_mcu_date)->format('d F Y')
+                : 'TBA';
+            $mcuTime = $this->record->apply_jobs_mcu_time 
+                ? Carbon::parse($this->record->apply_jobs_mcu_time)->format('H:i')
+                : 'TBA';
+            $mcuLocation = $this->record->apply_jobs_mcu_location 
+                ? $this->record->apply_jobs_mcu_location 
+                : "Rumah Sakit Royal Taruma\nJl. Daan Mogot No.34, RT.8/RW.1, Tj. Duren Utara, Kec.\nGrogol petamburan, Kota Jakarta Barat, DKI Jakarta (https://share.google/LL2S37nEjz1MY6oYg)";
+            
+            // Send MCU invitation email
+            Mail::to($candidateEmail)->send(
+                new McuInvitation(
+                    $candidateName,
+                    $jobTitle,
+                    $mcuDate,
+                    $mcuTime,
+                    $mcuLocation
+                )
+            );
+            
+            Log::info('MCU invitation sent', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'email' => $candidateEmail,
+                'candidate' => $candidateName
+            ]);
+
+            // Mark that MCU email has been sent so button can be hidden
+            $this->record->update([
+                'apply_jobs_mcu_email_sent' => true,
+            ]);
+            
+            Notification::make()
+                ->title('Email undangan MCU berhasil dikirim')
+                ->body('Email telah dikirim ke ' . $candidateEmail)
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            Log::error('Failed to send MCU invitation', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            Notification::make()
+                ->title('Gagal mengirim email')
+                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+    
+    protected function sendOfferingLetter(): void
+    {
+        try {
+            $applicant = $this->record->applicant;
+            $user = $this->record->user;
+            $jobVacancy = $this->record->jobVacancy;
+            
+            if (!$applicant || !$user || !$jobVacancy) {
+                Log::warning('Cannot send offering letter - missing data', [
+                    'apply_job_id' => $this->record->apply_jobs_id
+                ]);
+                return;
+            }
+            
+            // Get candidate email from user table
+            $candidateEmail = $user->email;
+            // Use firstname only
+            $candidateName = $applicant->firstname ?? 'Unknown';
+            
+            $jobTitle = $jobVacancy->job_vacancy_name ?? 'Unknown Position';
+            // Lokasi kerja sesuai project yang dilamar
+            $placementLocation = $jobVacancy->location ?? 'Kantor Pusat';
+            // Tanggal batas terakhir pengembalian offering letter (optional)
+            $offeringLetterDate = $this->record->apply_jobs_offering_letter_date
+                ? Carbon::parse($this->record->apply_jobs_offering_letter_date)->format('d F Y')
+                : 'TBA';
+            
+            // Send Offering Letter email
+            Mail::to($candidateEmail)->send(
+                new OfferingLetter(
+                    $candidateName,
+                    $jobTitle,
+                    $placementLocation,
+                    $offeringLetterDate
+                )
+            );
+            
+            Log::info('Offering letter email sent', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'email' => $candidateEmail,
+                'candidate' => $candidateName
+            ]);
+
+            // Mark that offering email has been sent so button can be hidden
+            $this->record->update([
+                'apply_jobs_offering_email_sent' => true,
+            ]);
+            
+            Notification::make()
+                ->title('Email Offering Letter berhasil dikirim')
+                ->body('Email telah dikirim ke ' . $candidateEmail)
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            Log::error('Failed to send Offering Letter email', [
+                'apply_job_id' => $this->record->apply_jobs_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            Notification::make()
+                ->title('Gagal mengirim email')
+                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+    
     protected function sendRejectionEmail(): void
     {
         try {
@@ -464,6 +752,10 @@ class EditApplyJob extends EditRecord
         $actions = parent::getFormActions();
 
         $isInterviewUser = $this->record->apply_jobs_status == 2;
+        $isPsikotest = $this->record->apply_jobs_status == 3;
+        $isMcu = $this->record->apply_jobs_status == 6;
+        $isOffering = $this->record->apply_jobs_status == 4;
+        $isHired = $this->record->apply_jobs_status == 5;
 
         $hasInterviewDetails =
             !empty($this->record->apply_jobs_interview_by) &&
@@ -471,7 +763,24 @@ class EditApplyJob extends EditRecord
             !empty($this->record->apply_jobs_interview_date) &&
             !empty($this->record->apply_jobs_interview_time);
 
+        $hasPsikotestDetails = true; // Always allow sending psikotest email, even without date/time
+
+        $hasMcuDetails =
+            !empty($this->record->apply_jobs_mcu_date) &&
+            !empty($this->record->apply_jobs_mcu_time) &&
+            !empty($this->record->apply_jobs_mcu_location);
+
+        $hasOfferingDetails =
+            !empty($this->record->apply_jobs_offering_letter_date);
+
+        $hasJoinDetails =
+            !empty($this->record->apply_jobs_join_date);
+
         $canSendInterviewEmail = !($this->record->apply_jobs_interview_email_sent);
+        $canSendPsikotestEmail = !($this->record->apply_jobs_psikotest_email_sent);
+        $canSendMcuEmail = !($this->record->apply_jobs_mcu_email_sent);
+        $canSendOfferingEmail = !($this->record->apply_jobs_offering_email_sent);
+        $canSendJoinEmail = !($this->record->apply_jobs_join_email_sent);
 
         if ($isInterviewUser && $hasInterviewDetails && $canSendInterviewEmail) {
             $actions[] = Action::make('send_interview_email')
@@ -480,6 +789,54 @@ class EditApplyJob extends EditRecord
                 ->color('primary')
                 ->action(function () {
                     $this->sendInterviewInvitation();
+                    // Refresh page so the Send Mail button disappears after first send
+                    $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record->getKey()]));
+                });
+        }
+
+        if ($isPsikotest && $canSendPsikotestEmail) {
+            $actions[] = Action::make('send_psikotest_email')
+                ->label('Send Mail')
+                ->icon('heroicon-o-envelope')
+                ->color('success')
+                ->action(function () {
+                    $this->sendPsikotestInvitation();
+                    // Refresh page so the Send Mail button disappears after first send
+                    $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record->getKey()]));
+                });
+        }
+        
+        if ($isMcu && $hasMcuDetails && $canSendMcuEmail) {
+            $actions[] = Action::make('send_mcu_email')
+                ->label('Send Mail')
+                ->icon('heroicon-o-envelope')
+                ->color('warning')
+                ->action(function () {
+                    $this->sendMcuInvitation();
+                    // Refresh page so the Send Mail button disappears after first send
+                    $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record->getKey()]));
+                });
+        }
+        
+        if ($isOffering && $hasOfferingDetails && $canSendOfferingEmail) {
+            $actions[] = Action::make('send_offering_email')
+                ->label('Send Mail')
+                ->icon('heroicon-o-envelope')
+                ->color('info')
+                ->action(function () {
+                    $this->sendOfferingLetter();
+                    // Refresh page so the Send Mail button disappears after first send
+                    $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record->getKey()]));
+                });
+        }
+        
+        if ($isHired && $hasJoinDetails && $canSendJoinEmail) {
+            $actions[] = Action::make('send_join_email')
+                ->label('Send Mail')
+                ->icon('heroicon-o-envelope')
+                ->color('success')
+                ->action(function () {
+                    $this->sendJoinNotification();
                     // Refresh page so the Send Mail button disappears after first send
                     $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record->getKey()]));
                 });
