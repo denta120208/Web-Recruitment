@@ -16,6 +16,7 @@ class AdminDashboard extends BaseDashboard
     {
         return [
             \App\Filament\Widgets\ApplicantStatsOverviewWidget::class,
+            \App\Filament\Widgets\JobVacancyApplicationsWidget::class,
         ];
     }
 }

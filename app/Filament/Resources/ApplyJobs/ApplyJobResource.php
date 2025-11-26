@@ -26,11 +26,11 @@ class ApplyJobResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'apply_jobs_id';
     
-    protected static ?string $navigationLabel = 'Apply Jobs';
+    protected static ?string $navigationLabel = 'Status Monitoring Applicant';
     
-    protected static ?string $modelLabel = 'Apply Jobs';
+    protected static ?string $modelLabel = 'Status Monitoring Applicant';
     
-    protected static ?string $pluralModelLabel = 'Apply Jobs';
+    protected static ?string $pluralModelLabel = 'Status Monitoring Applicant';
 
     protected static ?int $navigationSort = 3;
 

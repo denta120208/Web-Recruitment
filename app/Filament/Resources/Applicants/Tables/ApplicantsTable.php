@@ -72,6 +72,34 @@ class ApplicantsTable
                     ->label('Kota')
                     ->searchable(),
                 
+                TextColumn::make('job_vacancies')
+                    ->label('Posisi yang Dilamar')
+                    ->getStateUsing(function ($record) {
+                        if (!$record->user) {
+                            return 'User tidak ditemukan';
+                        }
+                        
+                        // Ambil semua job vacancy yang dilamar
+                        $jobVacancies = $record->user->applyJobs()
+                            ->with('jobVacancy')
+                            ->get()
+                            ->map(function ($applyJob) {
+                                if ($applyJob->jobVacancy) {
+                                    return $applyJob->jobVacancy->job_vacancy_name;
+                                }
+                                return null;
+                            })
+                            ->filter()
+                            ->unique()
+                            ->values()
+                            ->toArray();
+                        
+                        return empty($jobVacancies) ? 'Tidak ada posisi' : implode(', ', $jobVacancies);
+                    })
+                    ->searchable()
+                    ->wrap()
+                    ->toggleable(),
+                
                 TextColumn::make('job_locations')
                     ->label('Lokasi Lamaran')
                     ->getStateUsing(function ($record) {
@@ -111,6 +139,57 @@ class ApplicantsTable
                         'Male' => 'Laki-laki',
                         'Female' => 'Perempuan',
                     ]),
+                
+                SelectFilter::make('job_vacancy_id')
+                    ->label('Posisi yang Dilamar')
+                    ->options(function () {
+                        return \App\Models\JobVacancy::query()
+                            ->orderBy('job_vacancy_name')
+                            ->pluck('job_vacancy_name', 'job_vacancy_id')
+                            ->toArray();
+                    })
+                    ->query(function ($query, $state) {
+                        if (!empty($state)) {
+                            // Handle single value atau array
+                            if (is_array($state)) {
+                                $values = array_filter($state);
+                            } else {
+                                $values = [$state];
+                            }
+                            
+                            if (!empty($values)) {
+                                return $query->whereHas('user.applyJobs', function ($q) use ($values) {
+                                    $q->whereIn('job_vacancy_id', $values);
+                                });
+                            }
+                        }
+                        return $query;
+                    })
+                    ->indicateUsing(function ($state): ?string {
+                        if (empty($state)) {
+                            return null;
+                        }
+                        
+                        // Handle single value atau array
+                        if (is_array($state)) {
+                            $values = array_filter($state);
+                        } else {
+                            $values = [$state];
+                        }
+                        
+                        if (empty($values)) {
+                            return null;
+                        }
+                        
+                        $jobVacancies = \App\Models\JobVacancy::whereIn('job_vacancy_id', $values)
+                            ->pluck('job_vacancy_name')
+                            ->toArray();
+                        
+                        return 'Posisi: ' . implode(', ', $jobVacancies);
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->multiple(),
                 
             ])
             ->persistFiltersInSession()
