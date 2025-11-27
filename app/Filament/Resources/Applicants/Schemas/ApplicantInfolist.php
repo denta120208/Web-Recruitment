@@ -31,6 +31,9 @@ class ApplicantInfolist
                     TextEntry::make('gender')
                         ->label('Jenis Kelamin')
                         ->placeholder('-'),
+                    TextEntry::make('marital_status')
+                        ->label('Status Perkawinan')
+                        ->placeholder('-'),
                     TextEntry::make('dateofbirth')
                         ->label('Tanggal Lahir')
                         ->date('d M Y')
@@ -65,6 +68,12 @@ class ApplicantInfolist
                             TextEntry::make('salary')
                                 ->label('Gaji')
                                 ->money('IDR')
+                                ->placeholder('-'),
+                            TextEntry::make('eexp_comments')
+                                ->label('Alasan Keluar')
+                                ->placeholder('-'),
+                            TextEntry::make('jobdesk')
+                                ->label('Jobdesk / Tugas & Tanggung Jawab')
                                 ->placeholder('-'),
                         ])
                         ->columns(1)
@@ -101,6 +110,41 @@ class ApplicantInfolist
                         ->placeholder('-'),
                 ]),
 
+                Section::make('Referensi')
+                    ->icon('heroicon-o-users')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('ref1_name')->label('Ref 1 - Nama')->placeholder('-'),
+                        TextEntry::make('ref1_address_phone')->label('Ref 1 - Alamat & Telepon')->placeholder('-'),
+                        TextEntry::make('ref1_occupation')->label('Ref 1 - Pekerjaan')->placeholder('-'),
+                        TextEntry::make('ref1_relationship')->label('Ref 1 - Hubungan')->placeholder('-'),
+
+                        TextEntry::make('ref2_name')->label('Ref 2 - Nama')->placeholder('-'),
+                        TextEntry::make('ref2_address_phone')->label('Ref 2 - Alamat & Telepon')->placeholder('-'),
+                        TextEntry::make('ref2_occupation')->label('Ref 2 - Pekerjaan')->placeholder('-'),
+                        TextEntry::make('ref2_relationship')->label('Ref 2 - Hubungan')->placeholder('-'),
+
+                        TextEntry::make('ref3_name')->label('Ref 3 - Nama')->placeholder('-'),
+                        TextEntry::make('ref3_address_phone')->label('Ref 3 - Alamat & Telepon')->placeholder('-'),
+                        TextEntry::make('ref3_occupation')->label('Ref 3 - Pekerjaan')->placeholder('-'),
+                        TextEntry::make('ref3_relationship')->label('Ref 3 - Hubungan')->placeholder('-'),
+                    ]),
+
+                Section::make('Kontak Darurat')
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('emergency1_name')->label('Darurat 1 - Nama')->placeholder('-'),
+                        TextEntry::make('emergency1_address')->label('Darurat 1 - Alamat')->placeholder('-'),
+                        TextEntry::make('emergency1_phone')->label('Darurat 1 - Telepon')->placeholder('-'),
+                        TextEntry::make('emergency1_relationship')->label('Darurat 1 - Hubungan')->placeholder('-'),
+
+                        TextEntry::make('emergency2_name')->label('Darurat 2 - Nama')->placeholder('-'),
+                        TextEntry::make('emergency2_address')->label('Darurat 2 - Alamat')->placeholder('-'),
+                        TextEntry::make('emergency2_phone')->label('Darurat 2 - Telepon')->placeholder('-'),
+                        TextEntry::make('emergency2_relationship')->label('Darurat 2 - Hubungan')->placeholder('-'),
+                    ]),
+
                 // Section 4: Pendidikan - Layout lebih compact
                 Section::make('Pendidikan (Education)')
                     ->icon('heroicon-o-academic-cap')
@@ -129,6 +173,31 @@ class ApplicantInfolist
                     ])
                     ->collapsible()
                     ->collapsed(false),
+
+                Section::make('Pertanyaan Tambahan')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('is_fresh_graduate')
+                            ->label('Fresh Graduate')
+                            ->formatStateUsing(fn ($state) => $state ? 'Ya' : 'Tidak')
+                            ->placeholder('-'),
+                        TextEntry::make('q11_willing_outside_jakarta')
+                            ->label('Bersedia ditempatkan di luar Jakarta (Q11)')
+                            ->formatStateUsing(fn ($state) => is_null($state) ? '-' : ($state ? 'Ya' : 'Tidak')),
+                        TextEntry::make('q14_current_income')
+                            ->label('Q14 - Penghasilan & fasilitas saat ini')
+                            ->placeholder('-')
+                            ->columnSpan(2),
+                        TextEntry::make('q15_expected_income')
+                            ->label('Q15 - Penghasilan & fasilitas yang diharapkan')
+                            ->placeholder('-')
+                            ->columnSpan(2),
+                        TextEntry::make('q16_available_from')
+                            ->label('Q16 - Siap mulai bekerja dari')
+                            ->placeholder('-')
+                            ->columnSpan(2),
+                    ]),
 
                 // Section 5: Pengalaman Kerja - Layout lebih compact
                  Section::make('Dokumen')

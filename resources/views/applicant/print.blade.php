@@ -111,7 +111,9 @@
 
         <div class="section">
             <strong>Jabatan Yang Dilamar (Type of position desired) :</strong> 
-            <span style="border-bottom: 1px solid #000; display: inline-block; min-width: 300px; margin-left: 10px;"></span>
+            <span style="border-bottom: 1px solid #000; display: inline-block; min-width: 300px; margin-left: 10px;">
+                {{ $jobTitle ?? '' }}
+            </span>
         </div>
 
         <!-- SECTION I: DATA PRIBADI -->
@@ -185,12 +187,12 @@
                 </tr>
                 <tr>
                     <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>{{ $applicant->height ?? '' }}</td>
+                    <td>{{ $applicant->weight ?? '' }}</td>
+                    <td>{{ $applicant->religion ?? '' }}</td>
+                    <td>{{ $applicant->nationality ?? '' }}</td>
+                    <td>{{ $applicant->idnumber ?? '' }}</td>
+                    <td>{{ $applicant->drivinglicense ?? '' }}</td>
                 </tr>
             </table>
 
@@ -204,12 +206,24 @@
             <table style="margin-top: 10px;">
                 <tr>
                     <td rowspan="2" style="width: 180px; font-weight: bold;">Status Perkawinan<br>(Marital Status)</td>
-                    <td><span class="checkbox"></span> Belum kawin (Single)</td>
-                    <td><span class="checkbox"></span> Janda / Duda (Widow / Widower)</td>
+                    <td>
+                        <span class="checkbox">{{ $applicant->marital_status === 'Belum Kawin' ? '✓' : '' }}</span>
+                        Belum kawin (Single)
+                    </td>
+                    <td>
+                        <span class="checkbox">{{ $applicant->marital_status === 'Janda/Duda' ? '✓' : '' }}</span>
+                        Janda / Duda (Widow / Widower)
+                    </td>
                 </tr>
                 <tr>
-                    <td><span class="checkbox"></span> Kawin (Married)</td>
-                    <td><span class="checkbox"></span> Cerai (Divorced)</td>
+                    <td>
+                        <span class="checkbox">{{ $applicant->marital_status === 'Kawin' ? '✓' : '' }}</span>
+                        Kawin (Married)
+                    </td>
+                    <td>
+                        <span class="checkbox">{{ $applicant->marital_status === 'Cerai' ? '✓' : '' }}</span>
+                        Cerai (Divorced)
+                    </td>
                 </tr>
             </table>
 

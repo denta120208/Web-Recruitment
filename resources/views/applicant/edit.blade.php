@@ -513,13 +513,13 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="educations[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ $education->startdate }}" required>
+                                            <input type="date" class="form-control" name="educations[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ old('educations.'.$index.'.StartDate', $education->startdate?->format('Y-m-d')) }}" required>
                                             <label>Tanggal Mulai <span class="text-danger">*</span></label>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="educations[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ $education->enddate }}">
+                                            <input type="date" class="form-control" name="educations[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ old('educations.'.$index.'.EndDate', $education->enddate?->format('Y-m-d')) }}">
                                             <label>Tanggal Selesai</label>
                                         </div>
                                     </div>
@@ -574,13 +574,13 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ $workExp->startdate }}">
+                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][StartDate]" placeholder="Tanggal Mulai" value="{{ old('work_experiences.'.$index.'.StartDate', $workExp->startdate?->format('Y-m-d')) }}">
                                             <label>Tanggal Mulai</label>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ $workExp->enddate }}" {{ $workExp->iscurrent ? 'disabled' : '' }}>
+                                            <input type="date" class="form-control" name="work_experiences[{{ $index }}][EndDate]" placeholder="Tanggal Selesai" value="{{ old('work_experiences.'.$index.'.EndDate', $workExp->enddate?->format('Y-m-d')) }}" {{ $workExp->iscurrent ? 'disabled' : '' }}>
                                             <label>Tanggal Selesai</label>
                                         </div>
                                     </div>
@@ -644,8 +644,8 @@
                                         <div class="form-floating">
                                             <input type="text" class="form-control" name="trainings[{{ $index }}][TrainingName]" placeholder="Nama Pelatihan" value="{{ $training->trainingname }}">
                                             <label>Nama Pelatihan</label>
-                        </div>
-                    </div>
+                                        </div>
+                                    </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" name="trainings[{{ $index }}][CertificateNo]" placeholder="No. Sertifikat" value="{{ $training->certificateno }}">
@@ -654,13 +654,13 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="trainings[{{ $index }}][StartTrainingDate]" placeholder="Tanggal Mulai" value="{{ $training->starttrainingdate }}">
+                                            <input type="date" class="form-control" name="trainings[{{ $index }}][StartTrainingDate]" placeholder="Tanggal Mulai" value="{{ old('trainings.'.$index.'.StartTrainingDate', $training->starttrainingdate?->format('Y-m-d')) }}">
                                             <label>Tanggal Mulai</label>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="date" class="form-control" name="trainings[{{ $index }}][EndTrainingDate]" placeholder="Tanggal Selesai" value="{{ $training->endtrainingdate }}">
+                                            <input type="date" class="form-control" name="trainings[{{ $index }}][EndTrainingDate]" placeholder="Tanggal Selesai" value="{{ old('trainings.'.$index.'.EndTrainingDate', $training->endtrainingdate?->format('Y-m-d')) }}">
                                             <label>Tanggal Selesai</label>
                                         </div>
                                     </div>
@@ -672,6 +672,263 @@
                 </div>
             </div>
         </div>  
+
+        <!-- References Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-people-fill me-2"></i>
+                            Referensi
+                        </h3>
+                        <button type="button" class="btn btn-light btn-sm" id="addReference">
+                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-3">Mohon isi data referensi yang dapat dihubungi (mantan atasan, rekan kerja, atau dosen).</p>
+                        <div id="referencesContainer">
+                            @php $hasRef1 = !empty($applicant->ref1_name) || !empty($applicant->ref1_address_phone) || !empty($applicant->ref1_occupation) || !empty($applicant->ref1_relationship); @endphp
+                            @if($hasRef1)
+                                <div class="dynamic-section position-relative mb-3" data-index="1">
+                                    <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeReference(this)">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[1][Name]" placeholder="Nama" value="{{ old('references.1.Name', $applicant->ref1_name) }}">
+                                                <label>Nama</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[1][AddressPhone]" placeholder="Alamat & Telepon" value="{{ old('references.1.AddressPhone', $applicant->ref1_address_phone) }}">
+                                                <label>Alamat & Telepon</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[1][Occupation]" placeholder="Pekerjaan" value="{{ old('references.1.Occupation', $applicant->ref1_occupation) }}">
+                                                <label>Pekerjaan</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[1][Relationship]" placeholder="Hubungan" value="{{ old('references.1.Relationship', $applicant->ref1_relationship) }}">
+                                                <label>Hubungan</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @php $hasRef2 = !empty($applicant->ref2_name) || !empty($applicant->ref2_address_phone) || !empty($applicant->ref2_occupation) || !empty($applicant->ref2_relationship); @endphp
+                            @if($hasRef2)
+                                <div class="dynamic-section position-relative mb-3" data-index="2">
+                                    <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeReference(this)">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[2][Name]" placeholder="Nama" value="{{ old('references.2.Name', $applicant->ref2_name) }}">
+                                                <label>Nama</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[2][AddressPhone]" placeholder="Alamat & Telepon" value="{{ old('references.2.AddressPhone', $applicant->ref2_address_phone) }}">
+                                                <label>Alamat & Telepon</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[2][Occupation]" placeholder="Pekerjaan" value="{{ old('references.2.Occupation', $applicant->ref2_occupation) }}">
+                                                <label>Pekerjaan</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[2][Relationship]" placeholder="Hubungan" value="{{ old('references.2.Relationship', $applicant->ref2_relationship) }}">
+                                                <label>Hubungan</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @php $hasRef3 = !empty($applicant->ref3_name) || !empty($applicant->ref3_address_phone) || !empty($applicant->ref3_occupation) || !empty($applicant->ref3_relationship); @endphp
+                            @if($hasRef3)
+                                <div class="dynamic-section position-relative mb-3" data-index="3">
+                                    <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeReference(this)">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[3][Name]" placeholder="Nama" value="{{ old('references.3.Name', $applicant->ref3_name) }}">
+                                                <label>Nama</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[3][AddressPhone]" placeholder="Alamat & Telepon" value="{{ old('references.3.AddressPhone', $applicant->ref3_address_phone) }}">
+                                                <label>Alamat & Telepon</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[3][Occupation]" placeholder="Pekerjaan" value="{{ old('references.3.Occupation', $applicant->ref3_occupation) }}">
+                                                <label>Pekerjaan</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" name="references[3][Relationship]" placeholder="Hubungan" value="{{ old('references.3.Relationship', $applicant->ref3_relationship) }}">
+                                                <label>Hubungan</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contacts Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-telephone-forward-fill me-2"></i>
+                            Kontak Darurat
+                        </h3>
+                        <button type="button" class="btn btn-light btn-sm" id="addEmergencyContact">
+                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-3">Orang yang dapat dihubungi dalam keadaan darurat.</p>
+                        <div id="emergencyContactsContainer">
+                            @php
+                                $emergencies = [
+                                    [
+                                        'name' => $applicant->emergency1_name,
+                                        'address' => $applicant->emergency1_address,
+                                        'phone' => $applicant->emergency1_phone,
+                                        'relationship' => $applicant->emergency1_relationship,
+                                    ],
+                                    [
+                                        'name' => $applicant->emergency2_name,
+                                        'address' => $applicant->emergency2_address,
+                                        'phone' => $applicant->emergency2_phone,
+                                        'relationship' => $applicant->emergency2_relationship,
+                                    ],
+                                ];
+                                $emIndex = 0;
+                            @endphp
+
+                            @foreach($emergencies as $em)
+                                @php
+                                    $hasEmValue = !empty($em['name']) || !empty($em['address']) || !empty($em['phone']) || !empty($em['relationship']);
+                                @endphp
+                                @if($hasEmValue)
+                                    @php $emIndex++; @endphp
+                                    <div class="dynamic-section position-relative mb-3" data-index="{{ $emIndex }}">
+                                        <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeEmergencyContact(this)">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                        </button>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" name="emergency_contacts[{{ $emIndex }}][Name]" placeholder="Nama" value="{{ old('emergency_contacts.'.$emIndex.'.Name', $em['name']) }}">
+                                                    <label>Nama</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" name="emergency_contacts[{{ $emIndex }}][Address]" placeholder="Alamat" value="{{ old('emergency_contacts.'.$emIndex.'.Address', $em['address']) }}">
+                                                    <label>Alamat</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" name="emergency_contacts[{{ $emIndex }}][Phone]" placeholder="Telepon" value="{{ old('emergency_contacts.'.$emIndex.'.Phone', $em['phone']) }}">
+                                                    <label>Telepon</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control" name="emergency_contacts[{{ $emIndex }}][Relationship]" placeholder="Hubungan" value="{{ old('emergency_contacts.'.$emIndex.'.Relationship', $em['relationship']) }}">
+                                                    <label>Hubungan</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Questions Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-question-circle-fill me-2"></i>
+                            Pertanyaan Tambahan
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label d-block">11. Apakah anda bersedia ditempatkan diluar kota Jakarta?</label>
+                            @php $q11Old = old('Q11WillingOutsideJakarta', is_null($applicant->q11_willing_outside_jakarta) ? null : ($applicant->q11_willing_outside_jakarta ? '1' : '0')); @endphp
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="Q11WillingOutsideJakarta" id="Q11Yes" value="1" {{ $q11Old === '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="Q11Yes">Ya</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="Q11WillingOutsideJakarta" id="Q11No" value="0" {{ $q11Old === '0' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="Q11No">Tidak</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Q14CurrentIncome" class="form-label">14. Berapa penghasilan & fasilitas apa yang anda terima saat ini?</label>
+                            <input type="text" class="form-control @error('Q14CurrentIncome') is-invalid @enderror" id="Q14CurrentIncome" name="Q14CurrentIncome" placeholder="Contoh: Rp 8.000.000/bulan + tunjangan transport & makan" value="{{ old('Q14CurrentIncome', $applicant->q14_current_income) }}">
+                            @error('Q14CurrentIncome')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Q15ExpectedIncome" class="form-label">15. Berapa penghasilan & fasilitas apa yang anda harapkan?</label>
+                            <input type="text" class="form-control @error('Q15ExpectedIncome') is-invalid @enderror" id="Q15ExpectedIncome" name="Q15ExpectedIncome" placeholder="Contoh: Rp 10.000.000/bulan + tunjangan transport & makan" value="{{ old('Q15ExpectedIncome', $applicant->q15_expected_income) }}">
+                            @error('Q15ExpectedIncome')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Q16AvailableFrom" class="form-label">16. Kapankah anda siap untuk bekerja di perusahaan ini?</label>
+                            <input type="text" class="form-control @error('Q16AvailableFrom') is-invalid @enderror" id="Q16AvailableFrom" name="Q16AvailableFrom" placeholder="Contoh: Segera, 1 bulan lagi, 1 Januari 2026" value="{{ old('Q16AvailableFrom', $applicant->q16_available_from) }}">
+                            @error('Q16AvailableFrom')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Submit Button -->
         <div class="row">
@@ -696,6 +953,8 @@ $(document).ready(function() {
     // Education data from HRIS API
     const educationsData = @json($hrisEducations ?? []);
     
+    let referenceCount = $('#referencesContainer .dynamic-section').length;
+    let emergencyContactCount = $('#emergencyContactsContainer .dynamic-section').length;
     let workExpCount = {{ $workExperiences->count() }};
     let educationCount = {{ $educations->count() }};
     let trainingCount = {{ $trainings->count() }};
@@ -757,6 +1016,86 @@ $(document).ready(function() {
     });
 
     toggleFreshGraduateUi();
+
+    // Add reference
+    $('#addReference').click(function() {
+        referenceCount++;
+        const referenceHtml = `
+            <div class="dynamic-section position-relative mb-3" data-index="${referenceCount}">
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeReference(this)">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][Name]" placeholder="Nama">
+                            <label>Nama</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][AddressPhone]" placeholder="Alamat & Telepon">
+                            <label>Alamat & Telepon</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][Occupation]" placeholder="Pekerjaan">
+                            <label>Pekerjaan</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][Relationship]" placeholder="Hubungan">
+                            <label>Hubungan</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('#referencesContainer').append(referenceHtml);
+        updateProgress();
+    });
+
+    // Add emergency contact
+    $('#addEmergencyContact').click(function() {
+        emergencyContactCount++;
+        const emergencyHtml = `
+            <div class="dynamic-section position-relative mb-3" data-index="${emergencyContactCount}">
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeEmergencyContact(this)">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Name]" placeholder="Nama">
+                            <label>Nama</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Address]" placeholder="Alamat">
+                            <label>Alamat</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Phone]" placeholder="Telepon">
+                            <label>Telepon</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Relationship]" placeholder="Hubungan">
+                            <label>Hubungan</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('#emergencyContactsContainer').append(emergencyHtml);
+        updateProgress();
+    });
 
     // Add work experience
     $('#addWorkExperience').click(function() {
@@ -1111,6 +1450,16 @@ function removeEducation(button) {
 }
 
 function removeTraining(button) {
+    $(button).closest('.dynamic-section').remove();
+    updateProgress();
+}
+
+function removeReference(button) {
+    $(button).closest('.dynamic-section').remove();
+    updateProgress();
+}
+
+function removeEmergencyContact(button) {
     $(button).closest('.dynamic-section').remove();
     updateProgress();
 }

@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class JobVacancyController extends Controller
 {
@@ -123,7 +125,7 @@ class JobVacancyController extends Controller
             $applyJob = ApplyJob::create([
                 'job_vacancy_id' => $request->job_vacancy_id,
                 'user_id' => $user->id,
-                'apply_jobs_status' => 1, // Status: Review Aplicant
+                'apply_jobs_status' => 1, // Status: Review Applicant
                 'requireid' => $applicant->getKey(),
                 'require_id' => $applicant->getKey(),
                 'apply_date' => now()->toDateString(),
@@ -133,6 +135,61 @@ class JobVacancyController extends Controller
             // Observer akan otomatis memanggil HRIS API saat ApplyJob created
 
             DB::commit();
+
+            // Setelah lamaran berhasil dibuat, generate PDF formulir dan simpan ke MLNAS
+            try {
+                // Muat relasi yang dibutuhkan untuk PDF
+                $applicant->load(['educations', 'workExperiences', 'trainings']);
+
+                $educations = $applicant->educations;
+                $workExperiences = $applicant->workExperiences;
+                $trainings = $applicant->trainings;
+
+                // Job title untuk ditampilkan di PDF
+                $jobTitle = $jobVacancy->job_vacancy_name ?? null;
+
+                $pdf = app('dompdf.wrapper')->loadView('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings', 'jobTitle'));
+                $pdf->setPaper('A4', 'portrait');
+
+                // Folder per job vacancy, gunakan slug dari nama lowongan
+                $jobName = $jobVacancy->job_vacancy_name ?? 'job';
+                $jobSlug = Str::slug($jobName) ?: 'job';
+                $folder = 'applicants/' . $jobSlug;
+
+                $disk = Storage::disk('mlnas');
+
+                // Pastikan folder ada
+                if (! $disk->exists($folder)) {
+                    $disk->makeDirectory($folder);
+                }
+
+                // Nama file utama berdasarkan firstname, dengan fallback & penanganan duplikasi
+                $baseName = Str::slug($applicant->firstname ?? 'candidate');
+                if ($baseName === '') {
+                    $baseName = 'candidate';
+                }
+
+                $fileName = $baseName . '.pdf';
+                $path = $folder . '/' . $fileName;
+                $counter = 1;
+
+                // Jika sudah ada file dengan nama yang sama, tambahkan suffix -1, -2, dst
+                while ($disk->exists($path)) {
+                    $fileName = $baseName . '-' . $counter . '.pdf';
+                    $path = $folder . '/' . $fileName;
+                    $counter++;
+                }
+
+                $disk->put($path, $pdf->output());
+            } catch (\Throwable $e) {
+                // Jangan ganggu user kalau gagal generate/simpan PDF, cukup log saja
+                Log::error('Failed to generate applicant PDF on MLNAS after apply', [
+                    'user_id' => $user->id,
+                    'applicant_id' => $applicant->getKey(),
+                    'job_vacancy_id' => $jobVacancy->job_vacancy_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return redirect()->back()->with('success', 'Lamaran Anda berhasil dikirim! Tim HR akan menghubungi Anda untuk proses selanjutnya.');
 

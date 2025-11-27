@@ -220,6 +220,62 @@ class ApplicantController extends Controller
             $validated['LastName'] = '';
         }
 
+        $referencesInput = $request->input('references', []);
+        $refValues = [
+            'ref1_name' => null,
+            'ref1_address_phone' => null,
+            'ref1_occupation' => null,
+            'ref1_relationship' => null,
+            'ref2_name' => null,
+            'ref2_address_phone' => null,
+            'ref2_occupation' => null,
+            'ref2_relationship' => null,
+            'ref3_name' => null,
+            'ref3_address_phone' => null,
+            'ref3_occupation' => null,
+            'ref3_relationship' => null,
+        ];
+
+        $refIndex = 1;
+        foreach ($referencesInput as $ref) {
+            if ($refIndex > 3) {
+                break;
+            }
+
+            $refValues["ref{$refIndex}_name"] = $ref['Name'] ?? null;
+            $refValues["ref{$refIndex}_address_phone"] = $ref['AddressPhone'] ?? null;
+            $refValues["ref{$refIndex}_occupation"] = $ref['Occupation'] ?? null;
+            $refValues["ref{$refIndex}_relationship"] = $ref['Relationship'] ?? null;
+
+            $refIndex++;
+        }
+
+        $emergencyInput = $request->input('emergency_contacts', []);
+        $emergencyValues = [
+            'emergency1_name' => null,
+            'emergency1_address' => null,
+            'emergency1_phone' => null,
+            'emergency1_relationship' => null,
+            'emergency2_name' => null,
+            'emergency2_address' => null,
+            'emergency2_phone' => null,
+            'emergency2_relationship' => null,
+        ];
+
+        $emIndex = 1;
+        foreach ($emergencyInput as $contact) {
+            if ($emIndex > 2) {
+                break;
+            }
+
+            $emergencyValues["emergency{$emIndex}_name"] = $contact['Name'] ?? null;
+            $emergencyValues["emergency{$emIndex}_address"] = $contact['Address'] ?? null;
+            $emergencyValues["emergency{$emIndex}_phone"] = $contact['Phone'] ?? null;
+            $emergencyValues["emergency{$emIndex}_relationship"] = $contact['Relationship'] ?? null;
+
+            $emIndex++;
+        }
+
         // Map PascalCase form inputs to lowercase model attributes for PostgreSQL
         $modelData = [
             'firstname' => $validated['FirstName'],
@@ -239,27 +295,27 @@ class ApplicantController extends Controller
             'marital_status' => $validated['MaritalStatus'] ?? null,
             'is_fresh_graduate' => $isFreshGraduate,
             // References
-            'ref1_name' => $validated['Ref1Name'] ?? null,
-            'ref1_address_phone' => $validated['Ref1AddressPhone'] ?? null,
-            'ref1_occupation' => $validated['Ref1Occupation'] ?? null,
-            'ref1_relationship' => $validated['Ref1Relationship'] ?? null,
-            'ref2_name' => $validated['Ref2Name'] ?? null,
-            'ref2_address_phone' => $validated['Ref2AddressPhone'] ?? null,
-            'ref2_occupation' => $validated['Ref2Occupation'] ?? null,
-            'ref2_relationship' => $validated['Ref2Relationship'] ?? null,
-            'ref3_name' => $validated['Ref3Name'] ?? null,
-            'ref3_address_phone' => $validated['Ref3AddressPhone'] ?? null,
-            'ref3_occupation' => $validated['Ref3Occupation'] ?? null,
-            'ref3_relationship' => $validated['Ref3Relationship'] ?? null,
+            'ref1_name' => $refValues['ref1_name'],
+            'ref1_address_phone' => $refValues['ref1_address_phone'],
+            'ref1_occupation' => $refValues['ref1_occupation'],
+            'ref1_relationship' => $refValues['ref1_relationship'],
+            'ref2_name' => $refValues['ref2_name'],
+            'ref2_address_phone' => $refValues['ref2_address_phone'],
+            'ref2_occupation' => $refValues['ref2_occupation'],
+            'ref2_relationship' => $refValues['ref2_relationship'],
+            'ref3_name' => $refValues['ref3_name'],
+            'ref3_address_phone' => $refValues['ref3_address_phone'],
+            'ref3_occupation' => $refValues['ref3_occupation'],
+            'ref3_relationship' => $refValues['ref3_relationship'],
             // Emergency contacts
-            'emergency1_name' => $validated['Emergency1Name'] ?? null,
-            'emergency1_address' => $validated['Emergency1Address'] ?? null,
-            'emergency1_phone' => $validated['Emergency1Phone'] ?? null,
-            'emergency1_relationship' => $validated['Emergency1Relationship'] ?? null,
-            'emergency2_name' => $validated['Emergency2Name'] ?? null,
-            'emergency2_address' => $validated['Emergency2Address'] ?? null,
-            'emergency2_phone' => $validated['Emergency2Phone'] ?? null,
-            'emergency2_relationship' => $validated['Emergency2Relationship'] ?? null,
+            'emergency1_name' => $emergencyValues['emergency1_name'],
+            'emergency1_address' => $emergencyValues['emergency1_address'],
+            'emergency1_phone' => $emergencyValues['emergency1_phone'],
+            'emergency1_relationship' => $emergencyValues['emergency1_relationship'],
+            'emergency2_name' => $emergencyValues['emergency2_name'],
+            'emergency2_address' => $emergencyValues['emergency2_address'],
+            'emergency2_phone' => $emergencyValues['emergency2_phone'],
+            'emergency2_relationship' => $emergencyValues['emergency2_relationship'],
             // Extra questions
             'q11_willing_outside_jakarta' => array_key_exists('Q11WillingOutsideJakarta', $validated)
                 ? (bool) $validated['Q11WillingOutsideJakarta']
@@ -460,6 +516,91 @@ class ApplicantController extends Controller
             $validated['LastName'] = '';
         }
 
+        // Build references values from dynamic array first, fallback ke field lama jika kosong
+        $referencesInput = $request->input('references', []);
+        $refValues = [
+            'ref1_name' => $applicant->ref1_name,
+            'ref1_address_phone' => $applicant->ref1_address_phone,
+            'ref1_occupation' => $applicant->ref1_occupation,
+            'ref1_relationship' => $applicant->ref1_relationship,
+            'ref2_name' => $applicant->ref2_name,
+            'ref2_address_phone' => $applicant->ref2_address_phone,
+            'ref2_occupation' => $applicant->ref2_occupation,
+            'ref2_relationship' => $applicant->ref2_relationship,
+            'ref3_name' => $applicant->ref3_name,
+            'ref3_address_phone' => $applicant->ref3_address_phone,
+            'ref3_occupation' => $applicant->ref3_occupation,
+            'ref3_relationship' => $applicant->ref3_relationship,
+        ];
+
+        if (!empty($referencesInput)) {
+            $refIndex = 1;
+            foreach ($referencesInput as $ref) {
+                if ($refIndex > 3) {
+                    break;
+                }
+
+                $refValues["ref{$refIndex}_name"] = $ref['Name'] ?? null;
+                $refValues["ref{$refIndex}_address_phone"] = $ref['AddressPhone'] ?? null;
+                $refValues["ref{$refIndex}_occupation"] = $ref['Occupation'] ?? null;
+                $refValues["ref{$refIndex}_relationship"] = $ref['Relationship'] ?? null;
+
+                $refIndex++;
+            }
+        } else {
+            // Fallback ke field lama jika tidak ada input dinamis
+            $refValues['ref1_name'] = $validated['Ref1Name'] ?? $applicant->ref1_name;
+            $refValues['ref1_address_phone'] = $validated['Ref1AddressPhone'] ?? $applicant->ref1_address_phone;
+            $refValues['ref1_occupation'] = $validated['Ref1Occupation'] ?? $applicant->ref1_occupation;
+            $refValues['ref1_relationship'] = $validated['Ref1Relationship'] ?? $applicant->ref1_relationship;
+            $refValues['ref2_name'] = $validated['Ref2Name'] ?? $applicant->ref2_name;
+            $refValues['ref2_address_phone'] = $validated['Ref2AddressPhone'] ?? $applicant->ref2_address_phone;
+            $refValues['ref2_occupation'] = $validated['Ref2Occupation'] ?? $applicant->ref2_occupation;
+            $refValues['ref2_relationship'] = $validated['Ref2Relationship'] ?? $applicant->ref2_relationship;
+            $refValues['ref3_name'] = $validated['Ref3Name'] ?? $applicant->ref3_name;
+            $refValues['ref3_address_phone'] = $validated['Ref3AddressPhone'] ?? $applicant->ref3_address_phone;
+            $refValues['ref3_occupation'] = $validated['Ref3Occupation'] ?? $applicant->ref3_occupation;
+            $refValues['ref3_relationship'] = $validated['Ref3Relationship'] ?? $applicant->ref3_relationship;
+        }
+
+        // Build emergency contacts from dynamic array first, fallback ke field lama jika kosong
+        $emergencyInput = $request->input('emergency_contacts', []);
+        $emergencyValues = [
+            'emergency1_name' => $applicant->emergency1_name,
+            'emergency1_address' => $applicant->emergency1_address,
+            'emergency1_phone' => $applicant->emergency1_phone,
+            'emergency1_relationship' => $applicant->emergency1_relationship,
+            'emergency2_name' => $applicant->emergency2_name,
+            'emergency2_address' => $applicant->emergency2_address,
+            'emergency2_phone' => $applicant->emergency2_phone,
+            'emergency2_relationship' => $applicant->emergency2_relationship,
+        ];
+
+        if (!empty($emergencyInput)) {
+            $emIndex = 1;
+            foreach ($emergencyInput as $contact) {
+                if ($emIndex > 2) {
+                    break;
+                }
+
+                $emergencyValues["emergency{$emIndex}_name"] = $contact['Name'] ?? null;
+                $emergencyValues["emergency{$emIndex}_address"] = $contact['Address'] ?? null;
+                $emergencyValues["emergency{$emIndex}_phone"] = $contact['Phone'] ?? null;
+                $emergencyValues["emergency{$emIndex}_relationship"] = $contact['Relationship'] ?? null;
+
+                $emIndex++;
+            }
+        } else {
+            $emergencyValues['emergency1_name'] = $validated['Emergency1Name'] ?? $applicant->emergency1_name;
+            $emergencyValues['emergency1_address'] = $validated['Emergency1Address'] ?? $applicant->emergency1_address;
+            $emergencyValues['emergency1_phone'] = $validated['Emergency1Phone'] ?? $applicant->emergency1_phone;
+            $emergencyValues['emergency1_relationship'] = $validated['Emergency1Relationship'] ?? $applicant->emergency1_relationship;
+            $emergencyValues['emergency2_name'] = $validated['Emergency2Name'] ?? $applicant->emergency2_name;
+            $emergencyValues['emergency2_address'] = $validated['Emergency2Address'] ?? $applicant->emergency2_address;
+            $emergencyValues['emergency2_phone'] = $validated['Emergency2Phone'] ?? $applicant->emergency2_phone;
+            $emergencyValues['emergency2_relationship'] = $validated['Emergency2Relationship'] ?? $applicant->emergency2_relationship;
+        }
+
         // Map PascalCase form inputs to lowercase model attributes for PostgreSQL
         $modelData = [
             'firstname' => $validated['FirstName'],
@@ -475,28 +616,28 @@ class ApplicantController extends Controller
             'phone' => $validated['Phone'],
             'marital_status' => $validated['MaritalStatus'] ?? $applicant->marital_status,
             'is_fresh_graduate' => $isFreshGraduate,
-            // References
-            'ref1_name' => $validated['Ref1Name'] ?? $applicant->ref1_name,
-            'ref1_address_phone' => $validated['Ref1AddressPhone'] ?? $applicant->ref1_address_phone,
-            'ref1_occupation' => $validated['Ref1Occupation'] ?? $applicant->ref1_occupation,
-            'ref1_relationship' => $validated['Ref1Relationship'] ?? $applicant->ref1_relationship,
-            'ref2_name' => $validated['Ref2Name'] ?? $applicant->ref2_name,
-            'ref2_address_phone' => $validated['Ref2AddressPhone'] ?? $applicant->ref2_address_phone,
-            'ref2_occupation' => $validated['Ref2Occupation'] ?? $applicant->ref2_occupation,
-            'ref2_relationship' => $validated['Ref2Relationship'] ?? $applicant->ref2_relationship,
-            'ref3_name' => $validated['Ref3Name'] ?? $applicant->ref3_name,
-            'ref3_address_phone' => $validated['Ref3AddressPhone'] ?? $applicant->ref3_address_phone,
-            'ref3_occupation' => $validated['Ref3Occupation'] ?? $applicant->ref3_occupation,
-            'ref3_relationship' => $validated['Ref3Relationship'] ?? $applicant->ref3_relationship,
-            // Emergency contacts
-            'emergency1_name' => $validated['Emergency1Name'] ?? $applicant->emergency1_name,
-            'emergency1_address' => $validated['Emergency1Address'] ?? $applicant->emergency1_address,
-            'emergency1_phone' => $validated['Emergency1Phone'] ?? $applicant->emergency1_phone,
-            'emergency1_relationship' => $validated['Emergency1Relationship'] ?? $applicant->emergency1_relationship,
-            'emergency2_name' => $validated['Emergency2Name'] ?? $applicant->emergency2_name,
-            'emergency2_address' => $validated['Emergency2Address'] ?? $applicant->emergency2_address,
-            'emergency2_phone' => $validated['Emergency2Phone'] ?? $applicant->emergency2_phone,
-            'emergency2_relationship' => $validated['Emergency2Relationship'] ?? $applicant->emergency2_relationship,
+            // References (handle dynamic references array)
+            'ref1_name' => $refValues['ref1_name'],
+            'ref1_address_phone' => $refValues['ref1_address_phone'],
+            'ref1_occupation' => $refValues['ref1_occupation'],
+            'ref1_relationship' => $refValues['ref1_relationship'],
+            'ref2_name' => $refValues['ref2_name'],
+            'ref2_address_phone' => $refValues['ref2_address_phone'],
+            'ref2_occupation' => $refValues['ref2_occupation'],
+            'ref2_relationship' => $refValues['ref2_relationship'],
+            'ref3_name' => $refValues['ref3_name'],
+            'ref3_address_phone' => $refValues['ref3_address_phone'],
+            'ref3_occupation' => $refValues['ref3_occupation'],
+            'ref3_relationship' => $refValues['ref3_relationship'],
+            // Emergency Contacts (handle dynamic emergency_contacts array)
+            'emergency1_name' => $emergencyValues['emergency1_name'],
+            'emergency1_address' => $emergencyValues['emergency1_address'],
+            'emergency1_phone' => $emergencyValues['emergency1_phone'],
+            'emergency1_relationship' => $emergencyValues['emergency1_relationship'],
+            'emergency2_name' => $emergencyValues['emergency2_name'],
+            'emergency2_address' => $emergencyValues['emergency2_address'],
+            'emergency2_phone' => $emergencyValues['emergency2_phone'],
+            'emergency2_relationship' => $emergencyValues['emergency2_relationship'],
             // Extra questions
             'q11_willing_outside_jakarta' => array_key_exists('Q11WillingOutsideJakarta', $validated)
                 ? (bool) $validated['Q11WillingOutsideJakarta']
@@ -798,28 +939,16 @@ class ApplicantController extends Controller
         $educations = $applicant->educations;
         $workExperiences = $applicant->workExperiences;
         $trainings = $applicant->trainings;
-            
-        return view('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
-    }
+        
+        // Ambil job vacancy yang dilamar (jika ada) untuk ditampilkan di print view
+        $applyJob = \App\Models\ApplyJob::where('requireid', $applicant->getKey())
+            ->with('jobVacancy')
+            ->latest('apply_date')
+            ->first();
 
-    public function generatePDF($id)
-    {
-        $user = auth()->user();
-        $applicant = Applicant::where('requireid', $id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-        
-        // Get existing data from database
-        $educations = $applicant->educations;
-        $workExperiences = $applicant->workExperiences;
-        $trainings = $applicant->trainings;
-        
-        $pdf = app('dompdf.wrapper')->loadView('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
-        $pdf->setPaper('A4', 'portrait');
-        
-        $filename = 'Formulir_Lamaran_' . $applicant->firstname . '_' . $applicant->lastname . '.pdf';
-        
-        return $pdf->download($filename);
+        $jobTitle = $applyJob?->jobVacancy?->job_vacancy_name ?? null;
+
+        return view('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings', 'jobTitle'));
     }
 
     // Admin methods for viewing applicant data
@@ -853,8 +982,16 @@ class ApplicantController extends Controller
         $educations = $applicant->educations;
         $workExperiences = $applicant->workExperiences;
         $trainings = $applicant->trainings;
+
+        // Ambil job vacancy yang dilamar (jika ada) untuk ditampilkan di print view admin
+        $applyJob = \App\Models\ApplyJob::where('requireid', $applicant->getKey())
+            ->with('jobVacancy')
+            ->latest('apply_date')
+            ->first();
+
+        $jobTitle = $applyJob?->jobVacancy?->job_vacancy_name ?? null;
             
-        return view('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+        return view('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings', 'jobTitle'));
     }
 
     public function generatePDFAdmin($id)
@@ -871,7 +1008,15 @@ class ApplicantController extends Controller
         $workExperiences = $applicant->workExperiences;
         $trainings = $applicant->trainings;
         
-        $pdf = app('dompdf.wrapper')->loadView('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings'));
+        // Ambil job vacancy yang dilamar (jika ada) untuk ditampilkan di PDF admin
+        $applyJob = \App\Models\ApplyJob::where('requireid', $applicant->getKey())
+            ->with('jobVacancy')
+            ->latest('apply_date')
+            ->first();
+
+        $jobTitle = $applyJob?->jobVacancy?->job_vacancy_name ?? null;
+
+        $pdf = app('dompdf.wrapper')->loadView('applicant.pdf_complete', compact('applicant', 'educations', 'workExperiences', 'trainings', 'jobTitle'));
         $pdf->setPaper('A4', 'portrait');
         
         $filename = 'Formulir_Lamaran_' . $applicant->firstname . '_' . $applicant->lastname . '.pdf';

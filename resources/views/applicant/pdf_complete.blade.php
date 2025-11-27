@@ -8,11 +8,18 @@
     <style>
         
         body {
-            font-family: Arial, sans-serif;
+            /* DejaVu Sans is bundled with DomPDF and supports wider Unicode, preventing '?' boxes */
+            font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 9px;
             line-height: 1.2;
             margin: 0;
             padding: 10px;
+        }
+
+        /* Make DomPDF and browser print use the same page size & margins */
+        @page {
+            margin: 0.5in 0.5in 0.2in 0.5in;
+            size: A4;
         }
         
         .header {
@@ -98,12 +105,8 @@
             font-weight: bold;
         }
         
-        /* Hide URL when printing */
+        /* Hide URL when printing in browser */
         @media print {
-            @page {
-                margin: 0.5in 0.5in 0.2in 0.5in;
-                size: A4;
-            }
             
             /* Hide browser URL and other print elements */
             body {
@@ -159,7 +162,7 @@
     <!-- Jabatan -->
     <div class="form-row">
         <strong>Jabatan Yang Dilamar (Type of position desired) :</strong> 
-        <span class="underline"></span>
+        <span class="underline">{{ $jobTitle ?? '' }}</span>
     </div>
 
     <!-- SECTION I: DATA PRIBADI -->
@@ -360,6 +363,16 @@
     <div class="section">
         <div class="section-title">III. RIWAYAT PENDIDIKAN (Formal & Informal Education Record)</div>
         
+        @php
+            // Ambil mapping education_id => nama level dari HRIS
+            try {
+                $hrisService = app(\App\Services\HrisApiService::class);
+                $hrisEducations = $hrisService->getAllEducations() ?? [];
+            } catch (\Throwable $e) {
+                $hrisEducations = [];
+            }
+        @endphp
+
         <table>
             <tr style="background-color: #f0f0f0;">
                 <th style="width: 15%;"><strong>TINGKAT</strong><br>(Level)</th>
@@ -370,12 +383,24 @@
                 <th style="width: 10%;"><strong>SAMPAI</strong><br>(To)</th>
                 <th style="width: 10%;"><strong>GELAR</strong><br>(Academic Title)</th>
             </tr>
-            <tr style="height: 30px;"><td>SD (Elementary)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 30px;"><td>SLTP (Jr.High School)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 30px;"><td>SMU (Sr.High School)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 30px;"><td>D 3 (Diploma Degree)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 30px;"><td>S 1 (Bachelor Degree)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 30px;"><td>S 2 (Master Degree)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            @foreach($educations as $education)
+            @php
+                $eduId = $education->education_id ?? null;
+                $eduName = ($eduId && isset($hrisEducations[$eduId])) ? $hrisEducations[$eduId] : '';
+            @endphp
+            <tr style="height: 30px;">
+                <td>{{ $eduName }}</td>
+                <td>{{ $education->institutionname ?? '' }}</td>
+                <td></td>
+                <td>{{ $education->major ?? '' }}</td>
+                <td>{{ $education->startdate ? \Carbon\Carbon::parse($education->startdate)->format('Y') : '' }}</td>
+                <td>{{ $education->enddate ? \Carbon\Carbon::parse($education->enddate)->format('Y') : '' }}</td>
+                <td></td>
+            </tr>
+            @endforeach
+            @for($i = count($educations); $i < 6; $i++)
+            <tr style="height: 30px;"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            @endfor
         </table>
 
         <div style="margin-top: 15px;">
@@ -531,6 +556,10 @@
                 <strong>ALASAN KELUAR (Reason for Leaving):</strong><br>
                 {{ $work->eexp_comments ?? '' }}
             </div>
+            <div style="margin-top: 5px; border: 1px solid #000; padding: 8px; min-height: 50px;">
+                <strong>TUGAS DAN TANGGUNG JAWAB PADA JABATAN TERAKHIR:</strong><br>
+                {{ $work->jobdesk ?? '' }}
+            </div>
         </div>
         @endforeach
 
@@ -551,6 +580,9 @@
             </table>
             <div style="margin-top: 5px; border: 1px solid #000; padding: 8px; min-height: 50px;">
                 <strong>ALASAN KELUAR (Reason for Leaving):</strong><br>
+            </div>
+            <div style="margin-top: 5px; border: 1px solid #000; padding: 8px; min-height: 50px;">
+                <strong>TUGAS DAN TANGGUNG JAWAB PADA JABATAN TERAKHIR:</strong><br>
             </div>
         </div>
         @endfor
@@ -601,19 +633,23 @@
                 <th style="width: 25%;"><strong>TELEPON</strong><br>(Telephone)</th>
                 <th style="width: 25%;"><strong>HUBUNGAN</strong><br>(Relationship)</th>
             </tr>
-            <tr style="height: 35px;"><td></td><td></td><td></td><td></td></tr>
-            <tr style="height: 35px;"><td></td><td></td><td></td><td></td></tr>
+            <tr style="height: 35px;">
+                <td>{{ $applicant->emergency1_name ?? '' }}</td>
+                <td>{{ $applicant->emergency1_address ?? '' }}</td>
+                <td>{{ $applicant->emergency1_phone ?? '' }}</td>
+                <td>{{ $applicant->emergency1_relationship ?? '' }}</td>
+            </tr>
+            <tr style="height: 35px;">
+                <td>{{ $applicant->emergency2_name ?? '' }}</td>
+                <td>{{ $applicant->emergency2_address ?? '' }}</td>
+                <td>{{ $applicant->emergency2_phone ?? '' }}</td>
+                <td>{{ $applicant->emergency2_relationship ?? '' }}</td>
+            </tr>
         </table>
     </div>
 
     <!-- SECTION XII: TUGAS DAN TANGGUNG JAWAB -->
-    <div class="section">
-        <div class="section-title">XII. TUGAS DAN TANGGUNG JAWAB PADA JABATAN TERAKHIR</div>
-        <p style="font-size: 8px; font-style: italic;">(Your Task and Responsibility in last position)</p>
-        <table>
-            <tr><td style="height: 80px; border: 1px solid #000; padding: 10px;"></td></tr>
-        </table>
-    </div>
+    
 
     <!-- SECTION XIII: STRUKTUR ORGANISASI -->
     <div class="section">

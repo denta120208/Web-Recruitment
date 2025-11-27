@@ -503,6 +503,104 @@
             </div>
         </div>  
 
+        <!-- References Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-people-fill me-2"></i>
+                            Referensi
+                        </h3>
+                        <button type="button" class="btn btn-light btn-sm" id="addReference">
+                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-3">Mohon isi data referensi yang dapat dihubungi (mantan atasan, rekan kerja, atau dosen).</p>
+                        <div id="referencesContainer">
+                            <!-- Reference items will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contacts Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-telephone-forward-fill me-2"></i>
+                            Kontak Darurat
+                        </h3>
+                        <button type="button" class="btn btn-light btn-sm" id="addEmergencyContact">
+                            <i class="bi bi-plus-circle-fill me-1"></i>Tambah
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-3">Orang yang dapat dihubungi dalam keadaan darurat.</p>
+                        <div id="emergencyContactsContainer">
+                            <!-- Emergency contact items will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Questions Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card section-card">
+                    <div class="section-header">
+                        <h3 class="mb-0">
+                            <i class="bi bi-question-circle-fill me-2"></i>
+                            Pertanyaan Tambahan
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label d-block">11. Apakah anda bersedia ditempatkan diluar kota Jakarta?</label>
+                            @php $q11Old = old('Q11WillingOutsideJakarta'); @endphp
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="Q11WillingOutsideJakarta" id="Q11Yes" value="1" {{ $q11Old === '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="Q11Yes">Ya</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="Q11WillingOutsideJakarta" id="Q11No" value="0" {{ $q11Old === '0' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="Q11No">Tidak</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Q14CurrentIncome" class="form-label">14. Berapa penghasilan & fasilitas apa yang anda terima saat ini?</label>
+                            <input type="text" class="form-control @error('Q14CurrentIncome') is-invalid @enderror" id="Q14CurrentIncome" name="Q14CurrentIncome" placeholder="Contoh: Rp 8.000.000/bulan + tunjangan transport & makan" value="{{ old('Q14CurrentIncome') }}">
+                            @error('Q14CurrentIncome')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Q15ExpectedIncome" class="form-label">15. Berapa penghasilan & fasilitas apa yang anda harapkan?</label>
+                            <input type="text" class="form-control @error('Q15ExpectedIncome') is-invalid @enderror" id="Q15ExpectedIncome" name="Q15ExpectedIncome" placeholder="Contoh: Rp 10.000.000/bulan + tunjangan transport & makan" value="{{ old('Q15ExpectedIncome') }}">
+                            @error('Q15ExpectedIncome')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Q16AvailableFrom" class="form-label">16. Kapankah anda siap untuk bekerja di perusahaan ini?</label>
+                            <input type="text" class="form-control @error('Q16AvailableFrom') is-invalid @enderror" id="Q16AvailableFrom" name="Q16AvailableFrom" placeholder="Contoh: Segera, 1 bulan lagi, 1 Januari 2026" value="{{ old('Q16AvailableFrom') }}">
+                            @error('Q16AvailableFrom')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Submit Button -->
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
@@ -526,6 +624,8 @@ $(document).ready(function() {
     // Education data from HRIS API
     const educationsData = @json($hrisEducations ?? []);
     
+    let referenceCount = 0;
+    let emergencyContactCount = 0;
     let workExpCount = 0;
     let educationCount = 0;
     let trainingCount = 0;
@@ -587,12 +687,92 @@ $(document).ready(function() {
 
     toggleFreshGraduateUi();
 
+    // Add reference
+    $('#addReference').click(function() {
+        referenceCount++;
+        const referenceHtml = `
+            <div class="dynamic-section position-relative mb-3" data-index="${referenceCount}">
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeReference(this)">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][Name]" placeholder="Nama">
+                            <label>Nama</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][AddressPhone]" placeholder="Alamat & Telepon">
+                            <label>Alamat & Telepon</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][Occupation]" placeholder="Pekerjaan">
+                            <label>Pekerjaan</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="references[${referenceCount}][Relationship]" placeholder="Hubungan">
+                            <label>Hubungan</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('#referencesContainer').append(referenceHtml);
+        updateProgress();
+    });
+
+    // Add emergency contact
+    $('#addEmergencyContact').click(function() {
+        emergencyContactCount++;
+        const emergencyHtml = `
+            <div class="dynamic-section position-relative mb-3" data-index="${emergencyContactCount}">
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeEmergencyContact(this)">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Name]" placeholder="Nama">
+                            <label>Nama</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Address]" placeholder="Alamat">
+                            <label>Alamat</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Phone]" placeholder="Telepon">
+                            <label>Telepon</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="emergency_contacts[${emergencyContactCount}][Relationship]" placeholder="Hubungan">
+                            <label>Hubungan</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('#emergencyContactsContainer').append(emergencyHtml);
+        updateProgress();
+    });
+
     // Add work experience
     $('#addWorkExperience').click(function() {
         workExpCount++;
         const workExpHtml = `
             <div class="dynamic-section position-relative" data-index="${workExpCount}">
-                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeWorkExperience(${workExpCount})">
+                <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeWorkExperience(this)">
                     <i class="bi bi-x-circle-fill"></i>
                 </button>
                 <div class="row g-3">
@@ -910,29 +1090,28 @@ $(document).ready(function() {
 });
 
 // Remove functions
-function removeWorkExperience(index) {
-    $(`.dynamic-section[data-index="${index}"]`).remove();
+function removeWorkExperience(button) {
+    $(button).closest('.dynamic-section').remove();
     updateProgress();
 }
 
-// Toggle EndDate disabled/cleared when 'is current' checkbox is checked
-function toggleCurrent(el, index) {
-    var $section = $(`.dynamic-section[data-index="${index}"]`);
-    var $end = $section.find(`input[name="work_experiences[${index}][EndDate]"]`);
-    if ($(el).is(':checked')) {
-        $end.val('').prop('disabled', true);
-    } else {
-        $end.prop('disabled', false);
-    }
-}
-
-function removeEducation(index) {
-    $(`.dynamic-section[data-index="${index}"]`).remove();
+function removeEducation(button) {
+    $(button).closest('.dynamic-section').remove();
     updateProgress();
 }
 
-function removeTraining(index) {
-    $(`.dynamic-section[data-index="${index}"]`).remove();
+function removeTraining(button) {
+    $(button).closest('.dynamic-section').remove();
+    updateProgress();
+}
+
+function removeReference(button) {
+    $(button).closest('.dynamic-section').remove();
+    updateProgress();
+}
+
+function removeEmergencyContact(button) {
+    $(button).closest('.dynamic-section').remove();
     updateProgress();
 }
 
