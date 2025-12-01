@@ -72,6 +72,18 @@ return [
             'report' => false,
         ],
 
+        'career' => [
+            'driver' => 'sftp',
+            'host' => '192.168.200.87',
+            'username' => 'career',
+            'password' => 'pZH8pNBAZXp5H4y',
+            'port' => 2022,
+            'ssl' => false,
+            'root' => '/',
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

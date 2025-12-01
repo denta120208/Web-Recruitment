@@ -950,7 +950,7 @@
         }
     </style>
 </head>
-<body oncontextmenu="return false">
+<body>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
@@ -1158,10 +1158,10 @@ Anda wajib melaporkan kepada Perusahaan bila Anda kehilangan kendali atas akun A
                         <ol class="mb-2" style="padding-left: 1.2rem;">
                             <li>Dalam hal adanya pemeliharaan atau perawatan secara berkala atau keadaan darurat atau peningkatan peralatan dan sistem untuk publikasi Situs.</li>
                             <li>Dalam hal layanan atau penampilan Situs sulit untuk dilaksanakan karena hal-hal yang berada di luar kendali Perusahaan seperti kebakaran, mati listrik, bencana alam, keadaan perang atau darurat sipil/militer, gangguan telekomunikasi (termasuk pemutusan jaringan internet) dan lain sebagainya yang berada di luar kendali Perusahaan.</li>
-                            <li>Dalam hal layanan telekomunikasi tidak disediakan oleh operator telekomunikasi.</li>
+                            <li>Layanan telekomunikasi tidak disediakan oleh operator telekomunikasi.</li>
                             <li>Saat Perusahaan telah menetapkan penangguhan sementara atau pemberhentian Situs dibutuhkan untuk operasional atau alasan-alasan teknis, atau Perusahaan telah menetapkan atas keadaan yang tidak terduga, maka layanan atau penampilan Situs terlalu sulit untuk dilakukan.</li>
                             <li>Dalam hal adanya perintah dari aparat yang berwenang dan/ atau suatu putusan pengadilan berdasarkan hukum dan/atau peraturan perundang-undangan yang berlaku.</li>
-                            <li>Dalam hal Perusahaan memiliki alasan untuk percaya bahwa suatu serangan siber atau gangguan keamanan atas sistem yang kredibel telah, sedang, atau akan terjadi dalam waktu dekat.</li>
+                            <li>Perusahaan memiliki alasan untuk percaya bahwa suatu serangan siber atau gangguan keamanan atas sistem yang kredibel telah, sedang, atau akan terjadi dalam waktu dekat.</li>
                         </ol>
                         <p class="mb-2" style="text-align: justify;">Dalam hal setiap kerugian atau kerusakan terjadi pada Anda atau pihak ketiga karena penangguhan sementara atau penghentian Situs atau penampilan Situs, ketentuan Pasal 10 akan berlaku.</p>
                         <p class="mb-2" style="text-align: justify;">Anda dapat mengakhiri penggunaan Situs dengan menghapus Akun Anda yang telah didaftarkan dan diakses dalam perangkat yang digunakan.</p>
@@ -1525,28 +1525,10 @@ Jika dengan alasan apapun Anda menyampaikan, mengirimkan, mendistribusikan atau 
         });
     </script>
     
-    <!-- Disable Inspect Element Protection -->
     <script type="text/javascript">
-        document.onkeydown = (e) => {
-            if (e.key === 123) {
-                e.preventDefault();
-            }
-            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-                e.preventDefault();
-            }
-            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-                e.preventDefault();
-            }
-            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
-                e.preventDefault();
-            }
-            if (e.ctrlKey && e.key === 'U') {
-                e.preventDefault();
-            }
-            if (e.key === 'F12') {
-                e.preventDefault();
-            }
-        };
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('resize', function(){ alignToggleButtons(); });
+        });
     </script>
 </body>
 </html>

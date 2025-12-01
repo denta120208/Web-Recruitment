@@ -132,20 +132,41 @@ class ApplicantController extends Controller
             $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
 
             try {
-                $path = $file->storeAs('applicants/cv', $sanitized, 'mlnas');
+                \Log::info('Uploading CV to career disk', [
+                    'disk' => 'career',
+                    'original_name' => $originalName,
+                    'sanitized_name' => $sanitized,
+                    'user_id' => $user->id ?? null,
+                ]);
+
+                $path = $file->storeAs('applicants/cv', $sanitized, 'career');
                 if ($path === false) {
                     throw new \Exception('Storage returned false');
                 }
                 $validated['CVPath'] = $path;
-                $uploaded[] = ['disk' => 'mlnas', 'path' => $path];
+                $uploaded[] = ['disk' => 'career', 'path' => $path];
+
+                \Log::info('Successfully uploaded CV to career disk', [
+                    'disk' => 'career',
+                    'path' => $path,
+                    'user_id' => $user->id ?? null,
+                ]);
             } catch (\Exception $e) {
-                \Log::error('MLNAS CV upload failed: ' . $e->getMessage());
+                \Log::error('Career CV upload failed', [
+                    'disk' => 'career',
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
                 
                 foreach ($uploaded as $u) {
                     try {
                         Storage::disk($u['disk'])->delete($u['path']);
                     } catch (\Exception $ex) {
-                        \Log::warning('Failed to cleanup uploaded file after CV failure: ' . $ex->getMessage());
+                        \Log::warning('Failed to cleanup uploaded file after CV failure', [
+                            'disk' => $u['disk'],
+                            'path' => $u['path'],
+                            'error' => $ex->getMessage(),
+                        ]);
                     }
                 }
 
@@ -159,20 +180,41 @@ class ApplicantController extends Controller
             $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
 
             try {
-                $path = $file->storeAs('applicants/photos', $sanitized, 'mlnas');
+                \Log::info('Uploading photo to career disk', [
+                    'disk' => 'career',
+                    'original_name' => $originalName,
+                    'sanitized_name' => $sanitized,
+                    'user_id' => $user->id ?? null,
+                ]);
+
+                $path = $file->storeAs('applicants/photos', $sanitized, 'career');
                 if ($path === false) {
                     throw new \Exception('Storage returned false');
                 }
                 $validated['PhotoPath'] = $path;
-                $uploaded[] = ['disk' => 'mlnas', 'path' => $path];
+                $uploaded[] = ['disk' => 'career', 'path' => $path];
+
+                \Log::info('Successfully uploaded photo to career disk', [
+                    'disk' => 'career',
+                    'path' => $path,
+                    'user_id' => $user->id ?? null,
+                ]);
             } catch (\Exception $e) {
-                \Log::error('MLNAS Photo upload failed: ' . $e->getMessage());
+                \Log::error('Career photo upload failed', [
+                    'disk' => 'career',
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
                 
                 foreach ($uploaded as $u) {
                     try {
                         Storage::disk($u['disk'])->delete($u['path']);
                     } catch (\Exception $ex) {
-                        \Log::warning('Failed to cleanup uploaded file after Photo failure: ' . $ex->getMessage());
+                        \Log::warning('Failed to cleanup uploaded file after Photo failure', [
+                            'disk' => $u['disk'],
+                            'path' => $u['path'],
+                            'error' => $ex->getMessage(),
+                        ]);
                     }
                 }
 
@@ -464,7 +506,7 @@ class ApplicantController extends Controller
             $file = $request->file('CVPath');
             $originalName = $file->getClientOriginalName();
             $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
-            $path = $file->storeAs('applicants/cv', $sanitized, 'mlnas');
+            $path = $file->storeAs('applicants/cv', $sanitized, 'career');
             $validated['CVPath'] = $path;
         }
 
@@ -472,7 +514,7 @@ class ApplicantController extends Controller
             $file = $request->file('PhotoPath');
             $originalName = $file->getClientOriginalName();
             $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
-            $path = $file->storeAs('applicants/photos', $sanitized, 'mlnas');
+            $path = $file->storeAs('applicants/photos', $sanitized, 'career');
             $validated['PhotoPath'] = $path;
         }
 
@@ -738,14 +780,30 @@ class ApplicantController extends Controller
             abort(404);
         }
 
-        // Ensure path exists and is on the configured disk
-        if (empty($path) || !\Illuminate\Support\Facades\Storage::disk('mlnas')->exists($path)) {
+        if (empty($path)) {
+            abort(404);
+        }
+
+        // Try to locate the file on the new 'career' disk first, then fallback to legacy 'mlnas'
+        $disk = null;
+        foreach (['career', 'mlnas'] as $diskName) {
+            try {
+                $candidate = Storage::disk($diskName);
+                if ($candidate->exists($path)) {
+                    $disk = $candidate;
+                    break;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        if (! $disk) {
             abort(404);
         }
 
         // Stream the file inline (browser will render images/pdf)
         // We ignore the provided $filename to prevent path tampering
-        $disk = Storage::disk('mlnas');
         $stream = $disk->readStream($path);
         if ($stream === false) {
             abort(404);
@@ -787,8 +845,21 @@ class ApplicantController extends Controller
 
         if (!$isAllowed) abort(404);
 
-        $disk = Storage::disk('mlnas');
-        if (!$disk->exists($normalizedRequested)) abort(404);
+        // Try 'career' first, then 'mlnas' for backward compatibility
+        $disk = null;
+        foreach (['career', 'mlnas'] as $diskName) {
+            try {
+                $candidate = Storage::disk($diskName);
+                if ($candidate->exists($normalizedRequested)) {
+                    $disk = $candidate;
+                    break;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        if (! $disk) abort(404);
 
         $stream = $disk->readStream($normalizedRequested);
         if ($stream === false) abort(404);
@@ -826,8 +897,21 @@ class ApplicantController extends Controller
             abort(404);
         }
 
-        $disk = Storage::disk('mlnas');
-        if (! $disk->exists($path)) {
+        // Try 'career' first, then 'mlnas' for backward compatibility
+        $disk = null;
+        foreach (['career', 'mlnas'] as $diskName) {
+            try {
+                $candidate = Storage::disk($diskName);
+                if ($candidate->exists($path)) {
+                    $disk = $candidate;
+                    break;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        if (! $disk) {
             abort(404);
         }
 
@@ -1110,9 +1194,15 @@ class ApplicantController extends Controller
                 
                 Log::info('Deleted applicant files', ['user_id' => $userId, 'files' => $deletedFiles]);
 
-                // Delete applicant record
-                $applicant->delete();
-                Log::info('Deleted applicant record', ['user_id' => $userId, 'applicant_id' => $applicantId]);
+                // Soft delete applicant record (or hard delete if is_delete column does not exist)
+                if (Schema::hasColumn('require', 'is_delete')) {
+                    $applicant->is_delete = 1;
+                    $applicant->save();
+                    Log::info('Soft deleted applicant record (is_delete = 1)', ['user_id' => $userId, 'applicant_id' => $applicantId]);
+                } else {
+                    $applicant->delete();
+                    Log::info('Hard deleted applicant record (no is_delete column)', ['user_id' => $userId, 'applicant_id' => $applicantId]);
+                }
             } else {
                 Log::info('No applicant record found', ['user_id' => $userId]);
             }
@@ -1134,9 +1224,25 @@ class ApplicantController extends Controller
             }
             Log::info('Deleted user sessions', ['user_id' => $userId]);
 
-            // 5. Finally delete the user
-            $user->delete();
-            Log::info('Deleted user record', ['user_id' => $userId, 'email' => $userEmail]);
+            // 5. Soft delete the user (or hard delete if is_delete column does not exist)
+            if (Schema::hasColumn('users', 'is_delete')) {
+                $user->is_delete = 1;
+
+                // Simpan waktu kapan akun dihapus jika kolom tersedia
+                if (Schema::hasColumn('users', 'account_deleted_at')) {
+                    $user->account_deleted_at = now();
+                }
+
+                $user->save();
+                Log::info('Soft deleted user record (is_delete = 1)', [
+                    'user_id' => $userId,
+                    'email' => $userEmail,
+                    'account_deleted_at' => $user->account_deleted_at ?? null,
+                ]);
+            } else {
+                $user->delete();
+                Log::info('Hard deleted user record (no is_delete column)', ['user_id' => $userId, 'email' => $userEmail]);
+            }
 
             DB::commit();
             Log::info('Account deletion completed successfully', ['user_id' => $userId, 'email' => $userEmail]);

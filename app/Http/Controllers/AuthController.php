@@ -45,6 +45,11 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
+        // Exclude soft-deleted users if is_delete column exists
+        if (Schema::hasColumn('users', 'is_delete')) {
+            $credentials['is_delete'] = 0;
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended(route('applicant.create'));

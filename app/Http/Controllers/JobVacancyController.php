@@ -154,21 +154,26 @@ class JobVacancyController extends Controller
                 // Folder per job vacancy, gunakan slug dari nama lowongan
                 $jobName = $jobVacancy->job_vacancy_name ?? 'job';
                 $jobSlug = Str::slug($jobName) ?: 'job';
-                $folder = 'applicants/' . $jobSlug;
+                $folder = ''; // Tidak pakai folder, langsung di root
 
-                $disk = Storage::disk('mlnas');
+                $disk = Storage::disk('career');
 
                 // Pastikan folder ada
                 if (! $disk->exists($folder)) {
+                    Log::info('Career disk: creating applicants folder for PDF', [
+                        'folder' => $folder,
+                        'job_vacancy_id' => $jobVacancy->job_vacancy_id,
+                        'user_id' => $user->id ?? null,
+                    ]);
                     $disk->makeDirectory($folder);
                 }
 
-                // Nama file utama berdasarkan firstname, dengan fallback & penanganan duplikasi
-                $baseName = Str::slug($applicant->firstname ?? 'candidate');
+                // Nama file utama berdasarkan firstname dan slug lowongan, dengan fallback & penanganan duplikasi
+                $baseName = Str::slug(trim(($applicant->firstname ?? 'candidate') . '-' . $jobSlug));
                 if ($baseName === '') {
                     $baseName = 'candidate';
                 }
-
+    
                 $fileName = $baseName . '.pdf';
                 $path = $folder . '/' . $fileName;
                 $counter = 1;
@@ -180,10 +185,24 @@ class JobVacancyController extends Controller
                     $counter++;
                 }
 
+                Log::info('Career disk: writing auto-generated applicant PDF', [
+                    'path' => $path,
+                    'job_vacancy_id' => $jobVacancy->job_vacancy_id,
+                    'user_id' => $user->id ?? null,
+                    'applicant_id' => $applicant->getKey(),
+                ]);
+
                 $disk->put($path, $pdf->output());
+
+                Log::info('Career disk: PDF write completed', [
+                    'path' => $path,
+                    'job_vacancy_id' => $jobVacancy->job_vacancy_id,
+                    'user_id' => $user->id ?? null,
+                    'applicant_id' => $applicant->getKey(),
+                ]);
             } catch (\Throwable $e) {
                 // Jangan ganggu user kalau gagal generate/simpan PDF, cukup log saja
-                Log::error('Failed to generate applicant PDF on MLNAS after apply', [
+                Log::error('Failed to generate applicant PDF on sftp after apply', [
                     'user_id' => $user->id,
                     'applicant_id' => $applicant->getKey(),
                     'job_vacancy_id' => $jobVacancy->job_vacancy_id,

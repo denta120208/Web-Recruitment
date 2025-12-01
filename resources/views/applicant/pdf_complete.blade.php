@@ -56,6 +56,8 @@
             padding: 2px;
             vertical-align: top;
             font-size: 8px;
+            word-wrap: break-word;
+            word-break: break-word;
         }
         
         .no-border {
@@ -197,9 +199,24 @@
                                 $debugInfo = '';
                                 $imageSrc = '';
                                 
-                                // Try to get file from mlnas disk using Laravel Storage
+                                // Try to get file from the new 'career' disk first, then fallback to legacy 'mlnas'
                                 try {
-                                    $disk = \Storage::disk('mlnas');
+                                    $disk = null;
+                                    foreach (['career', 'mlnas'] as $diskName) {
+                                        try {
+                                            $candidate = \Storage::disk($diskName);
+                                            if ($candidate->exists($applicant->photopath)) {
+                                                $disk = $candidate;
+                                                break;
+                                            }
+                                        } catch (\Exception $e) {
+                                            continue;
+                                        }
+                                    }
+
+                                    if (! $disk) {
+                                        throw new \Exception('Photo not found on any disk');
+                                    }
                                     $photoPath = $applicant->photopath;
                                     
                                     // Try different path variations
@@ -255,16 +272,16 @@
 
         <table>
             <tr>
-                <td style="width: 150px;">
+                <td style="width: 16%;">
                     <span class="checkbox">{{ $applicant->gender == 'Male' ? '✓' : '' }}</span> Pria (Male)<br>
                     <span class="checkbox">{{ $applicant->gender == 'Female' ? '✓' : '' }}</span> Wanita (Female)
                 </td>
-                <td style="width: 80px;"><strong>Tinggi</strong><br>(Height)</td>
-                <td style="width: 80px;"><strong>Berat</strong><br>(Weight)</td>
-                <td style="width: 100px;"><strong>Agama</strong><br>(Religion)</td>
-                <td style="width: 120px;"><strong>Kebangsaan</strong><br>(Nationality)</td>
-                <td style="width: 120px;"><strong>No.KTP</strong><br>(ID No)</td>
-                <td style="width: 120px;"><strong>No.SIM</strong><br>(Driving Licence)</td>
+                <td style="width: 12%;"><strong>Tinggi</strong><br>(Height)</td>
+                <td style="width: 12%;"><strong>Berat</strong><br>(Weight)</td>
+                <td style="width: 14%;"><strong>Agama</strong><br>(Religion)</td>
+                <td style="width: 18%;"><strong>Kebangsaan</strong><br>(Nationality)</td>
+                <td style="width: 14%;"><strong>No.KTP</strong><br>(ID No)</td>
+                <td style="width: 14%;"><strong>No.SIM</strong><br>(Driving Licence)</td>
             </tr>
             <tr style="height: 35px;">
                 <td></td>

@@ -1,56 +1,34 @@
-# Laravel
-/vendor/
-/node_modules/
-
-# Composer dependencies
-composer.lock
-
-# Laravel environment files
+# Environment
 .env
 .env.*
 !.env.example
 
-# Cache & logs
+# Dependencies
+/vendor/
+/node_modules/
+
+# Laravel runtime
 /storage/*.key
 /storage/framework/*
 !/storage/framework/.gitignore
 /storage/logs/*
 !/storage/logs/.gitignore
-
-# Laravel cache
-bootstrap/cache/*
+/bootstrap/cache/*
 !bootstrap/cache/.gitignore
 
-# IDE / OS files
-.idea/
+# IDE config
 .vscode/
-*.swp
-*.swo
+.idea/
+
+# OS files
 .DS_Store
 Thumbs.db
 
-# NPM/Yarn Debug
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-
-# Uploads (optional, remove if needed)
-public/storage/
-public/uploads/
-
-# PHPUnit
-.phpunit.cache/
-tests/_output/
-
-# Backup / dump files
+# DB dump & temporary
 *.sql
-*.sqlite
 *.bak
 *.tmp
 *.temp
-*.key
-*.pem
-*.p12
-*.cer
-*.crt
-secrets/
+
+# Test scripts (opsional)
+test-*.php
