@@ -43,6 +43,11 @@ Route::prefix('applicant')->name('applicant.')->middleware(['auth', 'check.exist
     Route::get('/show/{id}', [ApplicantController::class, 'show'])->name('show');
     Route::get('/print/{id}', [ApplicantController::class, 'printView'])->name('print');
     Route::get('/pdf/{id}', [ApplicantController::class, 'generatePDF'])->name('pdf');
+
+    // Serve own CV/photo file for the logged-in applicant
+    Route::get('/file/{type}', [ApplicantController::class, 'serveOwnFile'])
+        ->where('type', 'cv|photo')
+        ->name('file');
 });
 
 // Route for serving files from mlnas disk (accept full path)

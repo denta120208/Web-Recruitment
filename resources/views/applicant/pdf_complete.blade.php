@@ -53,9 +53,9 @@
         
         td, th {
             border: 1px solid #000;
-            padding: 2px;
+            padding: 4px; /* Increase padding for better readability */
             vertical-align: top;
-            font-size: 8px;
+            font-size: 10px; /* Increase font size for better readability */
             word-wrap: break-word;
             word-break: break-word;
         }
@@ -107,6 +107,15 @@
             font-weight: bold;
         }
         
+        .watermark {
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.15;
+            width: 70%;
+        }
+        
         /* Hide URL when printing in browser */
         @media print {
             
@@ -150,6 +159,21 @@
     </script>
 </head>
 <body>
+    @php
+        $watermarkData = null;
+        try {
+            $logoPath = public_path('metland_logo_transparant.png');
+            if (file_exists($logoPath)) {
+                $watermarkData = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            }
+        } catch (\Exception $e) {
+            // ignore watermark errors, do not break PDF generation
+        }
+    @endphp
+
+    @if($watermarkData)
+        <img src="{{ $watermarkData }}" class="watermark" alt="Metland Logo Watermark">
+    @endif
     <!-- Header -->
     <div class="header">
      

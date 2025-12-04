@@ -418,7 +418,7 @@
                                     @enderror
                                             @if($applicant->cvpath)
                                                 <div class="mt-2">
-                                                    <a href="{{ route('file.serve', ['path' => $applicant->cvpath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <a href="{{ route('applicant.file', ['type' => 'cv']) }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                                         <i class="bi bi-file-earmark-pdf"></i> Lihat CV Sebelumnya
                                                     </a>
                                                 </div>
@@ -440,7 +440,7 @@
                                     @enderror
                                             @if($applicant->photopath)
                                                 <div class="mt-2">
-                                                    <a href="{{ route('file.serve', ['path' => $applicant->photopath]) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <a href="{{ route('applicant.file', ['type' => 'photo']) }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                                         <i class="bi bi-image"></i> Lihat Foto diri Sebelumnya
                                                     </a>
                                                 </div>

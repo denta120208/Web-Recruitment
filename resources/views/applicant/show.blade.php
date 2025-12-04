@@ -93,7 +93,7 @@
                             <div class="col-md-4 text-center">
                                 @if($applicant->photopath)
                                     <div class="photo-frame">
-                                        <img src="{{ route('file.serve', $applicant->photopath) }}" 
+                                        <img src="{{ route('applicant.file', ['type' => 'photo']) }}" 
                                              alt="Photo" class="img-thumbnail" style="max-width: 200px; max-height: 250px;">
                                     </div>
                                 @else
@@ -241,7 +241,7 @@
                                     <div class="card-body text-center">
                                         <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
                                         <h6>Curriculum Vitae</h6>
-                                        <a href="{{ route('file.serve', $applicant->cvpath) }}" 
+                                        <a href="{{ route('applicant.file', ['type' => 'cv']) }}" 
                                            target="_blank" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Lihat CV
                                         </a>
@@ -256,7 +256,7 @@
                                     <div class="card-body text-center">
                                         <i class="fas fa-image fa-3x text-info mb-2"></i>
                                         <h6>Foto</h6>
-                                        <a href="{{ route('file.serve', $applicant->photopath) }}" 
+                                        <a href="{{ route('applicant.file', ['type' => 'photo']) }}" 
                                            target="_blank" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Lihat Foto
                                         </a>

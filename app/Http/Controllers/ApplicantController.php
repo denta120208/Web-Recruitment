@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Filament\Facades\Filament;
+use setasign\Fpdi\Fpdi;
 
 class ApplicantController extends Controller
 {
@@ -126,34 +127,61 @@ class ApplicantController extends Controller
 
         $uploaded = [];
 
+        // Bangun nama dasar file dari fullname (atau firstname jika lainnya kosong)
+        $firstName = $validated['FirstName'];
+        $middleName = $validated['MiddleName'] ?? '';
+        $lastName = $validated['LastName'] ?? '';
+        $parts = array_filter([$firstName, $middleName, $lastName]);
+        $baseName = implode(' ', $parts);
+        if ($baseName === '') {
+            $baseName = $firstName;
+        }
+        $safeBase = preg_replace('/[^A-Za-z0-9_-]/', '_', $baseName);
+
         if ($request->hasFile('CVPath')) {
             $file = $request->file('CVPath');
             $originalName = $file->getClientOriginalName();
-            $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
+            $extension = $file->getClientOriginalExtension() ?: 'pdf';
+            $sanitized = $safeBase . '_' . date('Ymd_His') . '.' . $extension;
 
             try {
-                \Log::info('Uploading CV to career disk', [
-                    'disk' => 'career',
+                \Log::info('Uploading CV to mlnas disk with watermark', [
+                    'disk' => 'mlnas',
                     'original_name' => $originalName,
                     'sanitized_name' => $sanitized,
                     'user_id' => $user->id ?? null,
                 ]);
 
-                $path = $file->storeAs('applicants/cv', $sanitized, 'career');
-                if ($path === false) {
-                    throw new \Exception('Storage returned false');
+                // Simpan sementara ke storage lokal
+                $tmpDir = storage_path('app/tmp');
+                if (! is_dir($tmpDir)) {
+                    mkdir($tmpDir, 0755, true);
                 }
-                $validated['CVPath'] = $path;
-                $uploaded[] = ['disk' => 'career', 'path' => $path];
+                $tmpOriginal = $tmpDir . DIRECTORY_SEPARATOR . 'cv_original_' . uniqid() . '.pdf';
+                $file->move(dirname($tmpOriginal), basename($tmpOriginal));
 
-                \Log::info('Successfully uploaded CV to career disk', [
-                    'disk' => 'career',
+                // Apply PDF watermark
+                $tmpWatermarked = $tmpDir . DIRECTORY_SEPARATOR . 'cv_watermarked_' . uniqid() . '.pdf';
+                $this->applyPdfWatermark($tmpOriginal, $tmpWatermarked);
+
+                // Upload hasil watermarked ke disk mlnas
+                $path = 'applicants/cv/' . $sanitized;
+                Storage::disk('mlnas')->put($path, file_get_contents($tmpWatermarked));
+
+                $validated['CVPath'] = $path;
+                $uploaded[] = ['disk' => 'mlnas', 'path' => $path];
+
+                \Log::info('Successfully uploaded watermarked CV to mlnas disk', [
+                    'disk' => 'mlnas',
                     'path' => $path,
                     'user_id' => $user->id ?? null,
                 ]);
+
+                @unlink($tmpOriginal);
+                @unlink($tmpWatermarked);
             } catch (\Exception $e) {
-                \Log::error('Career CV upload failed', [
-                    'disk' => 'career',
+                \Log::error('MLNAS CV upload failed', [
+                    'disk' => 'mlnas',
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
@@ -176,32 +204,35 @@ class ApplicantController extends Controller
 
         if ($request->hasFile('PhotoPath')) {
             $file = $request->file('PhotoPath');
-            $originalName = $file->getClientOriginalName();
-            $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
 
             try {
-                \Log::info('Uploading photo to career disk', [
-                    'disk' => 'career',
-                    'original_name' => $originalName,
-                    'sanitized_name' => $sanitized,
-                    'user_id' => $user->id ?? null,
-                ]);
+                $watermarked = $this->convertImageWatermark($file);
 
-                $path = $file->storeAs('applicants/photos', $sanitized, 'career');
-                if ($path === false) {
-                    throw new \Exception('Storage returned false');
+                // Gunakan nama file berdasarkan fullname
+                $photoExtension = pathinfo($watermarked['filename'], PATHINFO_EXTENSION) ?: 'png';
+                $photoName = $safeBase . '_' . date('Ymd_His') . '.' . $photoExtension;
+
+                $mlnasPath = 'applicants/photos/' . $photoName;
+                Storage::disk('mlnas')->put($mlnasPath, file_get_contents($watermarked['path']));
+
+                // Cleanup temporary local file jika ada
+                try {
+                    @unlink($watermarked['path']);
+                } catch (\Throwable $e) {
+                    // ignore cleanup errors
                 }
-                $validated['PhotoPath'] = $path;
-                $uploaded[] = ['disk' => 'career', 'path' => $path];
 
-                \Log::info('Successfully uploaded photo to career disk', [
-                    'disk' => 'career',
-                    'path' => $path,
+                $validated['PhotoPath'] = $mlnasPath;
+                $uploaded[] = ['disk' => 'mlnas', 'path' => $mlnasPath];
+
+                \Log::info('Successfully uploaded watermarked photo to mlnas disk', [
+                    'disk' => 'mlnas',
+                    'path' => $mlnasPath,
                     'user_id' => $user->id ?? null,
                 ]);
             } catch (\Exception $e) {
-                \Log::error('Career photo upload failed', [
-                    'disk' => 'career',
+                \Log::error('MLNAS photo upload failed', [
+                    'disk' => 'mlnas',
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
@@ -501,21 +532,87 @@ class ApplicantController extends Controller
             'PhotoPath' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        // Handle file uploads
+        // Handle file uploads (store on MLNAS and apply watermark for CV + photo)
+
+        // Bangun nama dasar file dari fullname (atau firstname jika lainnya kosong)
+        $firstName = $validated['FirstName'];
+        $middleName = $validated['MiddleName'] ?? '';
+        $lastName = $validated['LastName'] ?? '';
+        $parts = array_filter([$firstName, $middleName, $lastName]);
+        $baseName = implode(' ', $parts);
+        if ($baseName === '') {
+            $baseName = $firstName;
+        }
+        $safeBase = preg_replace('/[^A-Za-z0-9_-]/', '_', $baseName);
+
         if ($request->hasFile('CVPath')) {
             $file = $request->file('CVPath');
-            $originalName = $file->getClientOriginalName();
-            $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
-            $path = $file->storeAs('applicants/cv', $sanitized, 'career');
-            $validated['CVPath'] = $path;
+            $extension = $file->getClientOriginalExtension() ?: 'pdf';
+            $sanitized = $safeBase . '_' . date('Ymd_His') . '.' . $extension;
+
+            try {
+                // Simpan sementara PDF asli
+                $tmpDir = storage_path('app/tmp');
+                if (! is_dir($tmpDir)) {
+                    mkdir($tmpDir, 0755, true);
+                }
+                $tmpOriginal = $tmpDir . DIRECTORY_SEPARATOR . 'cv_original_' . uniqid() . '.pdf';
+                $file->move(dirname($tmpOriginal), basename($tmpOriginal));
+
+                // Apply watermark ke PDF
+                $tmpWatermarked = $tmpDir . DIRECTORY_SEPARATOR . 'cv_watermarked_' . uniqid() . '.pdf';
+                $this->applyPdfWatermark($tmpOriginal, $tmpWatermarked);
+
+                $path = 'applicants/cv/' . $sanitized;
+                Storage::disk('mlnas')->put($path, file_get_contents($tmpWatermarked));
+
+                $validated['CVPath'] = $path;
+
+                @unlink($tmpOriginal);
+                @unlink($tmpWatermarked);
+            } catch (\Throwable $e) {
+                Log::error('Failed to apply watermark for applicant CV, storing original instead', [
+                    'user_id' => $user->id ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+
+                $path = 'applicants/cv/' . $sanitized;
+                Storage::disk('mlnas')->put($path, file_get_contents($file->getRealPath()));
+                $validated['CVPath'] = $path;
+            }
         }
 
         if ($request->hasFile('PhotoPath')) {
             $file = $request->file('PhotoPath');
-            $originalName = $file->getClientOriginalName();
-            $sanitized = preg_replace('/[^A-Za-z0-9_.-]/', '_', $originalName);
-            $path = $file->storeAs('applicants/photos', $sanitized, 'career');
-            $validated['PhotoPath'] = $path;
+
+            try {
+                $watermarked = $this->convertImageWatermark($file);
+
+                $mlnasPath = 'applicants/photos/' . $watermarked['filename'];
+                Storage::disk('mlnas')->put($mlnasPath, file_get_contents($watermarked['path']));
+
+                // Cleanup temporary local file if it exists
+                try {
+                    @unlink($watermarked['path']);
+                } catch (\Throwable $e) {
+                    // ignore cleanup errors
+                }
+
+                $validated['PhotoPath'] = $mlnasPath;
+            } catch (\Throwable $e) {
+                Log::error('Failed to apply watermark for applicant photo, storing original instead', [
+                    'user_id' => $user->id ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION) ?: 'png';
+                $sanitized = $safeBase . '_' . date('Ymd_His') . '.' . $extension;
+                $path = 'applicants/photos/' . $sanitized;
+
+                Storage::disk('mlnas')->put($path, file_get_contents($file->getRealPath()));
+                $validated['PhotoPath'] = $path;
+            }
         }
 
         // Ensure at least one education entry is provided
@@ -826,46 +923,78 @@ class ApplicantController extends Controller
     public function servePath(Request $request, string $path)
     {
         $user = auth()->user();
-        if (!$user) abort(401);
+        if (! $user) abort(401);
 
         $applicant = Applicant::where('user_id', $user->id)->first();
-        if (!$applicant) abort(404);
+        if (! $applicant) abort(404);
 
-        // Only allow access if the requested path matches the user's saved file paths
-        $allowedPaths = array_filter([
-            $applicant->cvpath,
-            $applicant->photopath,
-        ]);
+        // Normalisasi path dari URL (handle encoding seperti %20 untuk spasi)
+        $normalizedRequested = ltrim(urldecode($path), '/');
+        $requestedBase = basename($normalizedRequested);
 
-        // Normalize comparison
-        $normalizedRequested = ltrim($path, '/');
-        $isAllowed = collect($allowedPaths)->contains(function ($p) use ($normalizedRequested) {
-            return ltrim($p, '/') === $normalizedRequested;
-        });
+        // Tentukan apakah yang diminta adalah CV atau photo milik user ini
+        $cvBase = $applicant->cvpath ? basename($applicant->cvpath) : null;
+        $photoBase = $applicant->photopath ? basename($applicant->photopath) : null;
 
-        if (!$isAllowed) abort(404);
+        $type = null;
+        $canonicalPath = null;
 
-        // Try 'career' first, then 'mlnas' for backward compatibility
-        $disk = null;
-        foreach (['career', 'mlnas'] as $diskName) {
+        if ($cvBase && $requestedBase === $cvBase) {
+            $type = 'cv';
+            $canonicalPath = ltrim($applicant->cvpath, '/');
+        } elseif ($photoBase && $requestedBase === $photoBase) {
+            $type = 'photo';
+            $canonicalPath = ltrim($applicant->photopath, '/');
+        } else {
+            // Bukan file milik user ini
+            abort(404);
+        }
+
+        // Bangun variasi path berdasarkan path yang tersimpan di DB (mirip pdf_complete.blade.php)
+        $base = basename($canonicalPath);
+        if ($type === 'photo') {
+            $candidates = [
+                $canonicalPath,
+                'applicants/photos/' . $base,
+                $base,
+            ];
+        } else { // cv
+            $candidates = [
+                $canonicalPath,
+                'applicants/cv/' . $base,
+                $base,
+            ];
+        }
+
+        $foundDisk = null;
+        $foundPath = null;
+
+        // Prioritaskan 'mlnas' (penyimpanan baru), fallback ke 'career' (legacy)
+        foreach (['mlnas', 'career'] as $diskName) {
             try {
-                $candidate = Storage::disk($diskName);
-                if ($candidate->exists($normalizedRequested)) {
-                    $disk = $candidate;
-                    break;
-                }
+                $disk = Storage::disk($diskName);
             } catch (\Exception $e) {
                 continue;
             }
+
+            foreach ($candidates as $candidatePath) {
+                if ($disk->exists($candidatePath)) {
+                    $foundDisk = $disk;
+                    $foundPath = $candidatePath;
+                    break 2;
+                }
+            }
         }
 
-        if (! $disk) abort(404);
+        if (! $foundDisk || ! $foundPath) {
+            abort(404);
+        }
 
-        $stream = $disk->readStream($normalizedRequested);
+        $stream = $foundDisk->readStream($foundPath);
         if ($stream === false) abort(404);
 
-        $mime = $disk->mimeType($normalizedRequested) ?: 'application/octet-stream';
-        $downloadName = basename($normalizedRequested);
+        $mime = $foundDisk->mimeType($foundPath) ?: 'application/octet-stream';
+        $downloadName = basename($foundPath);
 
         return response()->stream(function () use ($stream) {
             fpassthru($stream);
@@ -932,6 +1061,86 @@ class ApplicantController extends Controller
             'Content-Type' => $mime,
             // CV should download, photo should open inline in a new tab
             'Content-Disposition' => ($type === 'cv' ? 'attachment' : 'inline') . '; filename="' . $downloadName . '"',
+        ]);
+    }
+
+    public function serveOwnFile(Request $request, string $type)
+    {
+        $user = auth()->user();
+        if (! $user) {
+            abort(401);
+        }
+
+        $applicant = Applicant::where('user_id', $user->id)->firstOrFail();
+
+        if ($type === 'cv') {
+            $path = $applicant->cvpath;
+        } elseif ($type === 'photo') {
+            $path = $applicant->photopath;
+        } else {
+            abort(404);
+        }
+
+        if (empty($path)) {
+            abort(404);
+        }
+
+        $canonicalPath = ltrim($path, '/');
+        $base = basename($canonicalPath);
+
+        if ($type === 'photo') {
+            $candidates = [
+                $canonicalPath,
+                'applicants/photos/' . $base,
+                $base,
+            ];
+        } else { // cv
+            $candidates = [
+                $canonicalPath,
+                'applicants/cv/' . $base,
+                $base,
+            ];
+        }
+
+        $foundDisk = null;
+        $foundPath = null;
+
+        foreach (['mlnas', 'career'] as $diskName) {
+            try {
+                $disk = Storage::disk($diskName);
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            foreach ($candidates as $candidatePath) {
+                if ($disk->exists($candidatePath)) {
+                    $foundDisk = $disk;
+                    $foundPath = $candidatePath;
+                    break 2;
+                }
+            }
+        }
+
+        if (! $foundDisk || ! $foundPath) {
+            abort(404);
+        }
+
+        $stream = $foundDisk->readStream($foundPath);
+        if ($stream === false) {
+            abort(404);
+        }
+
+        $mime = $foundDisk->mimeType($foundPath) ?: 'application/octet-stream';
+        $downloadName = basename($foundPath);
+
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
         ]);
     }
 
@@ -1106,6 +1315,198 @@ class ApplicantController extends Controller
         $filename = 'Formulir_Lamaran_' . $applicant->firstname . '_' . $applicant->lastname . '.pdf';
         
         return $pdf->download($filename);
+    }
+
+    /**
+     * Apply Metland logo watermark to every page of a PDF using FPDI.
+     *
+     * @param  string  $sourcePath  Path to the source PDF
+     * @param  string  $targetPath  Path to write the watermarked PDF
+     * @return void
+     */
+    protected function applyPdfWatermark(string $sourcePath, string $targetPath): void
+    {
+        if (! file_exists($sourcePath)) {
+            throw new \RuntimeException('Source PDF not found: ' . $sourcePath);
+        }
+
+        // Gunakan versi logo yang sudah dibuat lebih transparan
+        $logoPath = $this->getFadedWatermarkPath();
+
+        $pdf = new Fpdi();
+        $pageCount = $pdf->setSourceFile($sourcePath);
+
+        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+            $templateId = $pdf->importPage($pageNo);
+            $size = $pdf->getTemplateSize($templateId);
+
+            $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+            $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+            $pdf->useTemplate($templateId);
+
+            // Hitung posisi & ukuran watermark relatif ke halaman
+            $maxWidth = $size['width'] * 0.7; // 70% lebar halaman
+            [$logoWidth, $logoHeight] = getimagesize($logoPath);
+            $scale = $maxWidth / $logoWidth;
+            $wmWidth = $logoWidth * $scale;
+            $wmHeight = $logoHeight * $scale;
+
+            $x = ($size['width'] - $wmWidth) / 2;
+            $y = ($size['height'] - $wmHeight) / 2;
+
+            // Logo PNG sudah dibuat lebih transparan sehingga tidak terlalu tebal
+            $pdf->Image($logoPath, $x, $y, $wmWidth, $wmHeight, 'PNG');
+        }
+
+        $dir = dirname($targetPath);
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $pdf->Output($targetPath, 'F');
+    }
+
+    /**
+     * Get a lighter (more transparent) version of the Metland logo for watermarking.
+     *
+     * @return string  Absolute path to a faded PNG logo.
+     */
+    protected function getFadedWatermarkPath(): string
+    {
+        $sourcePath = public_path('metland_logo_transparant.png');
+        if (! file_exists($sourcePath)) {
+            throw new \RuntimeException('Watermark logo not found: ' . $sourcePath);
+        }
+
+        $tmpDir = storage_path('app/tmp');
+        if (! is_dir($tmpDir)) {
+            mkdir($tmpDir, 0755, true);
+        }
+
+        $fadedPath = $tmpDir . DIRECTORY_SEPARATOR . 'metland_logo_faded.png';
+        if (file_exists($fadedPath)) {
+            return $fadedPath;
+        }
+
+        $img = imagecreatefrompng($sourcePath);
+        if (! $img) {
+            throw new \RuntimeException('Failed to load watermark logo from ' . $sourcePath);
+        }
+
+        imagealphablending($img, false);
+        imagesavealpha($img, true);
+
+        $width = imagesx($img);
+        $height = imagesy($img);
+
+        for ($x = 0; $x < $width; $x++) {
+            for ($y = 0; $y < $height; $y++) {
+                $index = imagecolorat($img, $x, $y);
+                $rgba = imagecolorsforindex($img, $index);
+
+                // Lewati pixel yang sudah transparan penuh
+                if ($rgba['alpha'] >= 127) {
+                    continue;
+                }
+
+                // Tambah nilai alpha supaya logo jadi lebih transparan (lebih pudar)
+                $newAlpha = min(127, $rgba['alpha'] + 100);
+
+                $color = imagecolorallocatealpha(
+                    $img,
+                    $rgba['red'],
+                    $rgba['green'],
+                    $rgba['blue'],
+                    $newAlpha
+                );
+
+                imagesetpixel($img, $x, $y, $color);
+            }
+        }
+
+        imagepng($img, $fadedPath);
+        imagedestroy($img);
+
+        return $fadedPath;
+    }
+
+    /**
+     * Apply Metland logo watermark to an uploaded image and return temporary file info.
+     *
+     * @param  \Illuminate\Http\UploadedFile  $file
+     * @return array{path: string, filename: string}
+     */
+    protected function convertImageWatermark($file)
+    {
+        $sourcePath = $file->getPathname();
+
+        [$originalWidth, $originalHeight] = getimagesize($sourcePath);
+        $newWidth = 1050;
+        $newHeight = (int) ($newWidth * $originalHeight / $originalWidth);
+
+        $sourceImage = imagecreatefromstring(file_get_contents($sourcePath));
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Preserve transparency
+        imagealphablending($resizedImage, true);
+        imagesavealpha($resizedImage, true);
+
+        imagecopyresampled(
+            $resizedImage,
+            $sourceImage,
+            0,
+            0,
+            0,
+            0,
+            $newWidth,
+            $newHeight,
+            $originalWidth,
+            $originalHeight
+        );
+
+        // Pakai logo yang sudah dibuat lebih transparan
+        $watermarkPath = $this->getFadedWatermarkPath();
+        $watermark = imagecreatefrompng($watermarkPath);
+        $watermarkWidth = imagesx($watermark);
+        $watermarkHeight = imagesy($watermark);
+
+        $watermarkX = (int) (($newWidth - $watermarkWidth) / 2);
+        $watermarkY = (int) (($newHeight - $watermarkHeight) / 2);
+
+        imagecopy($resizedImage, $watermark, $watermarkX, $watermarkY, 0, 0, $watermarkWidth, $watermarkHeight);
+
+        imagealphablending($resizedImage, false);
+        imagesavealpha($resizedImage, true);
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        if ($extension === '') {
+            $extension = 'png';
+        }
+
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $filename = 'watermarked_' . $originalName . '.' . $extension;
+
+        $tmpDir = storage_path('app/tmp');
+        if (! is_dir($tmpDir)) {
+            mkdir($tmpDir, 0755, true);
+        }
+
+        $path = $tmpDir . DIRECTORY_SEPARATOR . $filename;
+
+        if ($extension === 'png') {
+            imagepng($resizedImage, $path, 0);
+        } else {
+            imagejpeg($resizedImage, $path, 100);
+        }
+
+        imagedestroy($resizedImage);
+        imagedestroy($sourceImage);
+        imagedestroy($watermark);
+
+        return [
+            'path' => $path,
+            'filename' => $filename,
+        ];
     }
 
     /**
